@@ -44,8 +44,7 @@
 		{
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			validators: zodClient(onboardingFormSchema as any),
-			onSubmit: async ({ cancel }) => {
-				cancel();
+			onSubmit: async () => {
 				isSubmitting = true;
 				error = null;
 				try {
