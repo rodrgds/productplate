@@ -4,7 +4,7 @@ import { api } from '$convex/_generated/api';
 import { resolve } from '$app/paths';
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async ({ locals }) => {
+export const load: LayoutServerLoad = async ({ locals, url }) => {
 	const client = createConvexHttpClient({ token: locals.token });
 	const currentUser = await client.query(api.auth.getCurrentUser, {});
 
@@ -13,6 +13,10 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 	}
 
 	const profile = await client.query(api.userProfiles.getCurrent, {});
+
+	if (!profile && url.pathname !== resolve('/onboarding')) {
+		throw redirect(303, resolve('/onboarding'));
+	}
 
 	return {
 		currentUser,

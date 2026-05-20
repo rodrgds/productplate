@@ -1,5 +1,41 @@
-echo "🔨 Running build before push..."
+set -e
+
+export PUBLIC_CONVEX_URL="${PUBLIC_CONVEX_URL:-https://fake-convex-url.convex.cloud}"
+export PUBLIC_CONVEX_SITE_URL="${PUBLIC_CONVEX_SITE_URL:-https://fake-convex-site-url.convex.site}"
+export SITE_URL="${SITE_URL:-https://fake-site-url.com}"
+export NODE_OPTIONS="${NODE_OPTIONS:---max_old_space_size=4096}"
+
+if command -v go >/dev/null 2>&1; then
+	export PATH="$(go env GOPATH)/bin:$PATH"
+fi
+
+echo "Running formatting fixes..."
+bun prettier --write .
+
+echo "Running ESLint fixes..."
+bun eslint . --fix
+
+echo "Checking formatting and linting..."
+bun run lint
+
+echo "Running typecheck..."
 bun run check
+
+if ! command -v misspell >/dev/null 2>&1; then
+	echo "misspell is required to match the GitHub Code Quality Checks workflow."
+	echo "Install it with: go install github.com/client9/misspell/cmd/misspell@latest"
+	exit 1
+fi
+
+echo "Running spelling fixes..."
+find ./src -type f \( -name "*.js" -o -name "*.ts" -o -name "*.svelte" \) | xargs misspell -w
+misspell -w README.md
+
+echo "Checking spelling..."
+find ./src -type f \( -name "*.js" -o -name "*.ts" -o -name "*.svelte" \) | xargs misspell -error
+misspell -error README.md
+
+echo "Running tests and build before push..."
 bun run test:unit
 bun run build
 

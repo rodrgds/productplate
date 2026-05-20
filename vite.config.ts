@@ -19,6 +19,8 @@ export default defineConfig({
 		tailwindcss(),
 		sveltekit(),
 		SvelteKitPWA({
+			base: '/',
+			buildBase: '/',
 			registerType: 'prompt',
 			includeAssets: ['/favicon.svg'],
 			manifest: {

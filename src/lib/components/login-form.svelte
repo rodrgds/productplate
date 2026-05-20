@@ -60,6 +60,33 @@
 		return message;
 	}
 
+	async function waitForAuthReady() {
+		if (!browser) return;
+
+		for (let attempt = 0; attempt < 10; attempt += 1) {
+			try {
+				const sessionResponse = await fetch('/api/auth/get-session', {
+					credentials: 'include',
+					cache: 'no-store'
+				});
+				const sessionText = await sessionResponse.text();
+
+				if (sessionResponse.ok && sessionText && sessionText !== 'null') {
+					const tokenResponse = await fetch('/api/auth/convex/token', {
+						credentials: 'include',
+						cache: 'no-store'
+					});
+
+					if (tokenResponse.ok) return;
+				}
+			} catch {
+				// Retry briefly while the browser commits auth cookies from the previous response.
+			}
+
+			await new Promise((resolve) => setTimeout(resolve, 100));
+		}
+	}
+
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 		isLoading = true;
@@ -82,8 +109,9 @@
 						callbackURL: resolve('/onboarding')
 					},
 					{
-						onSuccess: () => {
+						onSuccess: async () => {
 							if (browser) {
+								await waitForAuthReady();
 								window.location.assign(resolve('/onboarding'));
 							}
 						},
@@ -103,8 +131,9 @@
 				await authClient.signIn.email(
 					{ email: formValues.email, password: formValues.password },
 					{
-						onSuccess: () => {
-							goto(resolve('/dashboard'));
+						onSuccess: async () => {
+							await waitForAuthReady();
+							await goto(resolve('/dashboard'));
 						},
 						onError: (ctx) => {
 							error = getAuthErrorMessage(ctx.error.message, 'Unable to sign in.');

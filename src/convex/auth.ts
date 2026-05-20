@@ -7,7 +7,11 @@ import { betterAuth } from 'better-auth';
 import { admin } from 'better-auth/plugins';
 import authSchema from './betterAuth/schema';
 
-const siteUrl = process.env.SITE_URL!;
+function getSiteUrl() {
+	if (typeof process === 'undefined') return 'http://localhost:5173';
+
+	return process.env.SITE_URL ?? process.env.BETTER_AUTH_URL ?? 'http://localhost:5173';
+}
 
 // The component client has methods needed for integrating Convex with Better Auth,
 // as well as helper methods for general use.
@@ -27,7 +31,7 @@ export const createAuth = (
 		logger: {
 			disabled: optionsOnly
 		},
-		baseURL: siteUrl,
+		baseURL: getSiteUrl(),
 		database: authComponent.adapter(ctx),
 		// User configuration
 		user: {

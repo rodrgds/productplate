@@ -19,6 +19,7 @@ export default defineConfig(
 	...svelte.configs.prettier,
 	{
 		ignores: [
+			'.agents/**',
 			'.claude/**',
 			'convex/_generated/**',
 			'src/convex/_generated/**',
