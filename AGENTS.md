@@ -5,18 +5,19 @@
 - Frontend: SvelteKit ^2.30 with Svelte 5.
 - Backend: Convex (database, serverless functions, real-time).
 - Styling: Tailwind CSS v4 with shadcn-svelte components.
-- Package Manager: pnpm.
+- Package Manager: bun.
 
 ## Key Conventions
 
-- Package Management: IMPORTANT: Always use `pnpm` for all package management operations (`pnpm install`, `pnpm add`, etc.). YOU MUST NOT use `npm` or `yarn`.
+- Package Management: IMPORTANT: Always use `bun` for all package management operations (`bun install`, `bun add`, etc.). YOU MUST NOT use `npm` or `yarn`.
 - Backend Development: All backend logic is in the `convex/` directory.
 - File-based Routing: Use SvelteKit's file-based routing system in `src/routes/`.
 - Shared Code: Place reusable code in `src/lib/`.
 - Use `git mv` instead of creating a new file and deleting the old one or just `mv` if moving existing files that have been committed already.
 - Do not commit changes on your own. Humans will do that after approval.
 - Before making edits in files involving Svelte 5 or Convex, make sure you read the svelte/overview.md and convex.md documentation or you have it in your context.
-- Most of the time, `pnpm dev` and `pnpm convex dev` will be running in another terminal already. No need to run those commands yourself.
+- Most of the time, `bun dev` and `bun convex dev` will be running in another terminal already. No need to run those commands yourself.
+- Use TDD by default whenever the task has a testable behavior surface: write or update a focused failing test first, implement the smallest useful change, then run the relevant test command before finishing. Skip TDD only for wiring/docs-only changes, throwaway prototypes, or when the user explicitly asks not to.
 
 ## Svelte Best Practices
 

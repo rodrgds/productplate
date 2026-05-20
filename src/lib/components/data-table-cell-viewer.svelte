@@ -179,7 +179,11 @@
 			</form>
 		</div>
 		<Drawer.Footer>
-			<Button>Submit</Button>
+			<Drawer.Close>
+				{#snippet child({ props })}
+					<Button {...props}>Save</Button>
+				{/snippet}
+			</Drawer.Close>
 			<Drawer.Close>
 				{#snippet child({ props })}
 					<Button variant="outline" {...props}>Done</Button>

@@ -1,0 +1,4 @@
+echo "🔨 Running build before push..."
+bun run build
+
+echo "✅ Build successful! Proceeding with push..."

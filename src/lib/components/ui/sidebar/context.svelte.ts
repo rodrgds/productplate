@@ -43,6 +43,8 @@ class SidebarState {
 	// Event handler to apply to the `<svelte:window>`
 	handleShortcutKeydown = (e: KeyboardEvent) => {
 		if (e.key === SIDEBAR_KEYBOARD_SHORTCUT && (e.metaKey || e.ctrlKey)) {
+			const target = e.target as HTMLElement | null;
+			if (target?.closest('.ProseMirror')) return;
 			e.preventDefault();
 			this.toggle();
 		}

@@ -22,6 +22,7 @@ export default defineConfig(
 			'.claude/**',
 			'convex/_generated/**',
 			'src/convex/_generated/**',
+			'src/convex/*/_generated/**',
 			'build/**',
 			'.svelte-kit/**',
 			'package/**',

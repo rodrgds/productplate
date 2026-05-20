@@ -41,6 +41,7 @@
 	let totalUsers = $state(0);
 	let currentPage = $state(1);
 	let perPage = $state(25);
+	let isLoadingUsers = $state(true);
 
 	// Dialog state
 	let showCreateDialog = $state(false);
@@ -60,6 +61,7 @@
 
 	// Load users
 	async function loadUsers() {
+		isLoadingUsers = true;
 		try {
 			const offset = (currentPage - 1) * perPage;
 			const { data, error } = await authClient.admin.listUsers({
@@ -80,6 +82,8 @@
 		} catch (error) {
 			console.error('Error loading users:', error);
 			toast.error('Failed to load users');
+		} finally {
+			isLoadingUsers = false;
 		}
 	}
 
@@ -261,100 +265,115 @@
 					</Table.Row>
 				</Table.Header>
 				<Table.Body>
-					{#each users as user (user.id)}
+					{#if isLoadingUsers}
 						<Table.Row>
-							<Table.Cell class="font-medium">{user.name}</Table.Cell>
-							<Table.Cell>{user.email}</Table.Cell>
-							<Table.Cell>
-								{@const userRole = user.role || 'user'}
-								{@const roleLabel = roleOptions.find((r) => r.value === userRole)?.label || 'User'}
-								<Select.Root
-									type="single"
-									value={userRole}
-									onValueChange={(value) => {
-										if (value) {
-											handleUpdateRole(user.id, value);
-										}
-									}}
-								>
-									<Select.Trigger class="w-[120px]">
-										{roleLabel}
-									</Select.Trigger>
-									<Select.Content>
-										{#each roleOptions as option (option.value)}
-											<Select.Item value={option.value} label={option.label}>
-												{option.label}
-											</Select.Item>
-										{/each}
-									</Select.Content>
-								</Select.Root>
-							</Table.Cell>
-							<Table.Cell>
-								{#if user.banned}
-									<Badge variant="destructive">Banned</Badge>
-								{:else}
-									<Badge variant="outline">Active</Badge>
-								{/if}
-							</Table.Cell>
-							<Table.Cell>{formatDate(user.createdAt)}</Table.Cell>
-							<Table.Cell class="text-right">
-								<Tooltip.Provider>
-									<div class="flex justify-end gap-2">
-										{#if user.banned}
-											<Tooltip.Root>
-												<Tooltip.Trigger>
-													<Button
-														variant="outline"
-														size="sm"
-														onclick={() => confirmBanUser(user.id, false)}
-													>
-														Unban
-													</Button>
-												</Tooltip.Trigger>
-												<Tooltip.Content>
-													<p>Restore user access</p>
-												</Tooltip.Content>
-											</Tooltip.Root>
-										{:else}
-											<Tooltip.Root>
-												<Tooltip.Trigger>
-													<Button
-														variant="outline"
-														size="sm"
-														onclick={() => confirmBanUser(user.id, true)}
-													>
-														<Ban class="h-4 w-4" />
-													</Button>
-												</Tooltip.Trigger>
-												<Tooltip.Content>
-													<p>Ban user</p>
-												</Tooltip.Content>
-											</Tooltip.Root>
-										{/if}
-										<Tooltip.Root>
-											<Tooltip.Trigger>
-												<Button
-													variant="destructive"
-													size="sm"
-													onclick={() => confirmDeleteUser(user.id)}
-													disabled={user.id === currentUser?._id}
-												>
-													<Trash2 class="h-4 w-4" />
-												</Button>
-											</Tooltip.Trigger>
-											<Tooltip.Content>
-												<p>
-													{user.id === currentUser?._id
-														? 'Cannot delete your own account'
-														: 'Permanently delete this user'}
-												</p>
-											</Tooltip.Content>
-										</Tooltip.Root>
-									</div>
-								</Tooltip.Provider>
+							<Table.Cell colspan={6} class="py-8 text-center text-muted-foreground">
+								Loading users...
 							</Table.Cell>
 						</Table.Row>
-					{/each}
+					{:else if users.length === 0}
+						<Table.Row>
+							<Table.Cell colspan={6} class="py-8 text-center text-muted-foreground">
+								No users found.
+							</Table.Cell>
+						</Table.Row>
+					{:else}
+						{#each users as user (user.id)}
+							<Table.Row>
+								<Table.Cell class="font-medium">{user.name}</Table.Cell>
+								<Table.Cell>{user.email}</Table.Cell>
+								<Table.Cell>
+									{@const userRole = user.role || 'user'}
+									{@const roleLabel =
+										roleOptions.find((r) => r.value === userRole)?.label || 'User'}
+									<Select.Root
+										type="single"
+										value={userRole}
+										onValueChange={(value) => {
+											if (value) {
+												handleUpdateRole(user.id, value);
+											}
+										}}
+									>
+										<Select.Trigger class="w-[120px]">
+											{roleLabel}
+										</Select.Trigger>
+										<Select.Content>
+											{#each roleOptions as option (option.value)}
+												<Select.Item value={option.value} label={option.label}>
+													{option.label}
+												</Select.Item>
+											{/each}
+										</Select.Content>
+									</Select.Root>
+								</Table.Cell>
+								<Table.Cell>
+									{#if user.banned}
+										<Badge variant="destructive">Banned</Badge>
+									{:else}
+										<Badge variant="outline">Active</Badge>
+									{/if}
+								</Table.Cell>
+								<Table.Cell>{formatDate(user.createdAt)}</Table.Cell>
+								<Table.Cell class="text-right">
+									<Tooltip.Provider>
+										<div class="flex justify-end gap-2">
+											{#if user.banned}
+												<Tooltip.Root>
+													<Tooltip.Trigger>
+														<Button
+															variant="outline"
+															size="sm"
+															onclick={() => confirmBanUser(user.id, false)}
+														>
+															Unban
+														</Button>
+													</Tooltip.Trigger>
+													<Tooltip.Content>
+														<p>Restore user access</p>
+													</Tooltip.Content>
+												</Tooltip.Root>
+											{:else}
+												<Tooltip.Root>
+													<Tooltip.Trigger>
+														<Button
+															variant="outline"
+															size="sm"
+															onclick={() => confirmBanUser(user.id, true)}
+														>
+															<Ban class="h-4 w-4" />
+														</Button>
+													</Tooltip.Trigger>
+													<Tooltip.Content>
+														<p>Ban user</p>
+													</Tooltip.Content>
+												</Tooltip.Root>
+											{/if}
+											<Tooltip.Root>
+												<Tooltip.Trigger>
+													<Button
+														variant="destructive"
+														size="sm"
+														onclick={() => confirmDeleteUser(user.id)}
+														disabled={user.id === currentUser?._id}
+													>
+														<Trash2 class="h-4 w-4" />
+													</Button>
+												</Tooltip.Trigger>
+												<Tooltip.Content>
+													<p>
+														{user.id === currentUser?._id
+															? 'Cannot delete your own account'
+															: 'Permanently delete this user'}
+													</p>
+												</Tooltip.Content>
+											</Tooltip.Root>
+										</div>
+									</Tooltip.Provider>
+								</Table.Cell>
+							</Table.Row>
+						{/each}
+					{/if}
 				</Table.Body>
 			</Table.Root>
 		</div>

@@ -10,7 +10,7 @@ This repo is the starting point for a CodeSpring 2026 hackathon project. The sta
 - Autumn billing
 - Tailwind CSS v4
 - shadcn-svelte
-- pnpm
+- Bun
 
 ## What stays
 
@@ -26,19 +26,19 @@ This repo is the starting point for a CodeSpring 2026 hackathon project. The sta
 1. Install dependencies:
 
 ```sh
-pnpm install
+bun install
 ```
 
 2. Run Convex in one terminal:
 
 ```sh
-pnpm convex dev
+bun convex dev
 ```
 
 3. Run SvelteKit in another:
 
 ```sh
-pnpm dev
+bun dev
 ```
 
 ## Environment
@@ -74,14 +74,14 @@ This project is already using `@sveltejs/adapter-cloudflare`, so Pages is the pa
 1. Deploy Convex first:
 
 ```sh
-pnpm convex deploy
+bun convex deploy
 ```
 
 2. Set production env vars in Convex:
 
 ```sh
-npx convex env set SITE_URL https://your-domain.pages.dev
-npx convex env set BETTER_AUTH_SECRET your-secret
+bun convex env set --prod SITE_URL https://your-domain.pages.dev
+bun convex env set --prod BETTER_AUTH_SECRET your-secret
 ```
 
 Add the optional email, OAuth, and billing vars if your app uses them.
@@ -90,7 +90,7 @@ Add the optional email, OAuth, and billing vars if your app uses them.
 
 4. Use these build settings:
 
-- Build command: `pnpm build`
+- Build command: `bun run build`
 - Build output directory: `.svelte-kit/cloudflare`
 - Node version: `20`
 
@@ -106,7 +106,8 @@ Add the optional email, OAuth, and billing vars if your app uses them.
 
 The repo includes a Cloudflare Pages workflow in `.github/workflows/cloudflare-pages.yml`.
 
-Set these GitHub repository variables:
+The workflow selects the `production` environment on `main` and `development` otherwise.
+Set these GitHub environment variables in both environments:
 
 - `PUBLIC_CONVEX_URL`
 - `PUBLIC_CONVEX_SITE_URL`
@@ -120,6 +121,6 @@ Set these GitHub secrets:
 
 ## Notes
 
-- Use `pnpm` only.
+- Use `bun` only.
 - The docs in `docs/` are the repo’s reference material for Svelte, Convex, Tailwind, Better Auth, and Autumn.
 - There is still app scaffolding in place. Remove or reshape routes once the hackathon direction is clear.

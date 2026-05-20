@@ -36,7 +36,7 @@ export const createAuth = (
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				sendChangeEmailVerification: async ({ user, newEmail, url, token }, _request) => {
 					const resendApiKey = process.env.RESEND_API_KEY;
-					const from = process.env.RESET_EMAIL_FROM || 'CodeSpring 2026 <no-reply@yourdomain.com>';
+					const from = process.env.RESET_EMAIL_FROM || 'App <no-reply@yourdomain.com>';
 					if (!resendApiKey) {
 						console.error('RESEND_API_KEY not set. Unable to send email change verification.');
 						return;
@@ -87,7 +87,7 @@ export const createAuth = (
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			sendResetPassword: async ({ user, url, token }, _request) => {
 				const resendApiKey = process.env.RESEND_API_KEY;
-				const from = process.env.RESET_EMAIL_FROM || 'CodeSpring 2026 <no-reply@yourdomain.com>';
+				const from = process.env.RESET_EMAIL_FROM || 'App <no-reply@yourdomain.com>';
 				if (!resendApiKey) {
 					console.error('RESEND_API_KEY not set. Unable to send reset password email.');
 					return;

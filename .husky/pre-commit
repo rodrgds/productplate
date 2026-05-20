@@ -1,1 +1,2 @@
-pnpm lint-staged
+bun lint-staged
+bun run test:unit

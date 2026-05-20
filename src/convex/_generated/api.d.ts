@@ -17,6 +17,7 @@ import type * as betterAuth_auth from "../betterAuth/auth.js";
 import type * as billing from "../billing.js";
 import type * as http from "../http.js";
 import type * as storage from "../storage.js";
+import type * as userProfiles from "../userProfiles.js";
 
 import type {
   ApiFromModules,
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   billing: typeof billing;
   http: typeof http;
   storage: typeof storage;
+  userProfiles: typeof userProfiles;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { APP_NAME } from '$lib/constants.js';
 	import { api } from '$convex/_generated/api.js';
 	import { useQuery } from 'convex-svelte';
 	import { Separator } from '$lib/components/ui/separator/index.js';
@@ -11,10 +12,12 @@
 	// Get current user from Convex
 	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
 	let user = $derived(currentUserResponse.data);
+	const profileResponse = useQuery(api.userProfiles.getCurrent, {});
+	let profile = $derived(profileResponse.data);
 </script>
 
 <svelte:head>
-	<title>Settings | CodeSpring 2026</title>
+	<title>Settings | {APP_NAME}</title>
 </svelte:head>
 
 <!-- Header -->
@@ -47,7 +50,7 @@
 
 			<Tabs.Content value="account" class="space-y-6">
 				{#if user}
-					<AccountSettings {user} />
+					<AccountSettings {user} profile={profile ?? null} />
 				{/if}
 			</Tabs.Content>
 

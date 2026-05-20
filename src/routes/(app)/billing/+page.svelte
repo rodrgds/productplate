@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { APP_NAME } from '$lib/constants.js';
 	import { api } from '$convex/_generated/api.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -49,19 +50,35 @@
 		products?: CustomerProduct[];
 	}
 
+	function extractCustomerData(value: unknown): CustomerData | null {
+		if (!value || typeof value !== 'object' || !('data' in value)) return null;
+		const outerData = value.data;
+		if (!outerData || typeof outerData !== 'object' || !('data' in outerData)) return null;
+		const customer = outerData.data;
+		return customer && typeof customer === 'object' ? (customer as CustomerData) : null;
+	}
+
+	function extractActionUrl(value: unknown): string | null {
+		if (!value || typeof value !== 'object' || !('data' in value)) return null;
+		const data = value.data;
+		if (!data || typeof data !== 'object' || !('url' in data)) return null;
+		return typeof data.url === 'string' ? data.url : null;
+	}
+
 	// Get Convex client for actions (checkout/portal)
 	const client = useConvexClient();
 
 	// Get data from server load function
-	let products = $state<Product[]>(data.products || []);
+	let products = $derived<Product[]>(data.products || []);
 	// customerData from autumn.customers.get() - nested under data.data
-	let customerData = $state<CustomerData | null>(data.customerData?.data?.data || null);
+	let customerData = $derived<CustomerData | null>(extractCustomerData(data.customerData));
 
 	async function handleCheckout(productId: string) {
 		try {
-			const result = await client.action(api.billing.checkout, { productId });
-			if (result?.data?.url) {
-				window.location.href = result.data.url;
+			const result: unknown = await client.action(api.billing.checkout, { productId });
+			const url = extractActionUrl(result);
+			if (url) {
+				window.location.href = url;
 			}
 		} catch (error) {
 			console.error('Checkout error:', error);
@@ -70,9 +87,10 @@
 
 	async function handleManageSubscription() {
 		try {
-			const result = await client.action(api.billing.billingPortal, {});
-			if (result?.data?.url) {
-				window.location.href = result.data.url;
+			const result: unknown = await client.action(api.billing.billingPortal, {});
+			const url = extractActionUrl(result);
+			if (url) {
+				window.location.href = url;
 			}
 		} catch (error) {
 			console.error('Billing portal error:', error);
@@ -143,7 +161,7 @@
 </script>
 
 <svelte:head>
-	<title>Billing | CodeSpring 2026</title>
+	<title>Billing | {APP_NAME}</title>
 </svelte:head>
 
 <!-- Header -->

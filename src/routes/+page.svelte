@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { ArrowRight, Lock, Sparkles, Zap } from '@lucide/svelte';
+	import { ArrowRight, Lock, Zap } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { APP_NAME, APP_DESCRIPTION } from '$lib/constants.js';
+	import AppLogo from '$lib/components/app-logo.svelte';
 
 	const to = {
 		signUp: resolve('/auth/sign-up'),
@@ -26,7 +28,7 @@
 </script>
 
 <svelte:head>
-	<title>CodeSpring 2026</title>
+	<title>{APP_NAME}</title>
 </svelte:head>
 
 <section class="relative min-h-screen overflow-hidden bg-background">
@@ -34,18 +36,18 @@
 		class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent"
 	></div>
 	<div
-		class="pointer-events-none absolute left-1/2 top-24 h-72 w-72 -translate-x-1/2 rounded-full border border-border/60 bg-muted/20 blur-3xl"
+		class="pointer-events-none absolute top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full border border-border/60 bg-muted/20 blur-3xl"
 	></div>
 
 	<div class="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-10 sm:px-8 lg:px-10">
 		<header class="flex items-center justify-between border-b pb-5">
 			<div class="flex items-center gap-3">
 				<div class="flex h-10 w-10 items-center justify-center rounded-md border bg-muted">
-					<Sparkles class="h-4 w-4" />
+					<AppLogo class="h-5 w-5" />
 				</div>
 				<div>
-					<p class="text-sm font-medium">CodeSpring 2026</p>
-					<p class="text-sm text-muted-foreground">Hackathon base</p>
+					<p class="text-sm font-medium">{APP_NAME}</p>
+					<p class="text-sm text-muted-foreground">{APP_DESCRIPTION}</p>
 				</div>
 			</div>
 			<div class="flex items-center gap-2">
@@ -84,7 +86,7 @@
 			</div>
 
 			<div class="mt-16 grid gap-4 md:grid-cols-3">
-				{#each highlights as item}
+				{#each highlights as item (item.label)}
 					<div class="rounded-md border bg-background/80 p-5">
 						<div class="mb-4 flex h-9 w-9 items-center justify-center rounded-md bg-muted">
 							<Lock class="h-4 w-4 text-muted-foreground" />

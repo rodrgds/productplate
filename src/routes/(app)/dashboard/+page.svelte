@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { APP_NAME } from '$lib/constants.js';
 	import { api } from '$convex/_generated/api.js';
 	import { useQuery } from 'convex-svelte';
 	import { Separator } from '$lib/components/ui/separator/index.js';
@@ -6,6 +7,7 @@
 	import SectionCards from '$lib/components/section-cards.svelte';
 	import ChartAreaInteractive from '$lib/components/chart-area-interactive.svelte';
 	import DataTable from '$lib/components/data-table.svelte';
+	import AgentPanel from '$lib/components/ai/agent-panel.svelte';
 	import data from './data.js';
 
 	// Get current user from Convex
@@ -14,7 +16,7 @@
 </script>
 
 <svelte:head>
-	<title>Dashboard | CodeSpring 2026</title>
+	<title>Dashboard | {APP_NAME}</title>
 </svelte:head>
 
 <!-- Header -->
@@ -38,6 +40,9 @@
 			<SectionCards />
 			<div class="px-4 lg:px-6">
 				<ChartAreaInteractive />
+			</div>
+			<div class="px-4 lg:px-6">
+				<AgentPanel />
 			</div>
 			<DataTable {data} />
 		</div>

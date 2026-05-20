@@ -179,7 +179,10 @@ export const checkout = action({
 		await ctx.runAction(api.autumn.createCustomer, {});
 
 		// Now proceed with checkout
-		return await ctx.runAction(api.autumn.checkout, { productId: args.productId });
+		return await ctx.runAction(api.autumn.checkout, {
+			productId: args.productId,
+			successUrl: `${process.env.SITE_URL}/dashboard`
+		});
 	}
 });
 
@@ -192,7 +195,9 @@ export const billingPortal = action({
 		await ctx.runAction(api.autumn.createCustomer, {});
 
 		// Now proceed with billing portal
-		return await ctx.runAction(api.autumn.billingPortal, {});
+		return await ctx.runAction(api.autumn.billingPortal, {
+			returnUrl: `${process.env.SITE_URL}/dashboard`
+		});
 	}
 });
 ```

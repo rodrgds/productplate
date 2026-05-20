@@ -6,11 +6,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const client = createConvexHttpClient({ token: locals.token });
 
 	try {
-		// Fetch products and customer data in parallel
-		const [productsResult, customerResult] = await Promise.all([
-			client.action(api.billing.listProducts, {}),
-			client.action(api.billing.getCustomer, {})
-		]);
+		const productsResult = await client.action(api.billing.listProducts, {});
+		const customerResult = await client.action(api.billing.getCustomer, {});
 
 		return {
 			products: productsResult?.data?.list || [],

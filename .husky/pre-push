@@ -1,4 +1,6 @@
 echo "🔨 Running build before push..."
-pnpm run build
+bun run check
+bun run test:unit
+bun run build
 
-echo "✅ Build successful! Proceeding with push..." 
+echo "✅ Build successful! Proceeding with push..."

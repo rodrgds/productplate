@@ -1,11 +1,22 @@
 <script lang="ts">
-	import { CreditCard, EllipsisVertical, LogOut, Bell, CircleUser } from '@lucide/svelte';
+	import {
+		CreditCard,
+		EllipsisVertical,
+		LogOut,
+		Bell,
+		CircleUser,
+		Sun,
+		Moon,
+		Monitor
+	} from '@lucide/svelte';
+
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { authClient } from '$lib/auth-client.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { setMode, resetMode } from 'mode-watcher';
 
 	let { user }: { user: { name: string; email: string; avatar: string } } = $props();
 
@@ -89,6 +100,27 @@
 						Notifications
 					</DropdownMenu.Item>
 				</DropdownMenu.Group>
+				<DropdownMenu.Separator />
+				<DropdownMenu.Sub>
+					<DropdownMenu.SubTrigger>
+						<Sun class="mr-2 h-4 w-4" />
+						<span>Theme</span>
+					</DropdownMenu.SubTrigger>
+					<DropdownMenu.SubContent>
+						<DropdownMenu.Item onclick={() => setMode('light')}>
+							<Sun class="mr-2 h-4 w-4" />
+							Light
+						</DropdownMenu.Item>
+						<DropdownMenu.Item onclick={() => setMode('dark')}>
+							<Moon class="mr-2 h-4 w-4" />
+							Dark
+						</DropdownMenu.Item>
+						<DropdownMenu.Item onclick={() => resetMode()}>
+							<Monitor class="mr-2 h-4 w-4" />
+							System
+						</DropdownMenu.Item>
+					</DropdownMenu.SubContent>
+				</DropdownMenu.Sub>
 				<DropdownMenu.Separator />
 				<DropdownMenu.Item onclick={handleSignOut}>
 					<LogOut />
