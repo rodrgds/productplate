@@ -57,3 +57,10 @@ Refer to the following documents for detailed information on specific topics. Th
 - `docs/svelte/templating_and_components.md`: Advanced templating, data binding, and component composition with snippets and the Context API.
 - `docs/svelte/remote_functions.md`: In-depth guide to SvelteKit's remote functions (`query`, `form`, `command`).
 - `docs/svelte/reactivity_deep_dive.md`: Advanced look at Svelte 5's reactivity model, signals, and effects.
+
+This project uses [Convex](https://convex.dev) as its backend.
+
+When working on Convex code, **always read
+`src/convex/_generated/ai/guidelines.md` first** for important guidelines on
+how to correctly use Convex APIs and patterns. The file contains rules that
+override what you may have learned about Convex from training data.
