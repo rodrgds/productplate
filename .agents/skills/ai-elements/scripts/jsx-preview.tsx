@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
 import {
-	JSXPreview,
-	JSXPreviewContent,
-	JSXPreviewError
-} from '@/components/ai-elements/jsx-preview';
-import { Button } from '@/components/ui/button';
-import { useCallback, useEffect, useRef, useState } from 'react';
+  JSXPreview,
+  JSXPreviewContent,
+  JSXPreviewError,
+} from "@/components/ai-elements/jsx-preview";
+import { Button } from "@/components/ui/button";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const handleError = (error: Error) => {
-	console.log('JSX Parse Error:', error);
+  console.log("JSX Parse Error:", error);
 };
 
 const fullJsx = `<div className="rounded-lg border bg-card p-6 shadow-sm">
@@ -41,59 +41,64 @@ const fullJsx = `<div className="rounded-lg border bg-card p-6 shadow-sm">
 </div>`;
 
 const Example = () => {
-	const [streamedJsx, setStreamedJsx] = useState(fullJsx);
-	const [isStreaming, setIsStreaming] = useState(false);
-	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [streamedJsx, setStreamedJsx] = useState(fullJsx);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-	const simulateStreaming = useCallback(() => {
-		setIsStreaming(true);
-		setStreamedJsx('');
-		let index = 0;
+  const simulateStreaming = useCallback(() => {
+    setIsStreaming(true);
+    setStreamedJsx("");
+    let index = 0;
 
-		if (intervalRef.current) {
-			clearInterval(intervalRef.current);
-		}
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
 
-		intervalRef.current = setInterval(() => {
-			if (index < fullJsx.length) {
-				setStreamedJsx(fullJsx.slice(0, index + 15));
-				index += 15;
-			} else {
-				setIsStreaming(false);
-				if (intervalRef.current) {
-					clearInterval(intervalRef.current);
-					intervalRef.current = null;
-				}
-			}
-		}, 30);
-	}, []);
+    intervalRef.current = setInterval(() => {
+      if (index < fullJsx.length) {
+        setStreamedJsx(fullJsx.slice(0, index + 15));
+        index += 15;
+      } else {
+        setIsStreaming(false);
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      }
+    }, 30);
+  }, []);
 
-	useEffect(
-		() => () => {
-			if (intervalRef.current) {
-				clearInterval(intervalRef.current);
-			}
-		},
-		[]
-	);
+  useEffect(
+    () => () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    },
+    []
+  );
 
-	return (
-		<div className="space-y-4">
-			<Button disabled={isStreaming} onClick={simulateStreaming} size="sm" variant="outline">
-				{isStreaming ? 'Streaming...' : 'Simulate Streaming'}
-			</Button>
+  return (
+    <div className="space-y-4">
+      <Button
+        disabled={isStreaming}
+        onClick={simulateStreaming}
+        size="sm"
+        variant="outline"
+      >
+        {isStreaming ? "Streaming..." : "Simulate Streaming"}
+      </Button>
 
-			<JSXPreview
-				className="min-h-[200px]"
-				isStreaming={isStreaming}
-				jsx={streamedJsx}
-				onError={handleError}
-			>
-				<JSXPreviewContent />
-				<JSXPreviewError className="mt-2" />
-			</JSXPreview>
-		</div>
-	);
+      <JSXPreview
+        className="min-h-[200px]"
+        isStreaming={isStreaming}
+        jsx={streamedJsx}
+        onError={handleError}
+      >
+        <JSXPreviewContent />
+        <JSXPreviewError className="mt-2" />
+      </JSXPreview>
+    </div>
+  );
 };
 
 export default Example;

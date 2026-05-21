@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
 import {
-	StackTrace,
-	StackTraceActions,
-	StackTraceContent,
-	StackTraceCopyButton,
-	StackTraceError,
-	StackTraceErrorMessage,
-	StackTraceErrorType,
-	StackTraceExpandButton,
-	StackTraceFrames,
-	StackTraceHeader
-} from '@/components/ai-elements/stack-trace';
+  StackTrace,
+  StackTraceActions,
+  StackTraceContent,
+  StackTraceCopyButton,
+  StackTraceError,
+  StackTraceErrorMessage,
+  StackTraceErrorType,
+  StackTraceExpandButton,
+  StackTraceFrames,
+  StackTraceHeader,
+} from "@/components/ai-elements/stack-trace";
 
 const errorString = `TypeError: Cannot read properties of undefined (reading 'map')
     at UserList (/app/src/components/UserList.tsx:15:23)
@@ -21,21 +21,21 @@ const errorString = `TypeError: Cannot read properties of undefined (reading 'ma
     at beginWork (node_modules/react-dom/cjs/react-dom.development.js:19049:16)`;
 
 const Example = () => (
-	<StackTrace defaultOpen trace={errorString}>
-		<StackTraceHeader>
-			<StackTraceError>
-				<StackTraceErrorType />
-				<StackTraceErrorMessage />
-			</StackTraceError>
-			<StackTraceActions>
-				<StackTraceCopyButton />
-				<StackTraceExpandButton />
-			</StackTraceActions>
-		</StackTraceHeader>
-		<StackTraceContent>
-			<StackTraceFrames showInternalFrames={false} />
-		</StackTraceContent>
-	</StackTrace>
+  <StackTrace defaultOpen trace={errorString}>
+    <StackTraceHeader>
+      <StackTraceError>
+        <StackTraceErrorType />
+        <StackTraceErrorMessage />
+      </StackTraceError>
+      <StackTraceActions>
+        <StackTraceCopyButton />
+        <StackTraceExpandButton />
+      </StackTraceActions>
+    </StackTraceHeader>
+    <StackTraceContent>
+      <StackTraceFrames showInternalFrames={false} />
+    </StackTraceContent>
+  </StackTrace>
 );
 
 export default Example;

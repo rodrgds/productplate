@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
 import {
-	StackTrace,
-	StackTraceActions,
-	StackTraceContent,
-	StackTraceCopyButton,
-	StackTraceError,
-	StackTraceErrorMessage,
-	StackTraceErrorType,
-	StackTraceExpandButton,
-	StackTraceFrames,
-	StackTraceHeader
-} from '@/components/ai-elements/stack-trace';
+  StackTrace,
+  StackTraceActions,
+  StackTraceContent,
+  StackTraceCopyButton,
+  StackTraceError,
+  StackTraceErrorMessage,
+  StackTraceErrorType,
+  StackTraceExpandButton,
+  StackTraceFrames,
+  StackTraceHeader,
+} from "@/components/ai-elements/stack-trace";
 
 const handleFilePathClick = (path: string, line: number, col: number) => {
-	console.log(`Open file: ${path}:${line}:${col}`);
+  console.log(`Open file: ${path}:${line}:${col}`);
 };
 
 const handleCopy = () => {
-	console.log('Stack trace copied');
+  console.log("Stack trace copied");
 };
 
 const sampleStackTrace = `TypeError: Cannot read properties of undefined (reading 'map')
@@ -34,21 +34,25 @@ const sampleStackTrace = `TypeError: Cannot read properties of undefined (readin
     at workLoopSync (node_modules/react-dom/cjs/react-dom.development.js:22707:5)`;
 
 const Example = () => (
-	<StackTrace defaultOpen onFilePathClick={handleFilePathClick} trace={sampleStackTrace}>
-		<StackTraceHeader>
-			<StackTraceError>
-				<StackTraceErrorType />
-				<StackTraceErrorMessage />
-			</StackTraceError>
-			<StackTraceActions>
-				<StackTraceCopyButton onCopy={handleCopy} />
-				<StackTraceExpandButton />
-			</StackTraceActions>
-		</StackTraceHeader>
-		<StackTraceContent>
-			<StackTraceFrames />
-		</StackTraceContent>
-	</StackTrace>
+  <StackTrace
+    defaultOpen
+    onFilePathClick={handleFilePathClick}
+    trace={sampleStackTrace}
+  >
+    <StackTraceHeader>
+      <StackTraceError>
+        <StackTraceErrorType />
+        <StackTraceErrorMessage />
+      </StackTraceError>
+      <StackTraceActions>
+        <StackTraceCopyButton onCopy={handleCopy} />
+        <StackTraceExpandButton />
+      </StackTraceActions>
+    </StackTraceHeader>
+    <StackTraceContent>
+      <StackTraceFrames />
+    </StackTraceContent>
+  </StackTrace>
 );
 
 export default Example;

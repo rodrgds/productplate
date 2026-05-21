@@ -65,7 +65,7 @@
 			"source": "pbakaus/impeccable",
 			"sourceType": "github",
 			"skillPath": "skill/SKILL.md",
-			"computedHash": "ada9c434d56c794352ccd5c7a6901e5ebb4b7f3b7fe42e8c17c2c4b96c3735c8"
+			"computedHash": "34e59a34b9705187e87039faa5d9585aebe0056ef657f761b905afef276a3362"
 		},
 		"shadcn-svelte": {
 			"source": "huntabyte/shadcn-svelte",

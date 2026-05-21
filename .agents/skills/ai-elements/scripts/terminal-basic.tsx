@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Terminal } from '@/components/ai-elements/terminal';
+import { Terminal } from "@/components/ai-elements/terminal";
 
 const Example = () => <Terminal output="npm install complete" />;
 

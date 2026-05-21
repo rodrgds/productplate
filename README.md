@@ -32,7 +32,7 @@ bun install
 2. Run Convex in one terminal:
 
 ```sh
-bun convex dev
+bun x convex dev
 ```
 
 3. Run SvelteKit in another:
