@@ -16,6 +16,72 @@ const openrouter = createOpenAI({
 	}
 });
 
+function evaluateExpression(expr: string): number {
+	const pos = { i: 0 };
+
+	function skipWhitespace() {
+		while (pos.i < expr.length && expr[pos.i] === ' ') pos.i++;
+	}
+
+	function parseNumber(): number {
+		const start = pos.i;
+		if (pos.i < expr.length && expr[pos.i] === '-') pos.i++;
+		while (pos.i < expr.length && /\d/.test(expr[pos.i])) pos.i++;
+		if (pos.i < expr.length && expr[pos.i] === '.') {
+			pos.i++;
+			while (pos.i < expr.length && /\d/.test(expr[pos.i])) pos.i++;
+		}
+		return Number(expr.slice(start, pos.i));
+	}
+
+	function parseFactor(): number {
+		skipWhitespace();
+		let sign = 1;
+		while (pos.i < expr.length && (expr[pos.i] === '+' || expr[pos.i] === '-')) {
+			if (expr[pos.i] === '-') sign = -sign;
+			pos.i++;
+			skipWhitespace();
+		}
+		if (pos.i < expr.length && expr[pos.i] === '(') {
+			pos.i++;
+			const result = parseExpression();
+			skipWhitespace();
+			if (pos.i < expr.length && expr[pos.i] === ')') pos.i++;
+			return sign * result;
+		}
+		return sign * parseNumber();
+	}
+
+	function parseTerm(): number {
+		let result = parseFactor();
+		skipWhitespace();
+		while (pos.i < expr.length && /[*/%]/.test(expr[pos.i])) {
+			const op = expr[pos.i++];
+			const rhs = parseFactor();
+			if (op === '*') result *= rhs;
+			else if (op === '/') result /= rhs;
+			else if (op === '%') result %= rhs;
+			skipWhitespace();
+		}
+		return result;
+	}
+
+	function parseExpression(): number {
+		let result = parseTerm();
+		skipWhitespace();
+		while (pos.i < expr.length && /[+-]/.test(expr[pos.i])) {
+			const op = expr[pos.i++];
+			const rhs = parseTerm();
+			if (op === '+') result += rhs;
+			else if (op === '-') result -= rhs;
+			skipWhitespace();
+		}
+		return result;
+	}
+
+	return parseExpression();
+}
+
 export async function POST({ request }) {
 	if (!env.OPENROUTER_API_KEY) {
 		return new Response('OPENROUTER_API_KEY is not configured.', { status: 503 });
@@ -46,7 +112,7 @@ export async function POST({ request }) {
 					}
 
 					try {
-						const result = Function('"use strict"; return (' + sanitized + ')')();
+						const result = evaluateExpression(expression);
 						if (typeof result !== 'number' || !Number.isFinite(result)) {
 							return { expression, error: 'The expression did not produce a finite number.' };
 						}
