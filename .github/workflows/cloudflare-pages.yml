@@ -39,24 +39,18 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Lint and typecheck
+        run: bun run check
+
       - name: Build
         env:
           PUBLIC_CONVEX_URL: ${{ vars.PUBLIC_CONVEX_URL }}
           PUBLIC_CONVEX_SITE_URL: ${{ vars.PUBLIC_CONVEX_SITE_URL }}
-          SITE_URL: ${{ vars.SITE_URL || 'https://example.com' }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://productplate.pages.dev' }}
         run: bun run build
 
       - name: Set Cloudflare Node Version
         run: echo "22" > ./.svelte-kit/cloudflare/.node-version
-
-      - name: Extract Repository Name
-        id: extract_repo
-        shell: bash
-        run: |
-          full_repo_name="${{ github.repository }}"
-          repo_name="${full_repo_name##*/}"
-          echo "Repository name: $repo_name"
-          echo "repo_name=$repo_name" >> "$GITHUB_OUTPUT"
 
       - name: Deploy to Cloudflare Pages
         id: cloudflare-deploy
