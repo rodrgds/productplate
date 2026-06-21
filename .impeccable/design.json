@@ -1,0 +1,141 @@
+{
+	"schemaVersion": 2,
+	"generatedAt": "2026-06-21T12:00:00Z",
+	"title": "Design System: Product Plate",
+	"extensions": {
+		"colorMeta": {
+			"ink": {
+				"role": "primary",
+				"displayName": "Workbench Ink",
+				"canonical": "oklch(0.2 0.006 95)",
+				"tonalRamp": [
+					"oklch(0.15 0.006 95)",
+					"oklch(0.25 0.006 95)",
+					"oklch(0.35 0.006 95)",
+					"oklch(0.45 0.006 95)",
+					"oklch(0.58 0.006 95)",
+					"oklch(0.7 0.005 95)",
+					"oklch(0.83 0.004 95)",
+					"oklch(0.95 0.003 95)"
+				]
+			},
+			"canvas": {
+				"role": "neutral",
+				"displayName": "Warm Canvas",
+				"canonical": "oklch(0.988 0.003 95)",
+				"tonalRamp": [
+					"oklch(0.15 0.004 95)",
+					"oklch(0.28 0.004 95)",
+					"oklch(0.42 0.004 95)",
+					"oklch(0.56 0.004 95)",
+					"oklch(0.69 0.004 95)",
+					"oklch(0.8 0.003 95)",
+					"oklch(0.9 0.003 95)",
+					"oklch(0.988 0.003 95)"
+				]
+			}
+		},
+		"typographyMeta": {
+			"display": { "displayName": "Display", "purpose": "Landing hero only." },
+			"body": { "displayName": "Body", "purpose": "Interface and marketing copy." }
+		},
+		"shadows": [
+			{
+				"name": "surface",
+				"value": "0 1px 2px rgba(24,24,23,0.05)",
+				"purpose": "Ordinary elevated cards."
+			},
+			{
+				"name": "preview",
+				"value": "0 24px 50px rgba(24,24,23,0.05)",
+				"purpose": "Product preview windows."
+			}
+		],
+		"motion": [
+			{
+				"name": "ease-out",
+				"value": "cubic-bezier(0.22, 1, 0.36, 1)",
+				"purpose": "Short state transitions."
+			}
+		],
+		"breakpoints": [
+			{ "name": "sm", "value": "640px" },
+			{ "name": "md", "value": "768px" },
+			{ "name": "lg", "value": "1024px" }
+		]
+	},
+	"components": [
+		{
+			"name": "Primary Button",
+			"kind": "button",
+			"refersTo": "button-primary",
+			"description": "The dominant action in a group.",
+			"html": "<button class=\"ds-btn-primary\">Start building</button>",
+			"css": ".ds-btn-primary{background:var(--primary);color:var(--primary-foreground);border:0;border-radius:9px;padding:0 12px;height:36px;font:600 14px ui-sans-serif,system-ui;transition:opacity .15s cubic-bezier(.22,1,.36,1)}.ds-btn-primary:hover{opacity:.82}.ds-btn-primary:focus-visible{outline:3px solid color-mix(in oklch,var(--ring) 50%,transparent);outline-offset:2px}"
+		},
+		{
+			"name": "Outline Button",
+			"kind": "button",
+			"refersTo": "button-outline",
+			"description": "A secondary action with equal clarity and less weight.",
+			"html": "<button class=\"ds-btn-outline\">View source</button>",
+			"css": ".ds-btn-outline{background:var(--background);color:var(--foreground);border:1px solid var(--border);border-radius:9px;padding:0 12px;height:36px;font:600 14px ui-sans-serif,system-ui;transition:background .15s cubic-bezier(.22,1,.36,1)}.ds-btn-outline:hover{background:var(--muted)}.ds-btn-outline:focus-visible{outline:3px solid color-mix(in oklch,var(--ring) 50%,transparent);outline-offset:2px}"
+		},
+		{
+			"name": "Status Badge",
+			"kind": "chip",
+			"description": "Compact product state or category metadata.",
+			"html": "<span class=\"ds-badge\">Live</span>",
+			"css": ".ds-badge{display:inline-flex;align-items:center;background:var(--secondary);color:var(--secondary-foreground);border-radius:6px;padding:3px 8px;font:600 12px ui-sans-serif,system-ui}"
+		},
+		{
+			"name": "Surface Card",
+			"kind": "card",
+			"refersTo": "card",
+			"description": "A bordered content group with quiet elevation.",
+			"html": "<article class=\"ds-card\"><strong>Production foundations</strong><p>Integrated, typed, and ready to adapt.</p></article>",
+			"css": ".ds-card{background:var(--card);color:var(--card-foreground);border:1px solid var(--border);border-radius:11px;padding:24px;box-shadow:0 1px 2px rgba(24,24,23,.05);font-family:ui-sans-serif,system-ui}.ds-card p{margin:8px 0 0;color:var(--muted-foreground);line-height:1.6}.ds-card:focus-within{outline:3px solid color-mix(in oklch,var(--ring) 50%,transparent)}"
+		},
+		{
+			"name": "Navigation Item",
+			"kind": "nav",
+			"description": "Muted at rest, tonal when active.",
+			"html": "<a class=\"ds-nav-item\" href=\"#\">Overview</a>",
+			"css": ".ds-nav-item{display:block;color:var(--muted-foreground);border-radius:7px;padding:8px 10px;text-decoration:none;font:500 13px ui-sans-serif,system-ui;transition:background .15s,color .15s}.ds-nav-item:hover,.ds-nav-item:focus-visible{background:var(--muted);color:var(--foreground);outline:none}"
+		}
+	],
+	"narrative": {
+		"northStar": "The Founder Workbench",
+		"overview": "Product Plate should feel like a carefully organized workbench in a bright home office: capable, calm, and ready to be adapted.",
+		"keyCharacteristics": [
+			"Warm neutral canvas with high-contrast ink",
+			"Flat surfaces separated by borders and restrained tonal shifts",
+			"Real interface compositions instead of abstract decoration"
+		],
+		"rules": [
+			{
+				"name": "The Ten Percent Rule",
+				"body": "Strong ink-filled surfaces should occupy less than ten percent of a typical screen.",
+				"section": "colors"
+			},
+			{
+				"name": "The One Family Rule",
+				"body": "Hierarchy comes from scale, weight, and tracking, not an ornamental second typeface.",
+				"section": "typography"
+			},
+			{
+				"name": "The Flat-By-Default Rule",
+				"body": "If every card casts a shadow, remove the shadows and restore hierarchy with spacing and borders.",
+				"section": "elevation"
+			}
+		],
+		"dos": [
+			"Do show working routes, data tables, charts, forms, and app navigation.",
+			"Do use warm-tinted OKLCH neutrals and semantic design tokens."
+		],
+		"donts": [
+			"Don't use generic AI-tool marketing with purple gradients, glowing orbs, and glassmorphism.",
+			"Don't build over-animated component galleries that obscure the actual product foundation."
+		]
+	}
+}

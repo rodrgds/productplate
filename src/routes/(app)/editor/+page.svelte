@@ -16,8 +16,7 @@
 	if (browser) {
 		editor = createEditor({
 			extension: defineBasicExtension(),
-			defaultContent:
-				'<h2>Hackathon notes</h2><p>Use this page as a local rich text scratchpad.</p>'
+			defaultContent: '<h2>Product notes</h2><p>Use this page as a local rich text scratchpad.</p>'
 		});
 	}
 </script>

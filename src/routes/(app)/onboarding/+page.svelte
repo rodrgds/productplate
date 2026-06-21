@@ -100,7 +100,7 @@
 						>Set up your workspace</Card.Title
 					>
 					<Card.Description class="text-base text-muted-foreground">
-						A few baseline profile fields keep this boilerplate ready for most hackathon themes.
+						A few baseline profile fields keep this starter ready for your product.
 					</Card.Description>
 				</div>
 			</Card.Header>

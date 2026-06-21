@@ -9,8 +9,8 @@ Autumn is a billing and subscription management platform that integrates with St
 ### 1. Installation
 
 ```bash
-pnpm add autumn-js @useautumn/convex
-pnpm add -D atmn
+bun add autumn-js @useautumn/convex
+bun add -D atmn
 ```
 
 ### 2. Initialize Autumn
@@ -18,7 +18,7 @@ pnpm add -D atmn
 Initialize Autumn to create the configuration file:
 
 ```bash
-pnpm dlx atmn init
+bunx --bun atmn init
 ```
 
 This creates `autumn.config.ts` in your project root where you'll define products.
@@ -28,7 +28,7 @@ This creates `autumn.config.ts` in your project root where you'll define product
 Set your Autumn secret key in Convex:
 
 ```bash
-pnpm dlx convex env set AUTUMN_SECRET_KEY=am_sk_xxx
+bun convex env set AUTUMN_SECRET_KEY=am_sk_xxx
 ```
 
 ### 4. Convex Configuration
@@ -153,7 +153,7 @@ export const pro = product({
 ### 2. Push Products to Autumn
 
 ```bash
-pnpm dlx atmn push
+bunx --bun atmn push
 ```
 
 This syncs your products to Autumn's sandbox environment.

@@ -132,7 +132,7 @@ let { error = null, customPrompt = '' }: Props = $props();
 - Use Tailwind CSS v4 for utility-first styling approach.
 - Leverage Shadcn components for pre-built, customizable UI elements.
 - Import Shadcn components from `$lib/components/ui`.
-- Install new ones with `pnpm dlx shadcn-svelte@latest add <component_name>`. The documentation is available at https://shadcn-svelte.com/docs/installation/sveltekit.
+- Install new ones with `bunx --bun shadcn-svelte@latest add <component_name>`. The documentation is available at https://shadcn-svelte.com/docs/installation/sveltekit.
 - Use Svelte's built-in transition and animation features.
 - Use Lucide for icons.
 
@@ -422,7 +422,7 @@ const password = formFieldProxy(form, 'password');
 5. Follow Svelte's best practices for component composition and state management.
 6. Ensure cross-browser compatibility by testing on multiple platforms.
 7. Keep your Svelte and SvelteKit versions up to date.
-8. Use `pnpm` for all package management operations instead of `npm`.
+8. Use `bun` for all package management operations.
 
 ## Official Documentation
 

@@ -32,7 +32,7 @@ describe('baseline form schemas', () => {
 			displayName: 'Ada Lovelace',
 			workspaceName: 'Analytical Engine',
 			role: 'Prototype builder',
-			bio: 'Building a useful hackathon demo.'
+			bio: 'Building a useful product demo.'
 		});
 
 		expect(result.success).toBe(true);
@@ -41,7 +41,7 @@ describe('baseline form schemas', () => {
 	it('accepts an account profile update payload with displayName', () => {
 		const result = accountProfileUpdateSchema.safeParse({
 			displayName: 'Ada Lovelace',
-			bio: 'Building a useful hackathon demo.'
+			bio: 'Building a useful product demo.'
 		});
 
 		expect(result.success).toBe(true);
