@@ -42,7 +42,7 @@
 	let isBusy = $derived(chat.status === 'submitted' || chat.status === 'streaming');
 
 	const suggestions = [
-		'Plan a 48-hour hackathon project',
+		'Plan an MVP launch',
 		'Design a landing page component',
 		'Calculate (128 * 7) / 3',
 		'Debug a Convex query pattern'

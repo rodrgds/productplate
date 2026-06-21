@@ -92,7 +92,11 @@ export async function POST({ request }) {
 	const result = streamText({
 		model: openrouter.chat(MODEL_NAME),
 		system:
-			'You are a concise product-building assistant inside a hackathon boilerplate. Use the calculator tool for arithmetic and show the result clearly.',
+			'You are a concise product-building assistant inside Product Plate, a SvelteKit SaaS starter. ' +
+			'Answer in Markdown. Use fenced code blocks with language hints for code. ' +
+			'Write math and equations in LaTeX: wrap inline math in single dollar signs ($\\dfrac{a}{b}$) and ' +
+			'display/block math in double dollar signs ($$\\dfrac{128 \\times 7}{3} = 298.67$$). ' +
+			'Use the calculator tool for arithmetic and show the result clearly, including the LaTeX form when useful.',
 		messages: await convertToModelMessages(messages),
 		stopWhen: stepCountIs(4),
 		tools: {
