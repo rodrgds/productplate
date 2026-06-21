@@ -14,6 +14,8 @@
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest run",
 		"test:e2e": "playwright test",
+		"test:e2e:auth": "playwright test e2e/auth-onboarding.test.ts",
+		"screenshots:readme": "bun docs/scripts/capture-readme-screenshots.ts",
 		"test": "bun run test:unit",
 		"verify": "bun run lint && bun run check && bun run test:unit && bun run build"
 	},

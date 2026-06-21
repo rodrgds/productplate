@@ -54,6 +54,10 @@ export default defineConfig({
 				]
 			},
 			workbox: {
+				globPatterns: ['client/**/*.{js,css,html,ico,png,svg,webmanifest,woff,woff2,ttf,json}'],
+				modifyURLPrefix: {
+					'client/': ''
+				},
 				runtimeCaching: [
 					{
 						urlPattern: ({ request }) => request.destination === 'image',

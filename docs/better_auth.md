@@ -43,8 +43,9 @@ This project has Google OAuth pre-configured. To enable it:
 ### 2. Set Environment Variables
 
 ```sh
-npx convex env set GOOGLE_CLIENT_ID your_google_client_id_here
-npx convex env set GOOGLE_CLIENT_SECRET your_google_client_secret_here
+bun convex env set SITE_URL http://localhost:5173
+bun convex env set GOOGLE_CLIENT_ID your_google_client_id_here
+bun convex env set GOOGLE_CLIENT_SECRET your_google_client_secret_here
 ```
 
 ### 3. Update Authorized Redirect URIs

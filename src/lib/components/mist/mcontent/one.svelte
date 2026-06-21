@@ -57,9 +57,14 @@
 			</p>
 		</div>
 
-		<Tabs.Root value="dashboard" class="mt-12 grid gap-6 lg:grid-cols-[0.42fr_1.58fr] lg:items-start">
+		<Tabs.Root
+			value="dashboard"
+			class="mt-12 grid gap-6 lg:grid-cols-[0.42fr_1.58fr] lg:items-start"
+		>
 			<div class="space-y-3">
-				<Tabs.List class="grid h-auto w-full grid-cols-2 content-start gap-2 bg-transparent p-0 lg:grid-cols-1">
+				<Tabs.List
+					class="grid h-auto w-full grid-cols-2 content-start gap-2 bg-transparent p-0 lg:grid-cols-1"
+				>
 					{#each routes as route (route.value)}
 						<Tabs.Trigger
 							value={route.value}

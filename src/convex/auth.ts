@@ -3,11 +3,29 @@ import { convex } from '@convex-dev/better-auth/plugins';
 import { components } from './_generated/api';
 import { type DataModel } from './_generated/dataModel';
 import { query } from './_generated/server';
+import { v } from 'convex/values';
 import { betterAuth } from 'better-auth';
 import { admin } from 'better-auth/plugins';
 import authSchema from './betterAuth/schema';
 
-const siteUrl = process.env.SITE_URL!;
+const siteUrl = process.env.SITE_URL ?? 'http://localhost:5173';
+const useSecureCookies = siteUrl.startsWith('https://');
+
+const authUserValidator = v.object({
+	_id: v.string(),
+	_creationTime: v.number(),
+	name: v.string(),
+	email: v.string(),
+	emailVerified: v.boolean(),
+	image: v.optional(v.union(v.null(), v.string())),
+	createdAt: v.number(),
+	updatedAt: v.number(),
+	userId: v.optional(v.union(v.null(), v.string())),
+	role: v.optional(v.union(v.null(), v.string())),
+	banned: v.optional(v.union(v.null(), v.boolean())),
+	banReason: v.optional(v.union(v.null(), v.string())),
+	banExpires: v.optional(v.union(v.null(), v.number()))
+});
 
 // The component client has methods needed for integrating Convex with Better Auth,
 // as well as helper methods for general use.
@@ -28,7 +46,16 @@ export const createAuth = (
 			disabled: optionsOnly
 		},
 		baseURL: siteUrl,
-		trustedOrigins: ['http://localhost:5173', siteUrl].filter(Boolean) as string[],
+		trustedOrigins: [
+			'http://localhost:5173',
+			'http://localhost:4173',
+			'http://127.0.0.1:5173',
+			'http://127.0.0.1:4173',
+			siteUrl
+		].filter(Boolean) as string[],
+		advanced: {
+			useSecureCookies
+		},
 		database: authComponent.adapter(ctx),
 		// User configuration
 		user: {
@@ -148,6 +175,7 @@ export const createAuth = (
 // Feel free to edit, omit, etc.
 export const getCurrentUser = query({
 	args: {},
+	returns: v.union(authUserValidator, v.null()),
 	handler: async (ctx) => {
 		try {
 			return await authComponent.getAuthUser(ctx);

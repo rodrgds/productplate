@@ -44,14 +44,17 @@
 		{
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			validators: zodClient(onboardingFormSchema as any),
-			onSubmit: async () => {
+			SPA: true,
+			onUpdate: async ({ form: validatedForm }) => {
+				if (!validatedForm.valid) return;
+
 				isSubmitting = true;
 				error = null;
 				try {
 					await authClient.updateUser({
-						name: $formData.displayName
+						name: validatedForm.data.displayName
 					});
-					await convex.mutation(api.userProfiles.completeOnboarding, $formData);
+					await convex.mutation(api.userProfiles.completeOnboarding, validatedForm.data);
 					completed = true;
 					redirectTimer = setTimeout(() => {
 						goto(resolve('/dashboard'));
@@ -96,7 +99,7 @@
 					<UserRoundPen class="size-5 text-primary" />
 				</div>
 				<div class="space-y-1.5">
-					<Card.Title class="text-2xl font-semibold tracking-tight"
+					<Card.Title role="heading" aria-level={1} class="text-2xl font-semibold tracking-tight"
 						>Set up your workspace</Card.Title
 					>
 					<Card.Description class="text-base text-muted-foreground">

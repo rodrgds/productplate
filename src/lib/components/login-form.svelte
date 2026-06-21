@@ -37,7 +37,7 @@
 			)
 		}
 	);
-	const { form: formData, enhance, errors } = form;
+	const { form: formData, errors } = form;
 
 	let hasErrors = $state(false);
 	$effect(() => {
@@ -145,7 +145,7 @@
 		</Card.Description>
 	</Card.Header>
 	<Card.Content>
-		<form onsubmit={handleSubmit} use:enhance class="space-y-4">
+		<form onsubmit={handleSubmit} class="space-y-4">
 			{#if error}
 				<div
 					class="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive"
