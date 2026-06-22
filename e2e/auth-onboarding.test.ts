@@ -35,4 +35,8 @@ test('email signup and later sign-in reach the protected dashboard', async ({ pa
 
 	await page.waitForURL('**/dashboard');
 	await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+
+	await page.goto('/onboarding');
+	await page.waitForURL('**/dashboard');
+	await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
 });

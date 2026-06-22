@@ -129,7 +129,7 @@
 		try {
 			await authClient.signIn.social({
 				provider: 'google',
-				callbackURL: resolve('/onboarding'),
+				callbackURL: resolve('/dashboard'),
 				errorCallbackURL: resolve('/auth/sign-in')
 			});
 		} catch (err) {
