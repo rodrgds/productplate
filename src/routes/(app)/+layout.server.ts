@@ -2,6 +2,7 @@ import { createConvexHttpClient } from '@mmailaender/convex-better-auth-svelte/s
 import { redirect } from '@sveltejs/kit';
 import { api } from '$convex/_generated/api';
 import { resolve } from '$app/paths';
+import { isDemoAccountEmail } from '$lib/demo-account.js';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals, url }) => {
@@ -17,12 +18,13 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 	const onboardingUrl = new URL(onboardingPath, url);
 	const isOnboardingRoute =
 		url.pathname.replace(/\/$/, '') === onboardingUrl.pathname.replace(/\/$/, '');
+	const isDemoAccount = isDemoAccountEmail(currentUser.email);
 
-	if (!profile && !isOnboardingRoute) {
+	if (!profile && !isDemoAccount && !isOnboardingRoute) {
 		throw redirect(303, onboardingPath);
 	}
 
-	if (profile && isOnboardingRoute) {
+	if ((profile || isDemoAccount) && isOnboardingRoute) {
 		throw redirect(303, resolve('/dashboard'));
 	}
 
