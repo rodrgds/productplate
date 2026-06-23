@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./docs/images/readme/landing.png" alt="Product Plate landing page" width="100%" />
+  <img src="./docs/images/reddit.png" alt="Product Plate landing page" width="100%" />
 </p>
 
 <h1 align="center">Product Plate</h1>
@@ -13,7 +13,9 @@
 </p>
 
 <p align="center">
-  <a href="https://productplate.pages.dev">Live demo</a>
+  <a href="https://productplate.pages.dev/auth/demo">Live demo</a>
+  ·
+  <a href="https://productplate.pages.dev/landing-components">Landing components</a>
   ·
   <a href="https://github.com/rodrgds/productplate">GitHub</a>
   ·
@@ -45,7 +47,7 @@ It is not a locked-down framework. It is ordinary SvelteKit and Convex applicati
 
 - **Open source and MIT licensed** - use it for personal, commercial, closed-source, or open-source projects.
 - **Modern Svelte stack** - SvelteKit 2, Svelte 5, TypeScript, Tailwind CSS v4, and shadcn-svelte.
-- **Real SaaS surfaces included** - landing page, auth, onboarding, dashboard, assistant, billing, settings, profiles, admin users, editor, graph, and 3D demo routes.
+- **Real SaaS surfaces included** - landing page, landing component gallery, auth, onboarding, dashboard, assistant, billing, settings, profiles, admin users, editor, graph, and 3D demo routes.
 - **Backend already wired** - Convex functions, realtime data, storage, typed APIs, auth integration, and billing hooks.
 - **AI-ready** - Vercel AI SDK streaming chat and tool patterns are included instead of left as an exercise.
 - **Good developer experience** - Bun, Devenv, Vitest, Playwright, linting, typechecking, PWA setup, and Cloudflare Pages CI/deployment.
@@ -53,7 +55,15 @@ It is not a locked-down framework. It is ordinary SvelteKit and Convex applicati
 ## Screenshots
 
 <p align="center">
+  <img src="./docs/images/readme/landing.png" alt="Product Plate landing page with hero, proof, feature, pricing, FAQ, and footer sections" width="100%" />
+</p>
+
+<p align="center">
   <img src="./docs/images/readme/dashboard.png" alt="Product Plate dashboard with metrics, chart, data table, and AI workbench" width="100%" />
+</p>
+
+<p align="center">
+  <img src="./docs/images/readme/landing-components.png" alt="Landing component gallery with hero, bento, tabs, orbit, mosaic proof, pricing, FAQ, and CTA sections" width="100%" />
 </p>
 
 | Billing                                                                                               | Settings                                                                                                      |
@@ -68,7 +78,7 @@ It is not a locked-down framework. It is ordinary SvelteKit and Convex applicati
 | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | <img src="./docs/images/readme/onboarding.png" alt="Onboarding form for workspace setup" /> | <img src="./docs/images/readme/flow.png" alt="Svelte Flow workflow demo" /> |
 
-Try the hosted demo at **[productplate.pages.dev](https://productplate.pages.dev)**.
+Try the hosted no-login demo account at **[productplate.pages.dev/auth/demo](https://productplate.pages.dev/auth/demo)**. It signs into the real app shell and opens the dashboard.
 
 ## Included
 
@@ -93,11 +103,13 @@ Try the hosted demo at **[productplate.pages.dev](https://productplate.pages.dev
 ### Product features
 
 - Landing page with responsive nav, feature blocks, route previews, pricing CTA, FAQ, and footer
+- Hosted demo-account entrypoint at `/auth/demo`, meant to be deleted by the kickstart agent
 - Better Auth email/password sign-up and sign-in
 - Google OAuth provider wiring
 - Forgot-password and reset-password screens
 - Protected app shell with sidebar navigation and user menu
 - Onboarding flow for profile and workspace setup
+- Landing component gallery with reusable hero, marquee, stats, bento, beUI-style tabs, comparison, timeline, orbit, mosaic proof, pricing, FAQ, CTA, and footer sections
 - Dashboard with metric cards, interactive chart, data table, and embedded AI workbench
 - AI assistant route with Vercel AI SDK streaming, Markdown rendering, suggestions, and calculator tool
 - Autumn billing page with current plan, product cards, checkout, and billing portal hooks
@@ -114,6 +126,8 @@ Try the hosted demo at **[productplate.pages.dev](https://productplate.pages.dev
 
 - shadcn-svelte primitives
 - Marketing blocks adapted for Product Plate
+- Plug-and-play landing components in `src/lib/components/landing`
+- Source-owned bento, orbit, testimonial mosaic, pricing, FAQ, CTA, and footer patterns
 - Product cards, Formsnap/superforms forms, tables, overlays, navigation, charts, editor, graph, 3D, and AI components
 - Clean neutral design system that is easy to restyle
 
@@ -128,6 +142,8 @@ Try the hosted demo at **[productplate.pages.dev](https://productplate.pages.dev
 - Convex codegen and generated AI guidelines
 - Cloudflare Pages deploy workflow
 - GitHub Actions quality workflow
+- `START_HERE.md` kickstart prompt for AI-assisted product customization
+- Inactive `_template_options` scaffolds for Stripe, Polar, Creem, Autumn, Convex, and Drizzle choices
 
 ## Quick start
 
@@ -136,6 +152,18 @@ Try the hosted demo at **[productplate.pages.dev](https://productplate.pages.dev
 ```sh
 git clone https://github.com/rodrgds/productplate.git my-saas
 cd my-saas
+```
+
+Before installing or deploying, run the AI kickstart:
+
+1. Open `START_HERE.md`.
+2. Paste the prompt into your AI coding agent from this repo root.
+3. Answer the product and stack questions.
+4. Let the agent rename the app, remove the demo account, activate one stack, delete unused scaffolds, and update docs.
+
+Then install and start local services:
+
+```sh
 bun install
 cp .env.example .env.local
 ```
@@ -196,6 +224,8 @@ OPENROUTER_API_KEY=
 AUTUMN_SECRET_KEY=
 ```
 
+Inactive kickstart options are documented in `_template_options` and `docs/template-options.md`. Add only the env vars for the provider you select, such as `STRIPE_SECRET_KEY`, `POLAR_ACCESS_TOKEN`, `CREEM_API_KEY`, or `DATABASE_URL`.
+
 See `.env.example` and `.env.server.example` for the full setup.
 
 Server-side auth and billing code runs in Convex, so production server values such as `SITE_URL`, `BETTER_AUTH_SECRET`, OAuth secrets, email keys, and Autumn keys should also be configured with `bun convex env set`.
@@ -220,6 +250,7 @@ src/routes/                 SvelteKit routes and API handlers
 src/routes/(app)/           Authenticated product routes
 src/lib/components/ui/      shadcn-svelte primitives
 src/lib/components/ai/      AI chat and tool components
+src/lib/components/landing/ Reusable landing page sections
 src/lib/components/mist/    Adapted Svelte marketing blocks
 src/convex/                 Convex schema, auth, billing, and functions
 docs/                       Project-specific integration guidance
@@ -251,6 +282,8 @@ Node.js: 22
 
 - Core primitives: [shadcn-svelte](https://www.shadcn-svelte.com/)
 - Marketing block foundations: [Svelte Shadcn Blocks](https://sv-blocks.vercel.app/)
+- Selective motion implementation: [Motion for Svelte](https://motion.svelte.page/)
+- Motion and landing references: [beUI](https://beui.dev/), [Magic UI](https://magicui.design/), and [Aceternity UI](https://ui.aceternity.com/)
 - AI interface patterns: [AI Elements](https://ai-sdk.dev/elements)
 
 The imported marketing blocks are MIT licensed. Their structure and styling were adapted to the Product Plate design system and Svelte 5 conventions.

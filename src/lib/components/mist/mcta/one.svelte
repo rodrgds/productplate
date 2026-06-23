@@ -23,12 +23,7 @@
 					Start building
 					<ArrowRightIcon data-icon="inline-end" />
 				</Button>
-				<Button
-					href="https://github.com/rodrgds/productplate"
-					variant="outline"
-					size="lg"
-					class="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground dark:border-primary-foreground/30 dark:bg-transparent dark:hover:bg-primary-foreground/10 dark:hover:text-primary-foreground"
-				>
+				<Button href="https://github.com/rodrgds/productplate" variant="secondary" size="lg">
 					<Code2Icon data-icon="inline-start" />
 					GitHub
 				</Button>

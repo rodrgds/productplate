@@ -12,7 +12,8 @@
 		'Better Auth and protected routes',
 		'Autumn billing scaffolding',
 		'AI SDK chat patterns',
-		'60+ product and UI components',
+		'70+ product, UI, and landing components',
+		'Plug-and-play landing section gallery',
 		'Cloudflare deployment workflow',
 		'Devenv reproducible toolchain'
 	] as const;

@@ -1,13 +1,9 @@
 <script lang="ts">
 	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
-	import BotIcon from '@lucide/svelte/icons/bot';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import Code2Icon from '@lucide/svelte/icons/code-2';
-	import LayoutDashboardIcon from '@lucide/svelte/icons/layout-dashboard';
 	import MenuIcon from '@lucide/svelte/icons/menu';
-	import SettingsIcon from '@lucide/svelte/icons/settings';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
-	import UsersIcon from '@lucide/svelte/icons/users';
 	import { resolve } from '$app/paths';
 	import AppLogo from '$lib/components/app-logo.svelte';
 	import FeatureSection from '$lib/components/mist/mfeature/one.svelte';
@@ -26,26 +22,31 @@
 
 	let mobileNavOpen = $state(false);
 
-	const navLinks = [
-		{ label: 'Features', href: '#features' },
-		{ label: 'Demo routes', href: '#routes' },
-		{ label: 'Open source', href: '#open-source' },
-		{ label: 'FAQ', href: '#faq' }
-	] as const;
-
 	const to = {
 		home: resolve('/'),
 		signUp: resolve('/auth/sign-up'),
 		signIn: resolve('/auth/sign-in'),
-		dashboard: resolve('/dashboard')
+		dashboard: resolve('/dashboard'),
+		demo: resolve('/auth/demo'),
+		components: resolve('/landing-components')
 	};
 
-	const appNavigation = [
-		{ label: 'Overview', icon: LayoutDashboardIcon, active: true },
-		{ label: 'Customers', icon: UsersIcon, active: false },
-		{ label: 'Assistant', icon: BotIcon, active: false },
-		{ label: 'Settings', icon: SettingsIcon, active: false }
+	const navLinks = [
+		{ label: 'Features', href: '#features' },
+		{ label: 'Demo routes', href: '#routes' },
+		{ label: 'Components', href: to.components },
+		{ label: 'Open source', href: '#open-source' },
+		{ label: 'FAQ', href: '#faq' }
 	] as const;
+
+	const launchSteps = [
+		'Auth, billing, and Convex wired',
+		'Product routes ready to reshape',
+		'Landing sections in source',
+		'Ship with Bun and Cloudflare'
+	] as const;
+
+	const pipeline = [36, 52, 49, 64, 71, 84] as const;
 
 	const faq = [
 		{
@@ -99,7 +100,7 @@
 			class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6"
 		>
 			<a
-				href={to.home}
+				href={resolve('/')}
 				aria-label="Product Plate home"
 				class="flex items-center gap-3 font-semibold tracking-tight"
 			>
@@ -118,8 +119,8 @@
 				<Button href={to.signIn} variant="ghost" size="sm" class="hidden sm:inline-flex"
 					>Sign in</Button
 				>
-				<Button href={to.signUp} size="sm" class="hidden sm:inline-flex">
-					Start building
+				<Button href={to.demo} size="sm" class="hidden sm:inline-flex">
+					Open demo
 					<ArrowRightIcon data-icon="inline-end" />
 				</Button>
 				<Sheet.Root bind:open={mobileNavOpen}>
@@ -161,8 +162,8 @@
 								class="w-full"
 								onclick={() => (mobileNavOpen = false)}>Sign in</Button
 							>
-							<Button href={to.signUp} class="w-full" onclick={() => (mobileNavOpen = false)}>
-								Start building
+							<Button href={to.demo} class="w-full" onclick={() => (mobileNavOpen = false)}>
+								Open demo
 								<ArrowRightIcon data-icon="inline-end" />
 							</Button>
 						</div>
@@ -193,8 +194,8 @@
 						serious component system. Built for founders who would rather work on the idea.
 					</p>
 					<div class="mt-9 flex flex-wrap gap-3">
-						<Button href={to.signUp} size="lg">
-							Start building
+						<Button href={to.demo} size="lg">
+							Open demo
 							<ArrowRightIcon data-icon="inline-end" />
 						</Button>
 						<Button href="https://github.com/rodrgds/productplate" variant="outline" size="lg">
@@ -210,7 +211,6 @@
 				</div>
 
 				<div class="relative lg:pl-4">
-					<div class="absolute -inset-5 rounded-3xl bg-muted/55"></div>
 					<div
 						class="relative overflow-hidden rounded-2xl border bg-card shadow-xl shadow-foreground/5"
 					>
@@ -220,62 +220,51 @@
 								<span class="size-2 rounded-full bg-muted-foreground/25"></span>
 								<span class="size-2 rounded-full bg-muted-foreground/25"></span>
 							</div>
-							<span class="mx-auto pr-9 text-xs text-muted-foreground"
-								>productplate.pages.dev/dashboard</span
-							>
+							<span class="mx-auto pr-9 text-xs text-muted-foreground">productplate.pages.dev</span>
 						</div>
-						<div class="grid min-h-96 grid-cols-1 sm:min-h-105 sm:grid-cols-[9.5rem_1fr]">
-							<aside class="hidden border-r bg-muted/35 p-3 sm:block">
-								<div class="flex items-center gap-2 px-2 py-2 text-xs font-semibold">
-									<AppLogo class="size-5 rounded-md" />
-									Plate Inc.
+						<div class="grid min-h-96 gap-4 p-4 sm:p-5 lg:grid-cols-[0.88fr_1.12fr]">
+							<div class="rounded-xl border bg-muted/35 p-4">
+								<div class="flex items-center gap-2">
+									<AppLogo class="size-7 rounded-lg" />
+									<div>
+										<p class="text-sm font-semibold">Launch workspace</p>
+										<p class="mt-1 text-xs text-muted-foreground">Foundation status</p>
+									</div>
 								</div>
-								<Separator class="my-3" />
-								<div class="flex flex-col gap-1">
-									{#each appNavigation as item (item.label)}
+								<div class="mt-5 grid gap-3">
+									{#each launchSteps as step (step)}
 										<div
-											class:active-nav={item.active}
-											class="flex items-center gap-2 rounded-md px-2 py-2 text-xs text-muted-foreground"
+											class="flex items-center gap-2 rounded-lg border bg-background px-3 py-2 text-sm"
 										>
-											<item.icon class="size-3.5" />
-											{item.label}
+											<CheckIcon class="size-4 shrink-0" />
+											<span>{step}</span>
 										</div>
 									{/each}
 								</div>
-							</aside>
-							<div class="min-w-0 p-4 sm:p-5">
-								<div class="flex items-center justify-between gap-3">
-									<div>
-										<p class="text-sm font-semibold">Overview</p>
-										<p class="mt-1 text-[0.68rem] text-muted-foreground">Sunday, June 21</p>
-									</div>
-									<Badge variant="secondary">Live</Badge>
-								</div>
-								<div class="mt-5 grid gap-3 sm:grid-cols-2">
-									<div class="rounded-lg border p-3">
-										<p class="text-[0.65rem] text-muted-foreground">Active customers</p>
-										<p class="mt-2 text-xl font-semibold">1,429</p>
-										<p class="mt-1 text-[0.65rem] text-muted-foreground">+12.5% this month</p>
-									</div>
-									<div class="rounded-lg border p-3">
-										<p class="text-[0.65rem] text-muted-foreground">Monthly revenue</p>
-										<p class="mt-2 text-xl font-semibold">$24.8k</p>
-										<p class="mt-1 text-[0.65rem] text-muted-foreground">83% of target</p>
-									</div>
-								</div>
-								<div class="mt-3 rounded-lg border p-4">
-									<div class="flex items-center justify-between">
-										<p class="text-xs font-medium">Growth</p>
-										<span class="text-[0.65rem] text-muted-foreground">Last 8 weeks</span>
+							</div>
+							<div class="grid gap-4">
+								<div class="rounded-xl border p-4">
+									<div class="flex items-center justify-between gap-3">
+										<div>
+											<p class="text-sm font-semibold">Starter readiness</p>
+											<p class="mt-1 text-xs text-muted-foreground">Routes, backend, UI, deploy</p>
+										</div>
+										<Badge variant="secondary">Ready</Badge>
 									</div>
 									<div class="mt-6 flex h-28 items-end gap-2">
-										{#each [34, 48, 42, 61, 56, 72, 68, 86] as value, index (index)}
+										{#each pipeline as value, index (index)}
 											<div
-												class="min-w-2 flex-1 rounded-t-sm bg-primary/80"
+												class="min-w-2 flex-1 rounded-t-sm bg-primary"
 												style={`height: ${value}%`}
 											></div>
 										{/each}
 									</div>
+								</div>
+								<div class="rounded-xl border bg-primary p-4 text-primary-foreground">
+									<p class="text-sm font-semibold">Marketing sections added</p>
+									<p class="mt-2 text-sm leading-6 text-primary-foreground/75">
+										Hero, proof, features, pricing, FAQ, and CTA examples now live in source.
+									</p>
 								</div>
 							</div>
 						</div>
@@ -336,10 +325,5 @@
 			);
 		background-size: 42px 42px;
 		mask-image: linear-gradient(to bottom, black, transparent 78%);
-	}
-
-	.active-nav {
-		background: var(--muted);
-		color: var(--foreground);
 	}
 </style>

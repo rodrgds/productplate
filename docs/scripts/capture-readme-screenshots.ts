@@ -13,15 +13,20 @@ const routes = [
 	'threlte'
 ] as const;
 
-async function screenshot(page: Page, name: string, selector = 'body') {
+async function screenshot(page: Page, name: string, selector = 'body', settleMs = 0) {
 	await page.locator(selector).first().waitFor({ state: 'visible', timeout: 15_000 });
+	if (settleMs > 0) {
+		await page.waitForTimeout(settleMs);
+	}
 	await page.screenshot({ path: `${outputDir}/${name}.png`, fullPage: false });
 	console.log(`captured ${name}.png`);
 }
 
 await mkdir(outputDir, { recursive: true });
 
-const browser = await chromium.launch();
+const browser = await chromium.launch(
+	process.env.PLAYWRIGHT_CHROME_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHROME_CHANNEL } : {}
+);
 const page = await browser.newPage({
 	viewport: { width: 1440, height: 1100 },
 	deviceScaleFactor: 1
@@ -30,6 +35,9 @@ const page = await browser.newPage({
 try {
 	await page.goto(`${baseUrl}/`, { waitUntil: 'domcontentloaded' });
 	await screenshot(page, 'landing', 'h1');
+
+	await page.goto(`${baseUrl}/landing-components`, { waitUntil: 'domcontentloaded' });
+	await screenshot(page, 'landing-components', 'h1', 900);
 
 	await page.goto(`${baseUrl}/auth/sign-up`, { waitUntil: 'domcontentloaded' });
 	await screenshot(page, 'sign-up', 'form');

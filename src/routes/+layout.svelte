@@ -1,6 +1,5 @@
 <script lang="ts">
 	import '../app.css';
-	import '$lib/styles/landing-polish.css';
 	import '@uppy/core/css/style.min.css';
 	import '@uppy/dashboard/css/style.min.css';
 	import favicon from '$lib/assets/favicon.svg';

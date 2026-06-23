@@ -7,7 +7,7 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
-		"prepare": "svelte-kit sync || echo '' && husky",
+		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
@@ -50,10 +50,8 @@
 		"eslint-plugin-svelte": "^3.17.1",
 		"formsnap": "^2.0.1",
 		"globals": "^16.5.0",
-		"husky": "^9.1.7",
 		"jsdom": "^29.1.1",
 		"layerchart": "2.0.0-next.27",
-		"lint-staged": "^16.4.0",
 		"prettier": "3.6.2",
 		"prettier-plugin-svelte": "3.5.2",
 		"prettier-plugin-tailwindcss": "0.6.14",
@@ -81,6 +79,7 @@
 		"@ai-sdk/openai": "^3.0.64",
 		"@ai-sdk/svelte": "^4.0.188",
 		"@convex-dev/better-auth": "^0.9.11",
+		"@humanspeak/svelte-motion": "^0.7.2",
 		"@mmailaender/convex-better-auth-svelte": "^0.2.1",
 		"@neoconfetti/svelte": "^2.2.2",
 		"@prosekit/svelte": "^0.9.4",
@@ -107,14 +106,5 @@
 		"sveltekit-superforms": "^2.30.1",
 		"three": "^0.184.0",
 		"wrangler": "^4.93.1"
-	},
-	"lint-staged": {
-		"*.{js,ts,svelte}": [
-			"eslint --fix",
-			"prettier --write"
-		],
-		"*.{json,css,md}": [
-			"prettier --write"
-		]
 	}
 }

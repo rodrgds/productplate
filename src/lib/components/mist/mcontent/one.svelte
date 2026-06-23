@@ -61,7 +61,7 @@
 			value="dashboard"
 			class="mt-12 grid gap-6 lg:grid-cols-[0.42fr_1.58fr] lg:items-start"
 		>
-			<div class="space-y-3">
+			<div class="flex flex-col gap-3">
 				<Tabs.List
 					class="grid h-auto w-full grid-cols-2 content-start gap-2 bg-transparent p-0 lg:grid-cols-1"
 				>
@@ -159,7 +159,7 @@
 										<p class="text-[0.65rem] text-muted-foreground">OpenRouter free router</p>
 									</div>
 								</div>
-								<div class="space-y-3 py-3">
+								<div class="flex flex-col gap-3 py-3">
 									<div class="flex justify-end">
 										<div
 											class="max-w-[78%] rounded-2xl rounded-tr-sm bg-primary px-3 py-2 text-xs text-primary-foreground"
@@ -223,7 +223,7 @@
 									</div>
 								</div>
 							{:else if route.value === 'settings'}
-								<div class="mx-auto max-w-sm space-y-4">
+								<div class="mx-auto flex max-w-sm flex-col gap-4">
 									<div class="flex items-center gap-3">
 										<div
 											class="flex size-10 items-center justify-center rounded-full border bg-muted"
@@ -237,7 +237,7 @@
 											</p>
 										</div>
 									</div>
-									<div class="space-y-3">
+									<div class="flex flex-col gap-3">
 										<div>
 											<p class="text-[0.65rem] text-muted-foreground">Display name</p>
 											<div class="mt-1 rounded-lg border bg-muted/30 px-3 py-2 text-xs">
