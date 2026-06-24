@@ -23,13 +23,18 @@
 	let hasClientSession = $state<boolean | null>(null);
 	let isLoading = $derived(hasClientSession === null && !data.currentUser);
 	let isAuthenticated = $derived(hasClientSession ?? Boolean(data.currentUser));
+	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
+	let clientCurrentUser = $derived(currentUserResponse.data);
 	const profileResponse = useQuery(api.userProfiles.getCurrent, {});
 	let profile = $derived(profileResponse.data === undefined ? data.profile : profileResponse.data);
 	let isProfileLoading = $derived(profileResponse.isLoading && profileResponse.data === undefined);
 	let isOnboardingRoute = $derived(page.url.pathname === resolve('/onboarding'));
 	let isDemoAccount = $derived(isDemoAccountEmail(data.currentUser?.email));
 	let shouldEnsureDemoProfile = $derived(
-		isAuthenticated && !profile && !isProfileLoading && isDemoAccount
+		Boolean(clientCurrentUser) &&
+			!profile &&
+			!isProfileLoading &&
+			isDemoAccountEmail(clientCurrentUser?.email)
 	);
 	let shouldShowSidebar = $derived(!isOnboardingRoute && (Boolean(profile) || isDemoAccount));
 
