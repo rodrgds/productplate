@@ -82,7 +82,10 @@
 	<meta property="og:title" content="Product Plate" />
 	<meta property="og:description" content={APP_DESCRIPTION} />
 	<meta property="og:type" content="website" />
-	<meta name="twitter:card" content="summary" />
+	<meta property="og:image" content="/og.png" />
+	<meta property="og:image:alt" content="Product Plate — Ship the product, not the setup" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:image" content="/og.png" />
 </svelte:head>
 
 <a
