@@ -18,7 +18,15 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
-	import { APP_DESCRIPTION, APP_NAME } from '$lib/constants';
+	import {
+		APP_DESCRIPTION,
+		APP_NAME,
+		APP_OG_IMAGE_URL,
+		APP_SOCIAL_DESCRIPTION,
+		APP_SOCIAL_TITLE,
+		APP_TWITTER_CARD,
+		APP_URL
+	} from '$lib/constants';
 
 	let mobileNavOpen = $state(false);
 
@@ -79,13 +87,22 @@
 <svelte:head>
 	<title>{APP_NAME} | Ship the product, not the setup</title>
 	<meta name="description" content={APP_DESCRIPTION} />
-	<meta property="og:title" content="Product Plate" />
-	<meta property="og:description" content={APP_DESCRIPTION} />
+	<link rel="canonical" href={APP_URL} />
+	<meta property="og:site_name" content={APP_NAME} />
+	<meta property="og:title" content={APP_SOCIAL_TITLE} />
+	<meta property="og:description" content={APP_SOCIAL_DESCRIPTION} />
 	<meta property="og:type" content="website" />
-	<meta property="og:image" content="/og.png" />
-	<meta property="og:image:alt" content="Product Plate — Ship the product, not the setup" />
-	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:image" content="/og.png" />
+	<meta property="og:url" content={APP_URL} />
+	<meta property="og:image" content={APP_OG_IMAGE_URL} />
+	<meta property="og:image:secure_url" content={APP_OG_IMAGE_URL} />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta property="og:image:alt" content="Product Plate — ship the product, not the setup" />
+	<meta name="twitter:card" content={APP_TWITTER_CARD} />
+	<meta name="twitter:title" content={APP_SOCIAL_TITLE} />
+	<meta name="twitter:description" content={APP_SOCIAL_DESCRIPTION} />
+	<meta name="twitter:image" content={APP_OG_IMAGE_URL} />
+	<meta name="twitter:image:alt" content="Product Plate — ship the product, not the setup" />
 </svelte:head>
 
 <a
