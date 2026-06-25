@@ -22,7 +22,11 @@
 					<Code2Icon data-icon="inline-start" />
 					GitHub
 				</Button>
-				<Button href="/START_HERE.md" variant="secondary" size="lg">
+				<Button
+					href="https://github.com/rodrgds/productplate/blob/main/START_HERE.md"
+					variant="secondary"
+					size="lg"
+				>
 					Read Kickstart
 					<ArrowRightIcon data-icon="inline-end" />
 				</Button>
