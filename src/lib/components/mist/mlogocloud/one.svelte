@@ -1,14 +1,14 @@
 <script lang="ts">
 	const stack = [
-		{ name: 'SvelteKit', logo: 'https://cdn.simpleicons.org/svelte/FF3E00' },
-		{ name: 'TypeScript', logo: 'https://cdn.simpleicons.org/typescript/3178C6' },
-		{ name: 'Tailwind CSS', logo: 'https://cdn.simpleicons.org/tailwindcss/06B6D4' },
-		{ name: 'Bun', logo: 'https://cdn.simpleicons.org/bun/000000' },
-		{ name: 'Cloudflare', logo: 'https://cdn.simpleicons.org/cloudflare/F38020' },
-		{ name: 'Convex', initials: 'CX' },
-		{ name: 'Better Auth', initials: 'BA' },
-		{ name: 'Autumn', initials: 'AU' },
-		{ name: 'AI SDK', initials: 'AI' }
+		{ name: 'SvelteKit', logo: 'https://cdn.simpleicons.org/svelte/FF3E00', initials: null },
+		{ name: 'TypeScript', logo: 'https://cdn.simpleicons.org/typescript/3178C6', initials: null },
+		{ name: 'Tailwind CSS', logo: 'https://cdn.simpleicons.org/tailwindcss/06B6D4', initials: null },
+		{ name: 'Bun', logo: 'https://cdn.simpleicons.org/bun/000000', initials: null },
+		{ name: 'Cloudflare', logo: 'https://cdn.simpleicons.org/cloudflare/F38020', initials: null },
+		{ name: 'Convex', logo: null, initials: 'CX' },
+		{ name: 'Better Auth', logo: null, initials: 'BA' },
+		{ name: 'Autumn', logo: null, initials: 'AU' },
+		{ name: 'AI SDK', logo: null, initials: 'AI' }
 	] as const;
 </script>
 
@@ -21,7 +21,7 @@
 					<li
 						class="flex items-center gap-2 rounded-full border bg-background px-3 py-2 text-sm font-medium shadow-sm"
 					>
-						{#if 'logo' in item}
+						{#if item.logo}
 							<img src={item.logo} alt="" class="size-4" loading="lazy" />
 						{:else}
 							<span
