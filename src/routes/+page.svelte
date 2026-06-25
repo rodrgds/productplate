@@ -82,6 +82,7 @@
 	<meta property="og:title" content="Product Plate" />
 	<meta property="og:description" content={APP_DESCRIPTION} />
 	<meta property="og:type" content="website" />
+	<meta property="og:site_name" content={APP_NAME} />
 	<meta property="og:image" content="/og.png" />
 	<meta property="og:image:alt" content="Product Plate — Ship the product, not the setup" />
 	<meta name="twitter:card" content="summary_large_image" />

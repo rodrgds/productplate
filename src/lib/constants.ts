@@ -6,7 +6,8 @@ export const APP_LEGAL_NAME = 'Product Plate';
 
 export const APP_YEAR = 2026;
 
-export const APP_DESCRIPTION = 'A production-minded SvelteKit SaaS starter for founders.';
+export const APP_DESCRIPTION =
+	'A production-minded SvelteKit SaaS starter for founders. Ship faster with Convex, Tailwind CSS, shadcn-svelte, and built-in auth, billing, and admin.';
 
 export const APP_TAGLINE = 'Ship the product, not the setup.';
 
