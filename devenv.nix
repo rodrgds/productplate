@@ -60,23 +60,38 @@
             export SITE_URL="''${SITE_URL:-https://fake-site-url.com}"
             export NODE_OPTIONS="''${NODE_OPTIONS:---max-old-space-size=4096}"
 
-            echo "Running formatting fixes..."
-            bun prettier --write .
+            # Only inspect files that changed versus the upstream branch.
+            # eslint uses type-aware linting, so a full repo run is ~60s;
+            # limiting to changed files keeps the pre-push hook snappy and
+            # still catches issues introduced by this push.
+            upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo origin/main)"
+            files="$(git diff --name-only --diff-filter=ACMR "$upstream"...HEAD 2>/dev/null || git diff --name-only --diff-filter=ACMR HEAD~5...HEAD)"
+            [ -n "$files" ] || { echo "No files changed; skipping pre-push checks."; exit 0; }
 
-            echo "Running ESLint fixes..."
-            bun eslint . --fix
+            js_files="$(printf "%s\n" "$files" | grep -E "\.(js|ts|svelte)$" || true)"
+            format_files="$(printf "%s\n" "$files" | grep -E "\.(json|css|md)$" || true)"
 
-            echo "Checking formatting and linting..."
-            bun run lint
+            if [ -n "$js_files" ]; then
+              echo "Running ESLint --fix on changed JS/TS/Svelte files..."
+              printf "%s\n" "$js_files" | xargs bun eslint --fix
+            fi
+
+            if [ -n "$format_files" ] || [ -n "$js_files" ]; then
+              echo "Running prettier --write on changed files..."
+              to_format="$(printf "%s\n" "$js_files" "$format_files" | grep -v "^$" | sort -u)"
+              printf "%s\n" "$to_format" | xargs bun prettier --write
+            fi
+
+            # Stage any autofixes so they end up in the push.
+            printf "%s\n" "$files" | xargs git add
 
             echo "Running typecheck..."
             bun run check
 
-            echo "Running tests and build before push..."
+            echo "Running unit tests..."
             bun run test:unit
-            bun run build
 
-            echo "Build successful. Proceeding with push..."
+            echo "Pre-push checks passed. Run \`bun run verify\` to also build."
           '
         '';
       };

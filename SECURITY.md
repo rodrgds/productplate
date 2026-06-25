@@ -6,9 +6,9 @@ Product Plate is a starter template. Security fixes are still important because 
 
 Security fixes are handled on the default branch and included in the next tagged release.
 
-| Version | Supported |
-| ------- | --------- |
-| `main`  | Yes       |
+| Version         | Supported   |
+| --------------- | ----------- |
+| `main`          | Yes         |
 | `<1.0` releases | Best effort |
 
 ## Reporting a vulnerability
