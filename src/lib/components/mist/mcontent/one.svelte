@@ -16,14 +16,14 @@
 			label: 'Dashboard',
 			icon: ChartNoAxesCombinedIcon,
 			path: '/dashboard',
-			detail: 'Charts, data tables, summary cards, and responsive app navigation.'
+			detail: 'Summary cards, charts, tables, and a responsive app shell.'
 		},
 		{
 			value: 'assistant',
 			label: 'AI assistant',
 			icon: BotIcon,
 			path: '/assistant',
-			detail: 'Streaming messages, attachments, reasoning, tools, and model-ready input.'
+			detail: 'Streaming messages, Markdown, suggestions, and tool-call patterns.'
 		},
 		{
 			value: 'billing',
@@ -37,23 +37,23 @@
 			label: 'Settings',
 			icon: SettingsIcon,
 			path: '/settings',
-			detail: 'Account, email, and password flows with validated forms.'
+			detail: 'Account, email, password, and profile flows with validated forms.'
 		}
 	] as const;
 
 	const bars = [34, 48, 42, 61, 56, 72, 68, 86];
 </script>
 
-<section id="routes" class="py-24 sm:py-32">
+<section id="routes" class="py-20 sm:py-28">
 	<div class="mx-auto max-w-6xl px-6">
 		<div class="max-w-3xl">
-			<Badge variant="outline">Working product routes</Badge>
+			<Badge variant="outline">Clickable starter</Badge>
 			<h2 class="mt-5 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-				A starter you can click through.
+				Not screenshots. Real routes.
 			</h2>
 			<p class="mt-5 text-lg leading-8 text-muted-foreground">
-				Product Plate ships the common SaaS surfaces as real SvelteKit routes, not disconnected
-				mockups. Use them as reference, keep them, or delete them cleanly.
+				Open the demo, click around, then decide what your product should keep. The kickstart
+				prompt is written to turn these defaults into a specific app.
 			</p>
 		</div>
 
@@ -84,15 +84,15 @@
 					<div class="mt-4 grid gap-2 text-xs text-muted-foreground">
 						<div class="flex items-center gap-2">
 							<CheckIcon class="size-3.5" />
-							<span>4 working routes</span>
+							<span>4 core product routes</span>
 						</div>
 						<div class="flex items-center gap-2">
 							<CheckIcon class="size-3.5" />
-							<span>No screenshot-only demos</span>
+							<span>Shared app shell</span>
 						</div>
 						<div class="flex items-center gap-2">
 							<CheckIcon class="size-3.5" />
-							<span>Delete or replace cleanly</span>
+							<span>Easy to keep or remove</span>
 						</div>
 					</div>
 				</div>
@@ -164,7 +164,7 @@
 										<div
 											class="max-w-[78%] rounded-2xl rounded-tr-sm bg-primary px-3 py-2 text-xs text-primary-foreground"
 										>
-											Calculate (128 &times; 7) / 3
+											Summarize this week's feedback
 										</div>
 									</div>
 									<div class="flex justify-start gap-2">
@@ -176,8 +176,8 @@
 										<div
 											class="max-w-[78%] rounded-2xl rounded-tl-sm border bg-background px-3 py-2 text-xs"
 										>
-											<p class="text-muted-foreground">Using the calculator tool:</p>
-											<p class="mt-1 font-mono text-[0.7rem]">896 / 3 = 298.67</p>
+											<p class="text-muted-foreground">Using app context:</p>
+											<p class="mt-1">Most requests mention billing exports and team roles.</p>
 										</div>
 									</div>
 								</div>
