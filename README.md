@@ -281,7 +281,7 @@ Node.js: 22
 ## Component sources
 
 - Core primitives: [shadcn-svelte](https://www.shadcn-svelte.com/)
-- Marketing block foundations: [Svelte Shadcn Blocks](https://sv-blocks.vercel.app/)
+- Marketing block foundations: [Svelte Shadcn Blocks](https://sv-blocks.vercel.app/) and [Svelte Animations Components](https://sv-animations.vercel.app/)
 - Selective motion implementation: [Motion for Svelte](https://motion.svelte.page/)
 - Motion and landing references: [beUI](https://beui.dev/), [Magic UI](https://magicui.design/), and [Aceternity UI](https://ui.aceternity.com/)
 - AI interface patterns: [AI Elements](https://ai-sdk.dev/elements)
