@@ -10,38 +10,36 @@
 	const foundations = [
 		{
 			icon: ShieldCheckIcon,
-			name: 'Better Auth',
-			detail: 'Sessions, recovery, OAuth, protected routes'
+			name: 'Auth',
+			detail: 'Accounts, sessions, recovery, OAuth, and protected app routes.'
 		},
-		{ icon: CreditCardIcon, name: 'Autumn billing', detail: 'Plans, checkout, and customer state' },
-		{ icon: BotIcon, name: 'AI SDK', detail: 'Streaming assistant and tool patterns' },
-		{ icon: WorkflowIcon, name: 'Convex', detail: 'Realtime data, functions, and file storage' }
+		{ icon: CreditCardIcon, name: 'Billing', detail: 'Plans, checkout, and customer state through Autumn.' },
+		{ icon: WorkflowIcon, name: 'Realtime backend', detail: 'Convex functions, storage, typed APIs, and live queries.' },
+		{ icon: BotIcon, name: 'AI patterns', detail: 'Streaming chat, Markdown, suggestions, and tool calls.' }
 	] as const;
 </script>
 
-<section id="features" class="border-y bg-muted/35 py-24 sm:py-32">
+<section id="features" class="border-y bg-muted/35 py-20 sm:py-28">
 	<div class="mx-auto max-w-7xl px-6">
-		<div class="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
+		<div class="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
 			<div>
-				<Badge variant="outline">A complete starting surface</Badge>
+				<Badge variant="outline">What you do not rebuild</Badge>
 				<h2 class="mt-5 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-					Everything around your idea is already here.
+					The boring SaaS base is already wired.
 				</h2>
 			</div>
 			<p class="max-w-2xl text-lg leading-8 text-muted-foreground lg:justify-self-end">
-				Start with working product routes instead of a screenshot-only template. Replace the sample
-				data, keep the infrastructure, and spend the first week on your differentiator.
+				Start from working routes and real integrations. Keep what fits, remove what does not,
+				and spend the first week on the actual product.
 			</p>
 		</div>
 
-		<div class="mt-14 grid gap-5 lg:grid-cols-[1.55fr_0.75fr]">
+		<div class="mt-12 grid gap-5 lg:grid-cols-[1.55fr_0.75fr]">
 			<div class="min-w-0"><FeatureTable /></div>
 			<Card.Root class="min-h-full justify-between">
 				<Card.Header>
-					<Card.Title>Production foundations</Card.Title>
-					<Card.Description
-						>Integrated, typed, and represented by working demo routes.</Card.Description
-					>
+					<Card.Title>Default foundations</Card.Title>
+					<Card.Description>Useful enough to keep. Plain enough to replace.</Card.Description>
 				</Card.Header>
 				<Card.Content class="flex flex-col gap-5">
 					{#each foundations as item (item.name)}
