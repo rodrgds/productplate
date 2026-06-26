@@ -10,10 +10,10 @@
 		{ name: 'Tailwind CSS', logo: '/stack/tailwindcss.svg' },
 		{ name: 'Bun', logo: '/stack/bun.svg' },
 		{ name: 'Cloudflare', logo: '/stack/cloudflare.svg' },
-		{ name: 'Convex', logo: '/stack/convex.svg' },
+		{ name: 'Convex', logo: '/stack/convex.png' },
 		{ name: 'Better Auth', logo: '/stack/better-auth.svg' },
 		{ name: 'Autumn', logo: '/stack/autumn.svg' },
-		{ name: 'AI SDK', logo: '/stack/aisdk.svg' }
+		{ name: 'AI SDK', logo: '/stack/aisdk.png' }
 	] as const;
 </script>
 
@@ -34,8 +34,7 @@
 </section>
 
 <style>
-	:global(html.dark) img[src$='/better-auth.svg'],
-	:global(html.dark) img[src$='/aisdk.svg'] {
+	:global(html.dark) img[src$='/better-auth.svg'] {
 		filter: invert(1);
 	}
 </style>
