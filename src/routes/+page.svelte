@@ -43,7 +43,7 @@
 		{ label: 'Kickstart', href: '#kickstart' },
 		{ label: 'Stack', href: '#stack' },
 		{ label: 'Routes', href: '#routes' },
-		{ label: 'Components', href: resolve('/components/hero') },
+		{ label: 'Components', href: resolve('/components') },
 		{ label: 'FAQ', href: '#faq' }
 	] as const;
 
