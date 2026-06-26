@@ -2,6 +2,8 @@
 
 This document provides style presets and configurations to adapt the Product Plate's visual identity. Use these as a reference to copy and paste or customize the theme configuration in `src/app.css` and `src/app.html`.
 
+Use this file during kickstart to activate one coherent identity, not to keep multiple runtime themes. Update `src/app.css`, `src/app.html`, `APP_THEME_COLOR`, `APP_BACKGROUND_COLOR`, favicon/PWA/OG assets, and visible brand components to match the selected style.
+
 ---
 
 ## 1. Claude Theme (Outfit + Geist Mono)
