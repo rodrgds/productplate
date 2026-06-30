@@ -4,22 +4,24 @@ test('home page presents Product Plate and its starter capabilities', async ({ p
 	await page.goto('/');
 	await expect(page).toHaveTitle(/Product Plate/);
 	await expect(
-		page.getByRole('heading', { name: /Ship the product, not the setup/i })
+		page.getByRole('heading', { name: /SvelteKit starter, ready to become your product/i })
 	).toBeVisible();
-	await expect(page.getByRole('link', { name: /Use demo/i }).first()).toHaveAttribute(
+	await expect(page.getByRole('img', { name: /Product Plate dashboard/i })).toBeVisible();
+	await expect(page.getByRole('link', { name: /Open live demo/i }).first()).toHaveAttribute(
 		'href',
 		'/auth/demo'
 	);
-	await expect(page.getByRole('link', { name: /Create account/i }).first()).toHaveAttribute(
+	await expect(page.getByRole('link', { name: /View source/i }).first()).toHaveAttribute(
 		'href',
-		'/auth/sign-up'
+		'https://github.com/rodrgds/productplate'
 	);
-	await expect(page.getByRole('link', { name: /Sign in/i }).first()).toHaveAttribute(
-		'href',
-		'/auth/sign-in'
-	);
-	await expect(page.getByRole('heading', { name: /Everything around your idea/i })).toBeVisible();
-	await expect(page.getByRole('heading', { name: /Questions, answered/i })).toBeVisible();
+	await expect(
+		page.getByRole('heading', { name: /A working product, not a feature checklist/i })
+	).toBeVisible();
+	await expect(
+		page.getByRole('heading', { name: /Clone it. Brief it. Make it yours/i })
+	).toBeVisible();
+	await expect(page.getByRole('heading', { name: /Before you fork/i })).toBeVisible();
 });
 
 test('landing component gallery presents reusable marketing sections', async ({ page }) => {

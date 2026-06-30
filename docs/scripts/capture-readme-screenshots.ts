@@ -2,7 +2,7 @@ import { mkdir } from 'node:fs/promises';
 import { chromium, type Page } from 'playwright';
 
 const baseUrl = process.env.SCREENSHOT_BASE_URL ?? 'http://localhost:5173';
-const outputDir = 'docs/images/readme';
+const outputDir = 'static/screenshots';
 const routes = [
 	'dashboard',
 	'assistant',

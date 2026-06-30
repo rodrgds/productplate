@@ -50,12 +50,12 @@
 	<meta property="og:image:secure_url" content={APP_OG_IMAGE_URL} />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
-	<meta property="og:image:alt" content="Product Plate — ship the product, not the setup" />
+	<meta property="og:image:alt" content="Product Plate SvelteKit product starter" />
 	<meta name="twitter:card" content={APP_TWITTER_CARD} />
 	<meta name="twitter:title" content={APP_SOCIAL_TITLE} />
 	<meta name="twitter:description" content={APP_SOCIAL_DESCRIPTION} />
 	<meta name="twitter:image" content={APP_OG_IMAGE_URL} />
-	<meta name="twitter:image:alt" content="Product Plate — ship the product, not the setup" />
+	<meta name="twitter:image:alt" content="Product Plate SvelteKit product starter" />
 </svelte:head>
 
 <ModeWatcher />

@@ -21,7 +21,7 @@ Product Plate is a public, batteries-included SvelteKit starter. It shortens the
 
 ## Brand Personality
 
-Practical, composed, and quietly confident. The product should feel like a well-organized workbench: capable enough for serious work, approachable enough to start using immediately, and restrained enough to adapt to a new brand.
+Practical, composed, and quietly confident. The product should feel like a well-organized workbench: capable enough for serious work, approachable enough to start using immediately, and restrained enough to adapt to a new brand. A focused orange signal color marks Product Plate guidance without taking over the neutral product UI.
 
 ## Anti-references
 
@@ -33,6 +33,7 @@ Practical, composed, and quietly confident. The product should feel like a well-
 ## Design Principles
 
 - Show the working product, not abstract promises.
+- Lead public pages with real route screenshots instead of fabricated interface mockups.
 - Keep the default system neutral and adaptable while giving Product Plate a recognizable voice.
 - Prefer useful composition over decorative component volume.
 - Make the path from evaluation to local development obvious.

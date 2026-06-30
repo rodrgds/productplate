@@ -8,7 +8,7 @@ export default defineConfig({
 	webServer: {
 		command: 'bun run build && bun run preview -- --host localhost',
 		port: 4173,
-		timeout: 180_000
+		timeout: 360_000
 	},
 	testDir: 'e2e'
 });

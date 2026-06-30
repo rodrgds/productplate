@@ -9,14 +9,14 @@ export const APP_YEAR = 2026;
 export const APP_URL = 'https://productplate.pages.dev';
 
 export const APP_DESCRIPTION =
-	'An open-source SvelteKit SaaS starter with auth, billing, realtime data, AI patterns, tests, deployment, and polished product UI.';
+	'An open-source SvelteKit product starter with auth, billing, realtime data, AI, tests, deployment, and a guided kickstart prompt.';
 
 export const APP_TAGLINE = 'Ship the product, not the setup.';
 
-export const APP_SOCIAL_TITLE = 'Product Plate — SvelteKit SaaS starter';
+export const APP_SOCIAL_TITLE = 'Product Plate | SvelteKit product starter';
 
 export const APP_SOCIAL_DESCRIPTION =
-	'Ship SvelteKit products faster with auth, billing, Convex realtime data, AI patterns, tests, Cloudflare deployment, and a polished product UI.';
+	'Start from a working SvelteKit product, then use the guided kickstart prompt to keep what fits and remove what does not.';
 
 export const APP_KEYWORDS = [
 	'SvelteKit SaaS starter',

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { useRegisterSW } from 'virtual:pwa-register/svelte';
+	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { RefreshCw, X } from '@lucide/svelte';
@@ -16,7 +17,7 @@
 		}
 	});
 
-	let visible = $derived($offlineReady || $needRefresh);
+	let visible = $derived($needRefresh && page.url.pathname !== '/');
 </script>
 
 {#if visible}
@@ -25,19 +26,9 @@
 			<Card.Content class="p-4">
 				<div class="flex items-start gap-3">
 					<div class="flex-1">
-						<h4 class="text-sm font-semibold">
-							{#if $offlineReady}
-								{APP_NAME} is ready offline
-							{:else}
-								Update available
-							{/if}
-						</h4>
+						<h4 class="text-sm font-semibold">Update available</h4>
 						<p class="mt-1 text-xs text-muted-foreground">
-							{#if $offlineReady}
-								You can now use the app without an internet connection.
-							{:else}
-								A new version of {APP_NAME} has been deployed. Reload to get the latest updates.
-							{/if}
+							A new version of {APP_NAME} has been deployed. Reload to get the latest updates.
 						</p>
 					</div>
 					<Button

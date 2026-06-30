@@ -3,21 +3,13 @@
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import Code2Icon from '@lucide/svelte/icons/code-2';
 	import MenuIcon from '@lucide/svelte/icons/menu';
-	import SparklesIcon from '@lucide/svelte/icons/sparkles';
+	import TerminalIcon from '@lucide/svelte/icons/terminal';
 	import { resolve } from '$app/paths';
 	import AppLogo from '$lib/components/app-logo.svelte';
-	import FeatureSection from '$lib/components/mist/mfeature/one.svelte';
-	import ProductRoutes from '$lib/components/mist/mcontent/one.svelte';
-	import OpenSourceSection from '$lib/components/mist/mpricing/one.svelte';
-	import PrincipleQuote from '$lib/components/mist/mtestimonial/one.svelte';
-	import StackCloud from '$lib/components/mist/mlogocloud/one.svelte';
-	import CallToAction from '$lib/components/mist/mcta/one.svelte';
-	import SiteFooter from '$lib/components/mist/mfooter/one.svelte';
 	import * as Accordion from '$lib/components/ui/accordion';
-	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
-	import { Separator } from '$lib/components/ui/separator';
+	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import {
 		APP_DESCRIPTION,
 		APP_NAME,
@@ -30,69 +22,118 @@
 
 	let mobileNavOpen = $state(false);
 
+	const githubUrl = 'https://github.com/rodrgds/productplate';
+	const docsUrl = 'https://github.com/rodrgds/productplate/blob/main/README.md';
+	const securityUrl = 'https://github.com/rodrgds/productplate/blob/main/SECURITY.md';
+	const kickstartUrl = 'https://github.com/rodrgds/productplate/blob/main/START_HERE.md';
 	const to = {
 		home: resolve('/'),
-		signUp: resolve('/auth/sign-up'),
-		signIn: resolve('/auth/sign-in'),
-		dashboard: resolve('/dashboard'),
 		demo: resolve('/auth/demo'),
 		components: resolve('/components')
 	};
 
 	const navLinks = [
+		{ label: 'Product', href: '#product' },
 		{ label: 'Kickstart', href: '#kickstart' },
 		{ label: 'Stack', href: '#stack' },
-		{ label: 'Routes', href: '#routes' },
-		{ label: 'Components', href: resolve('/components') },
+		{ label: 'Components', href: to.components },
 		{ label: 'FAQ', href: '#faq' }
+	] as const;
+
+	const productSurfaces = [
+		{
+			number: '01',
+			title: 'A real authenticated app shell',
+			detail: 'Dashboard, profile, settings, admin, onboarding, and protected route patterns.'
+		},
+		{
+			number: '02',
+			title: 'Serious product building blocks',
+			detail: 'Forms, tables, charts, uploads, rich text, graph UI, 3D, and streaming AI.'
+		},
+		{
+			number: '03',
+			title: 'The backend is already connected',
+			detail: 'Convex data, Better Auth, Autumn billing, storage, tests, and Cloudflare deployment.'
+		}
 	] as const;
 
 	const kickstartSteps = [
 		{
+			number: '1',
 			title: 'Describe the product',
-			detail: 'Name it, define the user, and set the first-launch goal.'
+			detail: 'Give the agent the name, audience, launch goal, and visual direction.'
 		},
 		{
-			title: 'Choose what survives',
-			detail: 'Keep auth, billing, AI, routes, or components only when the product needs them.'
+			number: '2',
+			title: 'Choose what stays',
+			detail: 'Keep only the routes, integrations, and product patterns that fit the idea.'
 		},
 		{
-			title: 'Let the agent reshape the repo',
-			detail: 'Rename copy, remove demo-only surfaces, update docs, and leave a smaller app.'
+			number: '3',
+			title: 'Ship a smaller repo',
+			detail:
+				'The agent renames, rewrites, removes demo surfaces, updates docs, and verifies the result.'
 		}
+	] as const;
+
+	const stackRows = [
+		{
+			label: 'Application',
+			value: 'SvelteKit 2, Svelte 5, TypeScript, Tailwind CSS v4, shadcn-svelte'
+		},
+		{ label: 'Backend', value: 'Convex functions, realtime data, storage, typed APIs' },
+		{
+			label: 'Accounts',
+			value: 'Better Auth with email, password, OAuth wiring, and protected routes'
+		},
+		{ label: 'Revenue', value: 'Autumn billing with checkout and customer portal patterns' },
+		{ label: 'AI', value: 'Vercel AI SDK, streaming assistant UI, Markdown, and tool calls' },
+		{ label: 'Delivery', value: 'Bun, Vitest, Playwright, PWA support, and Cloudflare Pages' }
+	] as const;
+
+	const stackLogos = [
+		{ name: 'SvelteKit', src: '/stack/svelte.svg' },
+		{ name: 'Convex', src: '/stack/convex.png' },
+		{ name: 'Better Auth', src: '/stack/better-auth.svg' },
+		{ name: 'Autumn', src: '/stack/autumn.svg' },
+		{ name: 'Tailwind CSS', src: '/stack/tailwindcss.svg' },
+		{ name: 'AI SDK', src: '/stack/aisdk.png' },
+		{ name: 'TypeScript', src: '/stack/typescript.svg' },
+		{ name: 'Bun', src: '/stack/bun.svg' },
+		{ name: 'Cloudflare', src: '/stack/cloudflare.svg' }
 	] as const;
 
 	const faq = [
 		{
-			question: 'Is Product Plate just another template?',
+			question: 'Is this another generic SaaS template?',
 			answer:
-				'No. The repo is the base, but the Kickstart prompt is part of the product. It tells an AI coding agent how to turn the starter into a specific app instead of leaving you with generic boilerplate.'
+				'It is a working starter, but it is designed to stop looking like one quickly. START_HERE.md gives your coding agent a concrete process for choosing one product shape, deleting the unused surfaces, and updating the repo around the product you are actually building.'
 		},
 		{
-			question: 'Can I remove the features I do not need?',
+			question: 'What can I remove safely?',
 			answer:
-				'Yes. Routes and integrations are intentionally separated so billing, AI, the editor, 3D, or graph demos can be removed without changing the core app shell.'
+				'Billing, AI, the editor, graph, 3D, admin, and the public demo are intentionally separated. The kickstart flow asks which pieces matter, then removes the rest instead of leaving a permanent showcase app.'
 		},
 		{
-			question: 'What is ready out of the box?',
+			question: 'What works before I customize it?',
 			answer:
-				'Authentication, protected routes, profiles, billing scaffolding, realtime Convex data, file uploads, AI chat patterns, an app shell, forms, charts, tables, and deployment configuration.'
+				'Authentication, onboarding, profiles, protected routes, billing scaffolding, realtime Convex data, file uploads, AI chat patterns, tests, PWA support, and Cloudflare deployment configuration are already in the repository.'
 		},
 		{
-			question: 'Where can I deploy it?',
+			question: 'Do I need to adopt a framework on top of SvelteKit?',
 			answer:
-				'The repository is configured for Cloudflare Pages, while the SvelteKit application can be adapted to another supported adapter. Convex hosts the backend functions and data.'
+				'No. Product Plate is ordinary SvelteKit and Convex application code. The components and routes are yours to edit, move, or delete.'
 		},
 		{
-			question: 'Is it a framework?',
-			answer:
-				'No. It is ordinary SvelteKit, Svelte 5, and Convex application code. Fork it, delete parts, and make it yours.'
+			question: 'Can I use it commercially?',
+			answer: 'Yes. Product Plate is MIT licensed for personal, commercial, and open-source work.'
 		}
 	] as const;
 </script>
 
 <svelte:head>
-	<title>{APP_NAME} | Ship the product, not the setup</title>
+	<title>{APP_NAME} | SvelteKit starter for real products</title>
 	<meta name="description" content={APP_DESCRIPTION} />
 	<link rel="canonical" href={APP_URL} />
 	<meta property="og:site_name" content={APP_NAME} />
@@ -104,56 +145,53 @@
 	<meta property="og:image:secure_url" content={APP_OG_IMAGE_URL} />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
-	<meta property="og:image:alt" content="Product Plate — ship the product, not the setup" />
+	<meta property="og:image:alt" content="Product Plate SvelteKit product starter" />
 	<meta name="twitter:card" content={APP_TWITTER_CARD} />
 	<meta name="twitter:title" content={APP_SOCIAL_TITLE} />
 	<meta name="twitter:description" content={APP_SOCIAL_DESCRIPTION} />
 	<meta name="twitter:image" content={APP_OG_IMAGE_URL} />
-	<meta name="twitter:image:alt" content="Product Plate — ship the product, not the setup" />
 </svelte:head>
 
 <a
 	href="#main-content"
-	class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:shadow-lg"
+	class="sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:block focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-foreground focus:shadow-lg"
 >
 	Skip to content
 </a>
 
-<div class="min-h-screen overflow-hidden bg-background text-foreground">
-	<header class="border-b bg-background/85 backdrop-blur">
+<div class="min-h-screen overflow-x-hidden bg-background text-foreground">
+	<header class="border-b bg-background">
 		<nav
 			aria-label="Primary navigation"
-			class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6"
+			class="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8"
 		>
 			<a
-				href={resolve('/')}
+				href={to.home}
 				aria-label="Product Plate home"
-				class="flex items-center gap-3 font-semibold tracking-tight"
+				class="flex items-center gap-3 font-semibold"
 			>
 				<AppLogo class="size-8 rounded-lg" />
 				<span>{APP_NAME}</span>
 			</a>
-			<div class="hidden items-center gap-7 text-sm md:flex">
+
+			<div class="hidden items-center gap-7 text-sm lg:flex">
 				{#each navLinks as link (link.label)}
 					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-					<a href={link.href} class="text-muted-foreground transition-colors hover:text-foreground"
-						>{link.label}</a
-					>
+					<a href={link.href} class="text-muted-foreground transition-colors hover:text-foreground">
+						{link.label}
+					</a>
 				{/each}
 			</div>
+
 			<div class="flex items-center gap-2">
+				<Button href={githubUrl} variant="ghost" size="sm" class="hidden sm:inline-flex">
+					View source
+				</Button>
 				<Button href={to.demo} size="sm" class="hidden sm:inline-flex">
-					Use demo
+					Open live demo
 					<ArrowRightIcon data-icon="inline-end" />
 				</Button>
-				<Button
-					href="https://github.com/rodrgds/productplate"
-					variant="outline"
-					size="sm"
-					class="hidden sm:inline-flex"
-				>
-					GitHub
-				</Button>
+
 				<Sheet.Root bind:open={mobileNavOpen}>
 					<Sheet.Trigger>
 						{#snippet child({ props })}
@@ -161,8 +199,8 @@
 								{...props}
 								variant="ghost"
 								size="icon"
-								class="md:hidden"
-								aria-label="Open menu"
+								class="lg:hidden"
+								aria-label="Open navigation"
 							>
 								<MenuIcon />
 							</Button>
@@ -170,8 +208,8 @@
 					</Sheet.Trigger>
 					<Sheet.Content side="right" class="w-72">
 						<Sheet.Header>
-							<Sheet.Title>Menu</Sheet.Title>
-							<Sheet.Description class="sr-only">Navigate the landing page</Sheet.Description>
+							<Sheet.Title>Product Plate</Sheet.Title>
+							<Sheet.Description>Explore the starter and its working demo.</Sheet.Description>
 						</Sheet.Header>
 						<div class="flex flex-col gap-1 px-4">
 							<!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -179,24 +217,21 @@
 								<a
 									href={link.href}
 									onclick={() => (mobileNavOpen = false)}
-									class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-									>{link.label}</a
+									class="rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
 								>
+									{link.label}
+								</a>
 							{/each}
 							<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						</div>
-						<Separator class="my-4" />
-						<div class="flex flex-col gap-2 px-4">
-							<Button href={to.demo} class="w-full" onclick={() => (mobileNavOpen = false)}>
-								Use demo
+						<div class="mt-5 grid gap-2 border-t px-4 pt-5">
+							<Button href={to.demo} onclick={() => (mobileNavOpen = false)}>
+								Open live demo
 								<ArrowRightIcon data-icon="inline-end" />
 							</Button>
-							<Button
-								href="https://github.com/rodrgds/productplate"
-								variant="outline"
-								class="w-full"
-								onclick={() => (mobileNavOpen = false)}>GitHub</Button
-							>
+							<Button href={githubUrl} variant="outline" onclick={() => (mobileNavOpen = false)}>
+								View source
+							</Button>
 						</div>
 					</Sheet.Content>
 				</Sheet.Root>
@@ -205,117 +240,224 @@
 	</header>
 
 	<main id="main-content">
-		<section class="relative py-20 sm:py-28 lg:py-32">
-			<div class="landing-grid pointer-events-none absolute inset-0 opacity-45"></div>
-			<div
-				class="relative mx-auto grid max-w-6xl gap-14 px-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-center"
-			>
-				<div>
-					<Badge variant="outline">
-						<SparklesIcon />
-						Template + AI kickstart
+		<section class="relative border-b">
+			<div class="landing-grid pointer-events-none absolute inset-0"></div>
+			<div class="relative mx-auto max-w-7xl px-5 pt-12 pb-8 sm:px-8 sm:pt-16 lg:pt-18">
+				<div class="max-w-4xl">
+					<Badge variant="outline" class="bg-background">
+						<span class="size-1.5 rounded-full bg-[var(--signal)]"></span>
+						Open source, MIT licensed
 					</Badge>
 					<h1
-						class="mt-7 max-w-3xl text-5xl leading-[0.98] font-semibold tracking-[-0.045em] text-balance sm:text-6xl lg:text-7xl"
+						class="mt-6 text-5xl leading-[1.02] font-semibold text-balance sm:text-6xl lg:text-7xl"
 					>
-						Start with a real SvelteKit product. Then make it yours.
+						SvelteKit starter, ready to become your product.
 					</h1>
-					<p class="mt-7 max-w-xl text-lg leading-8 text-muted-foreground">
-						Product Plate gives you the SaaS base: auth, billing, Convex, AI, tests, deployment, and
-						app UI. The Kickstart prompt tells your coding agent what to keep, rename, and remove.
+					<p class="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl">
+						Auth, billing, realtime data, AI, product UI, tests, and deployment are already wired. A
+						practical kickstart prompt helps your coding agent keep what matters and remove what
+						does not.
 					</p>
-					<div class="mt-9 flex flex-wrap gap-3">
+					<div class="mt-7 flex flex-wrap gap-3">
 						<Button href={to.demo} size="lg">
-							Try the demo
+							Open live demo
 							<ArrowRightIcon data-icon="inline-end" />
 						</Button>
-						<Button href="https://github.com/rodrgds/productplate" variant="outline" size="lg">
+						<Button href={githubUrl} variant="outline" size="lg">
 							<Code2Icon data-icon="inline-start" />
-							GitHub
+							View source
 						</Button>
-						<Button href="#kickstart" variant="outline" size="lg">How Kickstart works</Button>
+					</div>
+					<div class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+						<span class="flex items-center gap-2"><CheckIcon class="size-4" /> Bun-native</span>
+						<span class="flex items-center gap-2"><CheckIcon class="size-4" /> Type-safe</span>
+						<span class="flex items-center gap-2"
+							><CheckIcon class="size-4" /> Production-minded</span
+						>
 					</div>
 				</div>
 
-				<div class="relative lg:pl-4">
-					<div
-						class="absolute -inset-3 rounded-3xl bg-gradient-to-br from-primary/20 via-transparent to-muted"
-					></div>
-					<div
-						class="relative overflow-hidden rounded-2xl border bg-card shadow-xl shadow-foreground/5"
-					>
-						<div class="flex h-11 items-center border-b px-4">
-							<div class="flex gap-1.5">
-								<span class="size-2 rounded-full bg-red-400"></span>
-								<span class="size-2 rounded-full bg-amber-400"></span>
-								<span class="size-2 rounded-full bg-emerald-400"></span>
-							</div>
-							<span class="mx-auto pr-9 text-xs text-muted-foreground">START_HERE.md</span>
-						</div>
-						<div class="grid gap-4 p-4 sm:p-5">
-							<div class="rounded-xl border bg-muted/35 p-4">
-								<div class="flex items-center gap-2">
-									<AppLogo class="size-7 rounded-lg" />
-									<div>
-										<p class="text-sm font-semibold">Kickstart prompt</p>
-										<p class="mt-1 text-xs text-muted-foreground">
-											The part most templates do not ship.
-										</p>
-									</div>
-								</div>
-								<div
-									class="mt-5 grid gap-2 rounded-lg bg-background p-3 font-mono text-xs leading-6"
-								>
-									<p><span class="text-muted-foreground">$</span> clone productplate my-app</p>
-									<p>
-										<span class="text-muted-foreground">$</span> paste START_HERE.md into your agent
-									</p>
-									<p><span class="text-muted-foreground">agent</span> asks what you are building</p>
-									<p>
-										<span class="text-muted-foreground">agent</span> keeps the stack, removes the demo
-									</p>
-									<p>
-										<span class="text-muted-foreground">agent</span> leaves a smaller product repo
-									</p>
-								</div>
-							</div>
+				<div
+					class="mt-9 overflow-hidden rounded-xl border bg-card p-2 shadow-[0_24px_70px_oklch(0.2_0.006_95/0.12)] sm:p-3"
+				>
+					<div class="flex h-9 items-center gap-2 border-b px-2 sm:px-3">
+						<span class="size-2 rounded-full bg-[oklch(0.7_0.18_28)]"></span>
+						<span class="size-2 rounded-full bg-[oklch(0.8_0.16_85)]"></span>
+						<span class="size-2 rounded-full bg-[oklch(0.7_0.16_150)]"></span>
+						<span class="ml-2 text-xs text-muted-foreground">productplate.pages.dev/dashboard</span>
+					</div>
+					<img
+						src="/screenshots/dashboard.png"
+						alt="Product Plate dashboard with analytics and an AI workbench"
+						class="mt-2 block h-auto w-full rounded-md border"
+						width="1440"
+						height="1100"
+						fetchpriority="high"
+					/>
+				</div>
+			</div>
 
-							<div class="grid gap-3 sm:grid-cols-3">
-								{#each kickstartSteps as step, index (step.title)}
-									<div class="rounded-xl border bg-background p-4">
-										<p class="text-xs font-semibold text-muted-foreground">0{index + 1}</p>
-										<p class="mt-2 text-sm font-semibold">{step.title}</p>
-										<p class="mt-2 text-xs leading-5 text-muted-foreground">{step.detail}</p>
-									</div>
-								{/each}
-							</div>
+			<div class="relative border-t bg-background">
+				<div class="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-5 py-4 sm:px-8">
+					<span class="mr-3 text-sm font-medium text-muted-foreground">Built on</span>
+					{#each stackLogos as logo (logo.name)}
+						<div
+							class="flex items-center gap-2 rounded-full border bg-card px-3 py-2 text-sm font-medium"
+						>
+							<img src={logo.src} alt="" class="size-4 object-contain" width="16" height="16" />
+							<span>{logo.name}</span>
 						</div>
+					{/each}
+				</div>
+			</div>
+		</section>
+
+		<section id="product" class="py-20 sm:py-28">
+			<div class="mx-auto max-w-7xl px-5 sm:px-8">
+				<div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+					<div>
+						<p class="text-sm font-semibold text-[var(--signal)]">What is already here</p>
+						<h2 class="mt-4 text-4xl leading-tight font-semibold text-balance sm:text-5xl">
+							A working product, not a feature checklist.
+						</h2>
+						<p class="mt-5 max-w-xl text-lg leading-8 text-muted-foreground">
+							Open the demo and inspect real routes. Product Plate is useful because the pieces
+							already work together, not because the homepage lists more logos.
+						</p>
+					</div>
+					<div class="divide-y border-y">
+						{#each productSurfaces as surface (surface.number)}
+							<div class="grid grid-cols-[3rem_1fr] gap-4 py-6 sm:grid-cols-[4rem_1fr] sm:py-7">
+								<span class="text-sm font-semibold text-[var(--signal)]">{surface.number}</span>
+								<div>
+									<h3 class="text-lg font-semibold">{surface.title}</h3>
+									<p class="mt-2 max-w-xl leading-7 text-muted-foreground">{surface.detail}</p>
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+
+				<div class="mt-14 grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
+					<figure class="overflow-hidden rounded-lg border bg-card p-2">
+						<img
+							src="/screenshots/onboarding-filled.png"
+							alt="Product Plate onboarding flow"
+							class="block h-auto w-full rounded-md border"
+							width="1440"
+							height="1100"
+							loading="lazy"
+						/>
+						<figcaption class="px-2 pt-3 pb-1 text-sm text-muted-foreground">
+							Onboarding and profile creation
+						</figcaption>
+					</figure>
+					<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
+						<figure class="overflow-hidden rounded-lg border bg-card p-2">
+							<img
+								src="/screenshots/editor.png"
+								alt="Product Plate rich text editor"
+								class="block h-auto w-full rounded-md border"
+								width="1440"
+								height="1100"
+								loading="lazy"
+							/>
+							<figcaption class="px-2 pt-3 pb-1 text-sm text-muted-foreground">
+								Rich text and upload patterns
+							</figcaption>
+						</figure>
+						<figure class="overflow-hidden rounded-lg border bg-card p-2">
+							<img
+								src="/screenshots/flow.png"
+								alt="Product Plate workflow editor"
+								class="block h-auto w-full rounded-md border"
+								width="1440"
+								height="1100"
+								loading="lazy"
+							/>
+							<figcaption class="px-2 pt-3 pb-1 text-sm text-muted-foreground">
+								Graph and workflow foundations
+							</figcaption>
+						</figure>
 					</div>
 				</div>
 			</div>
 		</section>
 
-		<div id="stack"><StackCloud /></div>
-
-		<section id="kickstart" class="py-20 sm:py-28">
-			<div class="mx-auto grid max-w-6xl gap-10 px-6 lg:grid-cols-[0.86fr_1.14fr] lg:items-center">
+		<section id="kickstart" class="bg-[var(--signal)] text-[var(--signal-foreground)]">
+			<div
+				class="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-8 sm:py-28 lg:grid-cols-2 lg:gap-20"
+			>
 				<div>
-					<Badge variant="outline">Why it is different</Badge>
-					<h2 class="mt-5 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-						The prompt is part of the boilerplate.
+					<p class="text-sm font-semibold text-[var(--signal-soft)]">The useful difference</p>
+					<h2 class="mt-4 text-4xl leading-tight font-semibold text-balance sm:text-5xl">
+						Clone it. Brief it. Make it yours.
 					</h2>
-					<p class="mt-5 text-lg leading-8 text-muted-foreground">
-						Most starters stop after cloning. Product Plate includes a handoff prompt that asks the
-						right questions, chooses one active stack, removes dead weight, and updates the repo for
-						the product you are actually building.
+					<p
+						class="mt-5 max-w-xl text-lg leading-8 text-[color-mix(in_oklch,var(--signal-foreground)_72%,transparent)]"
+					>
+						Most starters leave you with a renamed dashboard. Product Plate includes
+						<code class="font-mono text-base">START_HERE.md</code>, a concrete brief that turns the
+						template into the first coherent version of your product.
 					</p>
+					<div class="mt-8">
+						<Button href={kickstartUrl} variant="secondary" size="lg">
+							<TerminalIcon data-icon="inline-start" />
+							Read the kickstart prompt
+						</Button>
+					</div>
 				</div>
-				<div class="rounded-2xl border bg-card p-5 shadow-sm">
-					<div class="grid gap-3">
-						{#each ['Rename the app, constants, metadata, and README', 'Keep only the backend, auth, billing, and AI choices that fit', 'Remove demo account routes and unused showcase pages', 'Update AGENTS.md so the next agent sees the real product', 'Run the right checks and leave a clear handoff'] as item (item)}
-							<div class="flex items-start gap-3 rounded-xl border bg-background px-4 py-3">
-								<CheckIcon class="mt-0.5 size-4 shrink-0" />
-								<p class="text-sm leading-6">{item}</p>
+
+				<div
+					class="divide-y divide-[color-mix(in_oklch,var(--signal-foreground)_18%,transparent)] border-y border-[color-mix(in_oklch,var(--signal-foreground)_18%,transparent)]"
+				>
+					{#each kickstartSteps as step (step.number)}
+						<div class="grid grid-cols-[3rem_1fr] gap-4 py-6 sm:grid-cols-[4rem_1fr]">
+							<span class="font-mono text-sm text-[var(--signal-soft)]"
+								>{step.number.padStart(2, '0')}</span
+							>
+							<div>
+								<h3 class="text-lg font-semibold">{step.title}</h3>
+								<p
+									class="mt-2 leading-7 text-[color-mix(in_oklch,var(--signal-foreground)_72%,transparent)]"
+								>
+									{step.detail}
+								</p>
+							</div>
+						</div>
+					{/each}
+				</div>
+			</div>
+		</section>
+
+		<section id="stack" class="border-b py-20 sm:py-28">
+			<div class="mx-auto max-w-7xl px-5 sm:px-8">
+				<div class="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
+					<div>
+						<p class="text-sm font-semibold text-[var(--signal)]">Default stack</p>
+						<h2 class="mt-4 text-4xl leading-tight font-semibold text-balance sm:text-5xl">
+							Opinionated where it saves time.
+						</h2>
+						<p class="mt-5 max-w-lg text-lg leading-8 text-muted-foreground">
+							The defaults form one working path. Alternative data and billing scaffolds stay
+							inactive until the kickstart process selects them.
+						</p>
+					</div>
+					<div class="border-t">
+						<div class="flex flex-wrap gap-2 border-b py-5">
+							{#each stackLogos as logo (logo.name)}
+								<div
+									class="flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm font-medium"
+								>
+									<img src={logo.src} alt="" class="size-4 object-contain" width="16" height="16" />
+									<span>{logo.name}</span>
+								</div>
+							{/each}
+						</div>
+						{#each stackRows as row (row.label)}
+							<div class="grid gap-2 border-b py-5 sm:grid-cols-[9rem_1fr] sm:gap-6">
+								<h3 class="text-sm font-semibold">{row.label}</h3>
+								<p class="leading-7 text-muted-foreground">{row.value}</p>
 							</div>
 						{/each}
 					</div>
@@ -323,39 +465,114 @@
 			</div>
 		</section>
 
-		<FeatureSection />
-		<ProductRoutes />
-		<PrincipleQuote />
-		<OpenSourceSection />
-
-		<section id="faq" class="py-20 sm:py-28">
-			<div class="mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-[0.7fr_1.3fr]">
-				<div>
-					<Badge variant="outline">FAQ</Badge>
-					<h2 class="mt-5 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-						Questions, answered.
+		<section class="py-20 sm:py-28">
+			<div class="mx-auto max-w-7xl px-5 sm:px-8">
+				<div class="max-w-3xl">
+					<p class="text-sm font-semibold text-[var(--signal)]">One repository, three jobs</p>
+					<h2 class="mt-4 text-4xl leading-tight font-semibold text-balance sm:text-5xl">
+						Evaluate it, shape it, then build.
 					</h2>
-					<p class="mt-5 max-w-md text-base leading-7 text-muted-foreground">
-						The short version: it is ordinary open-source code plus a practical AI handoff.
+				</div>
+				<div class="mt-12 grid border-y md:grid-cols-3 md:divide-x">
+					<div class="py-7 md:pr-8">
+						<span class="font-mono text-sm text-[var(--signal)]">01</span>
+						<h3 class="mt-5 text-xl font-semibold">Open the demo</h3>
+						<p class="mt-3 leading-7 text-muted-foreground">
+							Inspect the app shell, onboarding, billing, editor, graph, and AI workbench before you
+							adopt anything.
+						</p>
+					</div>
+					<div class="border-t py-7 md:border-t-0 md:px-8">
+						<span class="font-mono text-sm text-[var(--signal)]">02</span>
+						<h3 class="mt-5 text-xl font-semibold">Run the kickstart</h3>
+						<p class="mt-3 leading-7 text-muted-foreground">
+							Answer four product questions and approve a focused keep, remove, and reshape plan.
+						</p>
+					</div>
+					<div class="border-t py-7 md:border-t-0 md:pl-8">
+						<span class="font-mono text-sm text-[var(--signal)]">03</span>
+						<h3 class="mt-5 text-xl font-semibold">Own ordinary code</h3>
+						<p class="mt-3 leading-7 text-muted-foreground">
+							Continue with familiar SvelteKit routes, Convex functions, TypeScript, and your own
+							product decisions.
+						</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section id="faq" class="border-y bg-muted/45 py-20 sm:py-28">
+			<div
+				class="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20"
+			>
+				<div>
+					<p class="text-sm font-semibold text-[var(--signal)]">FAQ</p>
+					<h2 class="mt-4 text-4xl leading-tight font-semibold text-balance sm:text-5xl">
+						Before you fork.
+					</h2>
+					<p class="mt-5 max-w-md text-lg leading-8 text-muted-foreground">
+						The short version: it is open-source product code with a disciplined path out of
+						template mode.
 					</p>
 				</div>
 				<Accordion.Root type="single" class="w-full" value="item-1">
 					{#each faq as item, index (item.question)}
 						<Accordion.Item value={`item-${index + 1}`}>
-							<Accordion.Trigger class="text-left">{item.question}</Accordion.Trigger>
-							<Accordion.Content class="max-w-2xl leading-7 text-muted-foreground"
-								>{item.answer}</Accordion.Content
-							>
+							<Accordion.Trigger class="text-left text-base">{item.question}</Accordion.Trigger>
+							<Accordion.Content class="max-w-2xl text-base leading-7 text-muted-foreground">
+								{item.answer}
+							</Accordion.Content>
 						</Accordion.Item>
 					{/each}
 				</Accordion.Root>
 			</div>
 		</section>
 
-		<CallToAction />
+		<section class="bg-foreground text-background">
+			<div
+				class="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 px-5 py-16 sm:px-8 sm:py-20 md:flex-row md:items-end"
+			>
+				<div>
+					<p class="text-sm font-semibold text-background/65">Start from something real</p>
+					<h2 class="mt-4 max-w-2xl text-4xl leading-tight font-semibold text-balance sm:text-5xl">
+						Spend the first week on the product.
+					</h2>
+				</div>
+				<div class="flex flex-wrap gap-3">
+					<Button href={to.demo} variant="secondary" size="lg">
+						Open live demo
+						<ArrowRightIcon data-icon="inline-end" />
+					</Button>
+					<Button
+						href={githubUrl}
+						variant="outline"
+						size="lg"
+						class="border-background/25 bg-transparent text-background hover:bg-background/10 hover:text-background"
+					>
+						View source
+					</Button>
+				</div>
+			</div>
+		</section>
 	</main>
 
-	<SiteFooter />
+	<footer>
+		<div
+			class="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-10 text-sm text-muted-foreground sm:px-8 md:flex-row md:items-center md:justify-between"
+		>
+			<div class="flex items-center gap-3 text-foreground">
+				<AppLogo class="size-7 rounded-md" />
+				<span class="font-semibold">Product Plate</span>
+				<span class="text-muted-foreground">MIT licensed</span>
+			</div>
+			<div class="flex flex-wrap gap-x-6 gap-y-2">
+				<a href={githubUrl} class="hover:text-foreground">GitHub</a>
+				<a href={to.components} class="hover:text-foreground">Components</a>
+				<a href={docsUrl} class="hover:text-foreground">Documentation</a>
+				<a href={securityUrl} class="hover:text-foreground">Security</a>
+			</div>
+		</div>
+	</footer>
 </div>
 
 <style>
@@ -371,7 +588,8 @@
 				color-mix(in oklch, var(--border) 55%, transparent) 1px,
 				transparent 1px
 			);
-		background-size: 42px 42px;
-		mask-image: linear-gradient(to bottom, black, transparent 78%);
+		background-size: 48px 48px;
+		mask-image: linear-gradient(to bottom, black, transparent 68%);
+		opacity: 0.65;
 	}
 </style>

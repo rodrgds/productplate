@@ -8,6 +8,7 @@ colors:
   muted: 'oklch(0.955 0.005 95)'
   muted-ink: 'oklch(0.5 0.008 95)'
   border: 'oklch(0.89 0.007 95)'
+  signal: 'oklch(0.62 0.19 42)'
   destructive: 'oklch(0.577 0.245 27.325)'
 typography:
   display:
@@ -70,7 +71,7 @@ It explicitly rejects generic AI-tool marketing with purple gradients, glowing o
 
 **Key Characteristics:**
 
-- Warm neutral canvas with high-contrast ink
+- Warm neutral canvas with high-contrast ink and a focused orange signal color
 - Flat surfaces separated by borders and restrained tonal shifts
 - Large, tightly tracked headlines with readable supporting copy
 - Real interface compositions instead of abstract decoration
@@ -83,6 +84,7 @@ The palette is restrained and warm. Ink is used decisively; tonal neutrals provi
 ### Primary
 
 - **Workbench Ink:** The primary action, headline, and strongest navigation color.
+- **Signal Orange:** Product Plate guidance, section markers, and the kickstart story. Keep it focused so downstream products can replace it easily.
 
 ### Neutral
 

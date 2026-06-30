@@ -55,6 +55,7 @@ export default defineConfig({
 			},
 			workbox: {
 				globPatterns: ['client/**/*.{js,css,html,ico,png,svg,webmanifest,woff,woff2,ttf,json}'],
+				globIgnores: ['client/screenshots/**'],
 				modifyURLPrefix: {
 					'client/': ''
 				},
