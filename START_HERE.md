@@ -176,7 +176,7 @@ Provider activation:
 
 Route cleanup:
 - Keep src/routes/(app)/ only when the product needs authenticated app routes.
-- Remove showcase routes such as editor, flow/graph, 3D, assistant, billing, or admin when they are not part of the product.
+- Remove showcase routes such as editor, flow/graph, map, 3D, assistant, billing, or admin when they are not part of the product.
 - Remove the components gallery route (`src/routes/components/`) if not needed as a reference in production.
 - Remove matching tests when routes are removed, then add product-specific smoke tests.
 - Keep src/lib/components/ui as reusable primitives.

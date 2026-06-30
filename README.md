@@ -55,7 +55,7 @@ The hosted demo creates a fresh disposable account and opens the authenticated a
 - **Accounts:** Better Auth, email/password, Google OAuth wiring, reset flows, protected routes.
 - **Billing:** Autumn checkout, subscription state, and customer portal patterns.
 - **AI:** Vercel AI SDK route, streaming assistant UI, Markdown, suggestions, and tool calls.
-- **Product UI:** onboarding, dashboard, profile, settings, admin, editor, graph, 3D, uploads.
+- **Product UI:** onboarding, dashboard, profile, settings, admin, editor, graph, map, 3D, uploads.
 - **Delivery:** Bun, Vitest, Playwright, PWA support, GitHub Actions, Cloudflare Pages.
 
 ## Start here

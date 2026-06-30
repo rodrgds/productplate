@@ -12,6 +12,7 @@
 		PenLine,
 		GitBranch,
 		Cuboid,
+		MapPinned,
 		CircleQuestionMark,
 		ChartLine
 	} from '@lucide/svelte';
@@ -59,6 +60,11 @@
 			title: 'Flow',
 			url: '/flow',
 			icon: GitBranch
+		},
+		{
+			title: 'Map',
+			url: '/map',
+			icon: MapPinned
 		},
 		{
 			title: 'Threlte',

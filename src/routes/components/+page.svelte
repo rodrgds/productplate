@@ -1,17 +1,24 @@
 <script lang="ts">
 	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
+	import BoxesIcon from '@lucide/svelte/icons/boxes';
+	import CodeIcon from '@lucide/svelte/icons/code-2';
+	import LayoutTemplateIcon from '@lucide/svelte/icons/layout-template';
 	import { resolve } from '$app/paths';
-	import AppLogo from '$lib/components/app-logo.svelte';
 	import LandingNav from '$lib/components/landing/landing-nav.svelte';
 	import LandingFooter from '$lib/components/landing/landing-footer.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { APP_DESCRIPTION, APP_NAME } from '$lib/constants';
 	import { categories } from './registry';
 
+	const componentCount = categories.reduce(
+		(total, category) => total + category.components.length,
+		0
+	);
+	const featuredCategories = categories.slice(0, 4);
+
 	const to = {
 		home: resolve('/'),
-		signUp: resolve('/auth/sign-up'),
-		demo: resolve('/auth/demo')
+		hero: resolve('/components/hero')
 	};
 </script>
 
@@ -31,35 +38,61 @@
 	<LandingNav />
 
 	<main id="main-content">
-		<section class="py-20 sm:py-24">
-			<div class="mx-auto max-w-7xl px-6">
-				<div class="max-w-2xl">
-					<a href={resolve('/')} class="flex items-center gap-3 font-semibold tracking-tight">
-						<AppLogo class="size-7 rounded-lg" />
-						<span>{APP_NAME}</span>
-					</a>
-					<h1 class="mt-6 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-						Landing components
+		<section class="border-b bg-muted/30 py-16 sm:py-20">
+			<div
+				class="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-end"
+			>
+				<div class="max-w-3xl">
+					<p class="text-sm font-medium text-muted-foreground">Component library</p>
+					<h1 class="mt-4 max-w-2xl text-3xl font-semibold text-balance sm:text-4xl">
+						Reusable landing sections
 					</h1>
-					<p class="mt-4 text-base leading-7 text-muted-foreground">
-						Source-owned Svelte sections in <code class="rounded bg-muted px-1.5 py-0.5 text-sm"
-							>src/lib/components/landing</code
-						>. Browse a category to see every variant with dummy data.
+					<p class="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
+						Browse the source-owned Svelte sections that ship with {APP_NAME}. They are meant to be
+						copied, removed, and reshaped during kickstart instead of treated as a locked theme.
 					</p>
 					<div class="mt-6 flex flex-wrap gap-3">
-						<Button href={to.demo} size="lg">
-							Use demo account
+						<Button href={to.hero} size="lg">
+							Browse variants
 							<ArrowRightIcon data-icon="inline-end" />
 						</Button>
-						<Button href={to.signUp} variant="outline" size="lg">Create account</Button>
+						<Button href={to.home} variant="outline" size="lg">Back to landing page</Button>
 					</div>
 				</div>
 
-				<div class="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+				<div class="library-panel" aria-label="Landing component inventory">
+					<div class="library-metric">
+						<BoxesIcon class="size-4" />
+						<span>{componentCount} sections</span>
+					</div>
+					<div class="library-metric">
+						<LayoutTemplateIcon class="size-4" />
+						<span>{categories.length} categories</span>
+					</div>
+					<div class="library-metric">
+						<CodeIcon class="size-4" />
+						<span>Plain Svelte files</span>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="py-14 sm:py-16">
+			<div class="mx-auto max-w-7xl px-6">
+				<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+					{#each featuredCategories as category (category.id)}
+						<a href={resolve(`/components/${category.id}`)} class="featured-card">
+							<span>{category.title}</span>
+							<ArrowRightIcon class="size-4" />
+						</a>
+					{/each}
+				</div>
+
+				<div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 					{#each categories as category (category.id)}
 						<a href={resolve(`/components/${category.id}`)} class="category-card">
 							<div class="category-card-top">
-								<span class="category-index">{category.title}</span>
+								<h2>{category.title}</h2>
 								<ArrowRightIcon class="size-4 transition-transform" />
 							</div>
 							<p class="category-blurb">{category.blurb}</p>
@@ -77,12 +110,59 @@
 </div>
 
 <style>
-	.category-card {
+	.library-panel {
 		display: grid;
 		gap: 0.6rem;
-		content-visibility: auto;
 		border: 1px solid var(--border);
 		border-radius: 1rem;
+		background: var(--background);
+		padding: 1rem;
+		box-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 5%, transparent);
+	}
+
+	.library-metric {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		border-radius: 0.75rem;
+		background: var(--muted);
+		padding: 0.85rem 0.95rem;
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--foreground);
+	}
+
+	.library-metric :global(svg) {
+		color: var(--primary);
+	}
+
+	.featured-card {
+		display: flex;
+		min-height: 4rem;
+		align-items: center;
+		justify-content: space-between;
+		border: 1px solid var(--border);
+		border-radius: 0.85rem;
+		background: var(--card);
+		padding: 1rem;
+		font-size: 0.9rem;
+		font-weight: 650;
+		transition:
+			border-color 140ms ease,
+			background-color 140ms ease;
+	}
+
+	.featured-card:hover {
+		border-color: color-mix(in oklch, var(--primary) 55%, var(--border));
+		background: color-mix(in oklch, var(--primary) 8%, var(--card));
+	}
+
+	.category-card {
+		display: grid;
+		gap: 0.7rem;
+		content-visibility: auto;
+		border: 1px solid var(--border);
+		border-radius: 0.9rem;
 		background: var(--card);
 		padding: 1.5rem;
 		box-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 5%, transparent);
@@ -106,7 +186,9 @@
 		justify-content: space-between;
 	}
 
-	.category-index {
+	.category-card h2 {
+		margin: 0;
+		font-size: 1rem;
 		font-weight: 650;
 	}
 
