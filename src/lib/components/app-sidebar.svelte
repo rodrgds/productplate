@@ -16,8 +16,7 @@
 		CircleQuestionMark,
 		ChartLine,
 		Building2,
-		Code2,
-		Palette
+		Code2
 	} from '@lucide/svelte';
 	import NavMain from './nav-main.svelte';
 	import NavSecondary from './nav-secondary.svelte';
@@ -94,11 +93,6 @@
 				title: 'Settings',
 				url: '/settings',
 				icon: Settings
-			},
-			{
-				title: 'Theme Builder',
-				url: '/theme-builder',
-				icon: Palette
 			},
 			{
 				title: 'Get Help',

@@ -29,13 +29,15 @@
 	const to = {
 		home: resolve('/'),
 		demo: resolve('/auth/demo'),
-		components: resolve('/components')
+		components: resolve('/components'),
+		themeBuilder: resolve('/theme-builder')
 	};
 
 	const navLinks = [
 		{ label: 'Product', href: '#product' },
 		{ label: 'Kickstart', href: '#kickstart' },
 		{ label: 'Stack', href: '#stack' },
+		{ label: 'Theme Builder', href: to.themeBuilder },
 		{ label: 'Components', href: to.components },
 		{ label: 'FAQ', href: '#faq' }
 	] as const;
@@ -166,7 +168,7 @@
 			class="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8"
 		>
 			<a
-				href={to.home}
+				href={resolve('/')}
 				aria-label="Product Plate home"
 				class="flex items-center gap-3 font-semibold"
 			>
@@ -304,7 +306,15 @@
 						<div
 							class="flex items-center gap-2 rounded-full border bg-card px-3 py-2 text-sm font-medium"
 						>
-							<img src={logo.src} alt="" class="size-4 object-contain" width="16" height="16" />
+							<img
+								src={logo.src}
+								alt=""
+								class="size-4 object-contain {logo.name === 'Better Auth'
+									? 'dark:brightness-0 dark:invert'
+									: ''}"
+								width="16"
+								height="16"
+							/>
 							<span>{logo.name}</span>
 						</div>
 					{/each}
@@ -338,12 +348,12 @@
 					</div>
 				</div>
 
-				<div class="mt-14 grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
-					<figure class="overflow-hidden rounded-lg border bg-card p-2">
+				<div class="mt-14 grid items-start gap-5 lg:grid-cols-[1.08fr_0.92fr]">
+					<figure class="self-start overflow-hidden rounded-lg border bg-card p-2">
 						<img
 							src="/screenshots/onboarding-filled.png"
 							alt="Product Plate onboarding flow"
-							class="block h-auto w-full rounded-md border"
+							class="block aspect-[4/3] w-full rounded-md border object-cover object-top"
 							width="1440"
 							height="1100"
 							loading="lazy"
@@ -357,7 +367,7 @@
 							<img
 								src="/screenshots/editor.png"
 								alt="Product Plate rich text editor"
-								class="block h-auto w-full rounded-md border"
+								class="block aspect-[16/9] w-full rounded-md border object-cover object-top"
 								width="1440"
 								height="1100"
 								loading="lazy"
@@ -370,7 +380,7 @@
 							<img
 								src="/screenshots/flow.png"
 								alt="Product Plate workflow editor"
-								class="block h-auto w-full rounded-md border"
+								class="block aspect-[16/9] w-full rounded-md border object-cover object-top"
 								width="1440"
 								height="1100"
 								loading="lazy"
@@ -444,16 +454,6 @@
 						</p>
 					</div>
 					<div class="border-t">
-						<div class="flex flex-wrap gap-2 border-b py-5">
-							{#each stackLogos as logo (logo.name)}
-								<div
-									class="flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm font-medium"
-								>
-									<img src={logo.src} alt="" class="size-4 object-contain" width="16" height="16" />
-									<span>{logo.name}</span>
-								</div>
-							{/each}
-						</div>
 						{#each stackRows as row (row.label)}
 							<div class="grid gap-2 border-b py-5 sm:grid-cols-[9rem_1fr] sm:gap-6">
 								<h3 class="text-sm font-semibold">{row.label}</h3>
@@ -567,7 +567,7 @@
 			</div>
 			<div class="flex flex-wrap gap-x-6 gap-y-2">
 				<a href={githubUrl} class="hover:text-foreground">GitHub</a>
-				<a href={to.components} class="hover:text-foreground">Components</a>
+				<a href={resolve('/components')} class="hover:text-foreground">Components</a>
 				<a href={docsUrl} class="hover:text-foreground">Documentation</a>
 				<a href={securityUrl} class="hover:text-foreground">Security</a>
 			</div>

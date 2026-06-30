@@ -19,6 +19,8 @@
 	} from '$lib/constants';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import PwaReloadPrompt from '$lib/components/pwa-reload-prompt.svelte';
+	import ThemeRuntime from '$lib/components/theme-runtime.svelte';
+	import { Toaster } from '$lib/components/ui/sonner/index.js';
 	createSvelteAuthClient({ authClient });
 
 	let { children } = $props();
@@ -59,6 +61,8 @@
 </svelte:head>
 
 <ModeWatcher />
+<ThemeRuntime />
+<Toaster richColors />
 
 {@render children?.()}
 

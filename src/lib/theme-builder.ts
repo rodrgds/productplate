@@ -22,6 +22,8 @@ export const fonts = [
 ] as const;
 export const menuAccents = ['subtle', 'bold'] as const;
 export const menuColors = ['default', 'inverted', 'translucent'] as const;
+export const themePresetStorageKey = 'product-plate-theme-preset';
+export const themePresetChangeEvent = 'product-plate-theme-preset-change';
 
 export interface ThemePreset {
 	style: (typeof themeStyles)[number];
@@ -193,6 +195,32 @@ const accentOklch: Record<(typeof accentColors)[number], { hue: number; chroma: 
 };
 
 const chartHueOffset = [0, 65, 120, 180, 245];
+const styleVariables: Record<(typeof themeStyles)[number], Record<string, string>> = {
+	operational: {
+		'--pp-theme-density': '1',
+		'--pp-theme-card-padding': '1rem',
+		'--pp-theme-section-gap': '1rem',
+		'--pp-theme-border-width': '1px'
+	},
+	compact: {
+		'--pp-theme-density': '0.82',
+		'--pp-theme-card-padding': '0.75rem',
+		'--pp-theme-section-gap': '0.65rem',
+		'--pp-theme-border-width': '1px'
+	},
+	editorial: {
+		'--pp-theme-density': '1.18',
+		'--pp-theme-card-padding': '1.35rem',
+		'--pp-theme-section-gap': '1.35rem',
+		'--pp-theme-border-width': '1px'
+	},
+	console: {
+		'--pp-theme-density': '0.92',
+		'--pp-theme-card-padding': '0.9rem',
+		'--pp-theme-section-gap': '0.85rem',
+		'--pp-theme-border-width': '1.5px'
+	}
+};
 
 function oklch(lightness: number, chroma: number, hue: number, alpha?: string) {
 	return `oklch(${lightness.toFixed(3)} ${chroma.toFixed(3)} ${Math.round(hue)}${alpha ? ` / ${alpha}` : ''})`;
@@ -297,23 +325,72 @@ export function getThemeVariables(config: ThemePreset) {
 				`--chart-${index + 1}`,
 				oklch(index === 0 ? 0.64 : 0.58 + index * 0.045, chart.chroma, chart.hue + offset)
 			])
-		)
+		),
+		style: styleVariables[config.style]
 	};
 }
 
 export function getThemeCss(config: ThemePreset) {
 	const variables = getThemeVariables(config);
-	const light = { ...variables.light, ...variables.charts };
-	const dark = { ...variables.dark, ...variables.charts };
+	const headingFont =
+		config.headingFont === 'inherit'
+			? fontMeta[config.font].value
+			: fontMeta[config.headingFont].value;
+	const light = {
+		...variables.light,
+		...variables.charts,
+		...variables.style,
+		'--pp-theme-font': fontMeta[config.font].value,
+		'--pp-theme-heading-font': headingFont
+	};
+	const dark = {
+		...variables.dark,
+		...variables.charts,
+		...variables.style,
+		'--pp-theme-font': fontMeta[config.font].value,
+		'--pp-theme-heading-font': headingFont
+	};
 	const lightLines = Object.entries(light).map(([key, value]) => `\t${key}: ${value};`);
 	const darkLines = Object.entries(dark).map(([key, value]) => `\t${key}: ${value};`);
 
 	return `:root {\n${lightLines.join('\n')}\n}\n\n.dark {\n${darkLines.join('\n')}\n}`;
 }
 
-export function getPreviewStyle(config: ThemePreset) {
+export function getThemeRuntimeCss(config: ThemePreset) {
+	return `${getThemeCss(config)}
+
+body {
+\tfont-family: var(--pp-theme-font);
+}
+
+h1,
+h2,
+h3,
+.theme-heading {
+\tfont-family: var(--pp-theme-heading-font);
+}`;
+}
+
+export function getPreviewStyle(config: ThemePreset, scheme: 'light' | 'dark' = 'light') {
 	const variables = getThemeVariables(config);
-	return Object.entries({ ...variables.light, ...variables.charts })
+	const colorVariables = scheme === 'dark' ? variables.dark : variables.light;
+	const headingFont =
+		config.headingFont === 'inherit'
+			? fontMeta[config.font].value
+			: fontMeta[config.headingFont].value;
+
+	return Object.entries({
+		...colorVariables,
+		...variables.charts,
+		...variables.style,
+		'--pp-theme-font': fontMeta[config.font].value,
+		'--pp-theme-heading-font': headingFont
+	})
 		.map(([key, value]) => `${key}: ${value}`)
 		.join('; ');
+}
+
+export function parseThemePreset(value: string | null | undefined) {
+	if (!value) return null;
+	return decodeThemePreset(value.trim().replace(/^--preset\s+/, ''));
 }

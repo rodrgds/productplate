@@ -9,10 +9,13 @@
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { Check, Code2, Copy, KeyRound, PlugZap } from '@lucide/svelte';
 	import type { Id } from '$convex/_generated/dataModel.js';
+	import { toast } from 'svelte-sonner';
 
 	const convex = useConvexClient();
+	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
 	const workspaceResponse = useQuery(api.organizations.getCurrent, {});
 
+	let clientCurrentUser = $derived(currentUserResponse.data);
 	let workspace = $derived(workspaceResponse.data);
 	let apiKeyName = $state('Production key');
 	let apiKeyScopes = $state('events:write');
@@ -23,7 +26,6 @@
 	let revealedSecret = $state('');
 	let copied = $state('');
 	let error = $state('');
-	let message = $state('');
 	let isBusy = $state(false);
 
 	let sampleRequest = $derived(`curl -X POST "${
@@ -51,18 +53,25 @@
 	async function runAction(action: () => Promise<unknown>, success: string) {
 		isBusy = true;
 		error = '';
-		message = '';
 		try {
 			await action();
-			message = success;
+			toast.success(success);
 		} catch (cause) {
 			error = cause instanceof Error ? cause.message : String(cause);
+			toast.error(error);
 		} finally {
 			isBusy = false;
 		}
 	}
 
 	async function ensureWorkspace() {
+		if (!clientCurrentUser) {
+			error = currentUserResponse.isLoading
+				? 'Your session is still connecting. Try again in a moment.'
+				: 'Sign in again before creating developer resources.';
+			return;
+		}
+
 		await runAction(
 			() =>
 				convex.mutation(api.organizations.ensureCurrent, { workspaceName: 'Product workspace' }),
@@ -131,24 +140,26 @@
 	</div>
 </header>
 
-<main class="flex flex-1 flex-col gap-4 p-4 lg:p-6">
+<main class="flex min-w-0 flex-1 flex-col gap-4 bg-muted/20 p-4 lg:p-6">
 	{#if !workspace}
-		<Card.Root class="max-w-xl">
-			<Card.Header>
+		<Card.Root class="max-w-xl gap-0 py-0">
+			<Card.Header class="p-4 pb-3">
 				<Card.Title>Initialize developer settings</Card.Title>
 				<Card.Description
 					>Create the workspace record before issuing keys or webhooks.</Card.Description
 				>
 			</Card.Header>
-			<Card.Content>
-				<Button onclick={ensureWorkspace} disabled={isBusy}>Create workspace</Button>
+			<Card.Content class="p-4 pt-0">
+				<Button onclick={ensureWorkspace} disabled={isBusy || !clientCurrentUser}>
+					{currentUserResponse.isLoading ? 'Preparing session...' : 'Create workspace'}
+				</Button>
 			</Card.Content>
 		</Card.Root>
 	{:else}
-		<div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
-			<div class="grid gap-4">
-				<Card.Root>
-					<Card.Header class="border-b">
+		<div class="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)]">
+			<div class="grid min-w-0 auto-rows-max content-start gap-4">
+				<Card.Root class="min-w-0 gap-0 overflow-hidden py-0">
+					<Card.Header class="border-b p-4">
 						<Card.Title class="flex items-center gap-2 text-base">
 							<KeyRound class="size-4 text-primary" />
 							API keys
@@ -160,15 +171,17 @@
 					<Card.Content class="p-0">
 						<div class="divide-y">
 							{#each workspace.apiKeys as key (key._id)}
-								<div class="grid gap-3 p-4 md:grid-cols-[1fr_auto_auto] md:items-center">
-									<div>
+								<div
+									class="grid min-w-0 gap-3 p-4 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-center"
+								>
+									<div class="min-w-0">
 										<div class="flex flex-wrap items-center gap-2">
 											<p class="font-medium">{key.name}</p>
 											<Badge variant={key.revokedAt ? 'secondary' : 'default'}>
 												{key.revokedAt ? 'Revoked' : 'Active'}
 											</Badge>
 										</div>
-										<p class="text-sm text-muted-foreground">
+										<p class="text-sm break-all text-muted-foreground">
 											{key.prefix}... · {key.scopes.join(', ')}
 										</p>
 									</div>
@@ -187,14 +200,19 @@
 									</Button>
 								</div>
 							{:else}
-								<p class="p-4 text-sm text-muted-foreground">No API keys yet.</p>
+								<div class="p-4">
+									<p class="text-sm font-medium">No API keys yet</p>
+									<p class="mt-1 text-sm text-muted-foreground">
+										Create one from the panel on the right when you need API access.
+									</p>
+								</div>
 							{/each}
 						</div>
 					</Card.Content>
 				</Card.Root>
 
-				<Card.Root>
-					<Card.Header class="border-b">
+				<Card.Root class="min-w-0 gap-0 overflow-hidden py-0">
+					<Card.Header class="border-b p-4">
 						<Card.Title class="flex items-center gap-2 text-base">
 							<PlugZap class="size-4 text-primary" />
 							Webhooks
@@ -206,8 +224,10 @@
 					<Card.Content class="p-0">
 						<div class="divide-y">
 							{#each workspace.webhooks as webhook (webhook._id)}
-								<div class="grid gap-3 p-4 md:grid-cols-[1fr_auto] md:items-center">
-									<div>
+								<div
+									class="grid min-w-0 gap-3 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
+								>
+									<div class="min-w-0">
 										<div class="flex flex-wrap items-center gap-2">
 											<p class="font-medium">{webhook.description}</p>
 											<Badge variant={webhook.enabled ? 'default' : 'secondary'}>
@@ -226,19 +246,24 @@
 									</Button>
 								</div>
 							{:else}
-								<p class="p-4 text-sm text-muted-foreground">No webhooks yet.</p>
+								<div class="p-4">
+									<p class="text-sm font-medium">No webhooks yet</p>
+									<p class="mt-1 text-sm text-muted-foreground">
+										Register an endpoint when you are ready to receive product events.
+									</p>
+								</div>
 							{/each}
 						</div>
 					</Card.Content>
 				</Card.Root>
 			</div>
 
-			<div class="grid gap-4 self-start">
-				<Card.Root>
-					<Card.Header>
+			<div class="grid min-w-0 auto-rows-max content-start gap-4 self-start">
+				<Card.Root class="min-w-0 gap-0 overflow-hidden py-0">
+					<Card.Header class="p-4 pb-3">
 						<Card.Title class="text-base">Create API key</Card.Title>
 					</Card.Header>
-					<Card.Content class="space-y-3">
+					<Card.Content class="flex flex-col gap-3 p-4 pt-0">
 						<input
 							class="h-9 w-full rounded-md border bg-background px-3 text-sm"
 							bind:value={apiKeyName}
@@ -262,11 +287,11 @@
 					</Card.Content>
 				</Card.Root>
 
-				<Card.Root>
-					<Card.Header>
+				<Card.Root class="min-w-0 gap-0 overflow-hidden py-0">
+					<Card.Header class="p-4 pb-3">
 						<Card.Title class="text-base">Create webhook</Card.Title>
 					</Card.Header>
-					<Card.Content class="space-y-3">
+					<Card.Content class="flex flex-col gap-3 p-4 pt-0">
 						<input
 							class="h-9 w-full rounded-md border bg-background px-3 text-sm"
 							bind:value={webhookDescription}
@@ -298,8 +323,8 @@
 					</Card.Content>
 				</Card.Root>
 
-				<Card.Root>
-					<Card.Header class="border-b">
+				<Card.Root class="min-w-0 gap-0 overflow-hidden py-0">
+					<Card.Header class="border-b p-4">
 						<Card.Title class="flex items-center gap-2 text-base">
 							<Code2 class="size-4 text-primary" />
 							Template endpoint
@@ -315,7 +340,9 @@
 							>
 								{#if copied === 'curl'}<Check />{:else}<Copy />{/if}
 							</Button>
-							<pre class="overflow-auto p-4 pr-16 text-xs leading-5"><code>{sampleRequest}</code
+							<pre
+								class="max-w-full overflow-auto p-4 pr-16 text-xs leading-5 break-all whitespace-pre-wrap"><code
+									>{sampleRequest}</code
 								></pre>
 						</div>
 					</Card.Content>
@@ -324,9 +351,6 @@
 		</div>
 	{/if}
 
-	{#if message}
-		<p class="text-sm text-primary">{message}</p>
-	{/if}
 	{#if error}
 		<p class="text-sm text-destructive">{error}</p>
 	{/if}

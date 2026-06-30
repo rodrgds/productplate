@@ -125,6 +125,13 @@ type EntitlementPatch = {
 	source: 'plan' | 'billing' | 'manual';
 };
 
+interface CurrentAuthUser {
+	_id: string;
+	email: string;
+	name: string;
+	role?: string | null;
+}
+
 const roleRank: Record<Role, number> = {
 	viewer: 0,
 	member: 1,
@@ -225,12 +232,21 @@ async function getMembership(
 	return membership?.status === 'active' ? membership : null;
 }
 
+async function requireCurrentUser(ctx: QueryCtx | MutationCtx): Promise<CurrentAuthUser> {
+	const user = await authComponent.safeGetAuthUser(ctx);
+	if (!user) {
+		throw new Error('Your session is still connecting. Refresh the page or sign in again.');
+	}
+
+	return user;
+}
+
 async function requireRole(
 	ctx: QueryCtx | MutationCtx,
 	orgId: Id<'organizations'>,
 	minimumRole: Role
 ) {
-	const user = await authComponent.getAuthUser(ctx);
+	const user = await requireCurrentUser(ctx);
 	const membership = await getMembership(ctx, orgId, user._id);
 	if (!membership || roleRank[membership.role] < roleRank[minimumRole]) {
 		throw new Error('You do not have permission to manage this workspace.');
@@ -406,24 +422,30 @@ async function createOrganizationForUser(
 	return orgId;
 }
 
+async function ensureWorkspaceForUser(
+	ctx: MutationCtx,
+	user: CurrentAuthUser,
+	workspaceName?: string
+) {
+	const existingMembership = await getFirstActiveMembership(ctx, user._id);
+	if (existingMembership) return existingMembership.orgId;
+
+	return await createOrganizationForUser(ctx, {
+		name: workspaceName?.trim() || `${user.name || 'My'} workspace`,
+		userId: user._id,
+		email: user.email,
+		displayName: user.name
+	});
+}
+
 export const ensureCurrent = mutation({
 	args: {
 		workspaceName: v.optional(v.string())
 	},
 	returns: workspaceOverviewValidator,
 	handler: async (ctx, args) => {
-		const user = await authComponent.getAuthUser(ctx);
-		const existingMembership = await getFirstActiveMembership(ctx, user._id);
-		let orgId = existingMembership?.orgId;
-
-		if (!orgId) {
-			orgId = await createOrganizationForUser(ctx, {
-				name: args.workspaceName?.trim() || `${user.name || 'My'} workspace`,
-				userId: user._id,
-				email: user.email,
-				displayName: user.name
-			});
-		}
+		const user = await requireCurrentUser(ctx);
+		const orgId = await ensureWorkspaceForUser(ctx, user, args.workspaceName);
 
 		const overview = await getWorkspaceOverview(ctx, orgId, user._id);
 		if (!overview) throw new Error('Workspace was not found after setup.');
@@ -593,7 +615,7 @@ export const acceptInvite = mutation({
 	},
 	returns: memberValidator,
 	handler: async (ctx, args) => {
-		const user = await authComponent.getAuthUser(ctx);
+		const user = await requireCurrentUser(ctx);
 		const invite = await ctx.db
 			.query('organizationInvites')
 			.withIndex('by_token', (q) => q.eq('token', args.token))
@@ -758,7 +780,7 @@ export const adminListOrganizations = query({
 		})
 	),
 	handler: async (ctx) => {
-		const user = await authComponent.getAuthUser(ctx);
+		const user = await requireCurrentUser(ctx);
 		if (user.role !== 'admin') throw new Error('Admin access required.');
 
 		const organizations = await ctx.db.query('organizations').order('desc').take(50);
@@ -808,30 +830,27 @@ export const syncBillingPlan = mutation({
 	},
 	returns: workspaceOverviewValidator,
 	handler: async (ctx, args) => {
-		const user = await authComponent.getAuthUser(ctx);
-		const membership = await getFirstActiveMembership(ctx, user._id);
-		if (!membership) {
-			throw new Error('Create a workspace before syncing billing entitlements.');
-		}
+		const user = await requireCurrentUser(ctx);
+		const orgId = await ensureWorkspaceForUser(ctx, user);
 
 		const productId = args.status === 'active' ? (args.productId ?? 'starter') : 'starter';
 		const plan = billingPlanEntitlements[productId] ?? billingPlanEntitlements.starter;
 		const now = Date.now();
 
-		await ctx.db.patch(membership.orgId, {
+		await ctx.db.patch(orgId, {
 			planKey: plan.planKey,
 			updatedAt: now
 		});
 		await upsertEntitlements(
 			ctx,
-			membership.orgId,
+			orgId,
 			plan.entitlements.map((entitlement) => ({
 				...entitlement,
 				source: productId === 'starter' ? 'plan' : 'billing'
 			}))
 		);
 		await ctx.db.insert('notifications', {
-			orgId: membership.orgId,
+			orgId,
 			userId: user._id,
 			type: 'billing',
 			title: 'Billing entitlements synced',
@@ -840,14 +859,14 @@ export const syncBillingPlan = mutation({
 			createdAt: now
 		});
 		await insertAuditLog(ctx, {
-			orgId: membership.orgId,
+			orgId,
 			actorUserId: user._id,
 			action: 'billing.entitlements_synced',
 			target: plan.planKey,
 			metadata: { status: args.status ?? 'none', productId: args.productId ?? 'starter' }
 		});
 
-		const overview = await getWorkspaceOverview(ctx, membership.orgId, user._id);
+		const overview = await getWorkspaceOverview(ctx, orgId, user._id);
 		if (!overview) throw new Error('Workspace was not found after billing sync.');
 		return overview;
 	}
@@ -862,7 +881,7 @@ export const adminSetEntitlement = mutation({
 	},
 	returns: entitlementValidator,
 	handler: async (ctx, args) => {
-		const user = await authComponent.getAuthUser(ctx);
+		const user = await requireCurrentUser(ctx);
 		if (user.role !== 'admin') throw new Error('Admin access required.');
 
 		const existing = await ctx.db

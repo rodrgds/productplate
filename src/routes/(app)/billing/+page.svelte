@@ -67,7 +67,9 @@
 
 	// Get Convex client for actions (checkout/portal)
 	const client = useConvexClient();
+	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
 	const workspaceResponse = useQuery(api.organizations.getCurrent, {});
+	let clientCurrentUser = $derived(currentUserResponse.data);
 	let workspace = $derived(workspaceResponse.data);
 	let syncMessage = $state('');
 	let syncError = $state('');
@@ -172,6 +174,13 @@
 	async function syncEntitlements() {
 		syncMessage = '';
 		syncError = '';
+		if (!clientCurrentUser) {
+			syncError = currentUserResponse.isLoading
+				? 'Your session is still connecting. Try again in a moment.'
+				: 'Sign in again before syncing entitlements.';
+			return;
+		}
+
 		isSyncingEntitlements = true;
 		try {
 			const args: { productId?: string; status?: string } = {};
@@ -280,8 +289,16 @@
 							</div>
 						{/each}
 					</div>
-					<Button class="w-full" onclick={syncEntitlements} disabled={isSyncingEntitlements}>
-						{isSyncingEntitlements ? 'Syncing...' : 'Sync entitlements'}
+					<Button
+						class="w-full"
+						onclick={syncEntitlements}
+						disabled={isSyncingEntitlements || !clientCurrentUser}
+					>
+						{currentUserResponse.isLoading
+							? 'Preparing session...'
+							: isSyncingEntitlements
+								? 'Syncing...'
+								: 'Sync entitlements'}
 					</Button>
 					{#if syncMessage}
 						<p class="text-sm text-primary">{syncMessage}</p>

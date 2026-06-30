@@ -9,14 +9,19 @@
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { Bell, Building2, Check, Copy, MailPlus, ShieldCheck, Users } from '@lucide/svelte';
 	import type { Id } from '$convex/_generated/dataModel.js';
+	import { toast } from 'svelte-sonner';
 
 	const convex = useConvexClient();
+	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
 	const workspaceResponse = useQuery(api.organizations.getCurrent, {});
 
+	let clientCurrentUser = $derived(currentUserResponse.data);
 	let workspace = $derived(workspaceResponse.data);
+	let unreadNotifications = $derived(
+		workspace?.notifications.filter((notification) => !notification.readAt) ?? []
+	);
 	let inviteEmail = $state('');
 	let inviteRole = $state<'admin' | 'member' | 'viewer'>('member');
-	let message = $state('');
 	let error = $state('');
 	let isBusy = $state(false);
 	let copiedInviteId = $state('');
@@ -28,18 +33,25 @@
 	async function runAction(action: () => Promise<unknown>, success: string) {
 		isBusy = true;
 		error = '';
-		message = '';
 		try {
 			await action();
-			message = success;
+			toast.success(success);
 		} catch (cause) {
 			error = cause instanceof Error ? cause.message : String(cause);
+			toast.error(error);
 		} finally {
 			isBusy = false;
 		}
 	}
 
 	async function ensureWorkspace() {
+		if (!clientCurrentUser) {
+			error = currentUserResponse.isLoading
+				? 'Your session is still connecting. Try again in a moment.'
+				: 'Sign in again before creating a workspace.';
+			return;
+		}
+
 		await runAction(
 			() =>
 				convex.mutation(api.organizations.ensureCurrent, { workspaceName: 'Product workspace' }),
@@ -52,7 +64,6 @@
 
 		isBusy = true;
 		error = '';
-		message = '';
 		try {
 			const invite = await convex.mutation(api.organizations.inviteMember, {
 				orgId: workspace.organization._id,
@@ -75,10 +86,11 @@
 				deliveryStatus = 'Email delivery failed; copy the invite link.';
 			}
 
-			message = `Invite created. ${deliveryStatus}`;
+			toast.success(`Invite created. ${deliveryStatus}`);
 			inviteEmail = '';
 		} catch (cause) {
 			error = cause instanceof Error ? cause.message : String(cause);
+			toast.error(error);
 		} finally {
 			isBusy = false;
 		}
@@ -109,9 +121,14 @@
 	}
 
 	async function markNotificationsRead() {
+		if (unreadNotifications.length === 0) {
+			toast.info('No unread notifications.');
+			return;
+		}
+
 		await runAction(
 			() => convex.mutation(api.notifications.markAllRead, {}),
-			'Notifications marked as read.'
+			'Notifications read.'
 		);
 	}
 
@@ -122,6 +139,7 @@
 
 	async function copyInvite(inviteId: Id<'organizationInvites'>, token: string) {
 		await navigator.clipboard.writeText(inviteUrl(token));
+		toast.success('Invite link copied.');
 		copiedInviteId = inviteId;
 		setTimeout(() => {
 			if (copiedInviteId === inviteId) copiedInviteId = '';
@@ -146,14 +164,14 @@
 	</div>
 </header>
 
-<main class="flex flex-1 flex-col gap-4 p-4 lg:p-6">
+<main class="flex min-w-0 flex-1 flex-col gap-4 bg-muted/20 p-4 lg:p-6">
 	{#if workspaceResponse.isLoading && !workspace}
-		<Card.Root>
+		<Card.Root class="gap-0 py-0">
 			<Card.Content class="p-6 text-sm text-muted-foreground">Loading workspace...</Card.Content>
 		</Card.Root>
 	{:else if !workspace}
-		<Card.Root class="max-w-xl">
-			<Card.Header>
+		<Card.Root class="max-w-xl gap-0 py-0">
+			<Card.Header class="p-4 pb-3">
 				<Card.Title class="flex items-center gap-2">
 					<Building2 class="size-5 text-primary" />
 					Create your workspace
@@ -163,15 +181,17 @@
 					this signed-in user.
 				</Card.Description>
 			</Card.Header>
-			<Card.Content>
-				<Button onclick={ensureWorkspace} disabled={isBusy}>Create workspace</Button>
+			<Card.Content class="p-4 pt-0">
+				<Button onclick={ensureWorkspace} disabled={isBusy || !clientCurrentUser}>
+					{currentUserResponse.isLoading ? 'Preparing session...' : 'Create workspace'}
+				</Button>
 			</Card.Content>
 		</Card.Root>
 	{:else}
-		<div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-			<div class="grid gap-4">
-				<Card.Root>
-					<Card.Header class="border-b">
+		<div class="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
+			<div class="grid min-w-0 auto-rows-max content-start gap-4">
+				<Card.Root class="min-w-0 gap-0 overflow-hidden py-0">
+					<Card.Header class="border-b p-4">
 						<Card.Title class="flex items-center gap-2 text-base">
 							<Users class="size-4 text-primary" />
 							Members
@@ -183,10 +203,12 @@
 					<Card.Content class="p-0">
 						<div class="divide-y">
 							{#each workspace.members as member (member._id)}
-								<div class="grid gap-3 p-4 md:grid-cols-[1fr_160px_auto] md:items-center">
-									<div>
+								<div
+									class="grid min-w-0 gap-3 p-4 md:grid-cols-[minmax(0,1fr)_160px_auto] md:items-center"
+								>
+									<div class="min-w-0">
 										<p class="font-medium">{member.displayName ?? member.email}</p>
-										<p class="text-sm text-muted-foreground">{member.email}</p>
+										<p class="text-sm break-all text-muted-foreground">{member.email}</p>
 									</div>
 									<select
 										class="h-9 rounded-md border bg-background px-2 text-sm"
@@ -217,8 +239,8 @@
 					</Card.Content>
 				</Card.Root>
 
-				<Card.Root>
-					<Card.Header class="border-b">
+				<Card.Root class="min-w-0 gap-0 overflow-hidden py-0">
+					<Card.Header class="border-b p-4">
 						<Card.Title class="flex items-center gap-2 text-base">
 							<ShieldCheck class="size-4 text-primary" />
 							Entitlements
@@ -246,16 +268,16 @@
 				</Card.Root>
 			</div>
 
-			<div class="grid gap-4 self-start">
-				<Card.Root>
-					<Card.Header>
+			<div class="grid min-w-0 auto-rows-max content-start gap-4 self-start">
+				<Card.Root class="min-w-0 gap-0 overflow-hidden py-0">
+					<Card.Header class="p-4 pb-3">
 						<Card.Title class="flex items-center gap-2 text-base">
 							<MailPlus class="size-4 text-primary" />
 							Invite
 						</Card.Title>
 						<Card.Description>Create a token-backed invite for a teammate.</Card.Description>
 					</Card.Header>
-					<Card.Content class="space-y-3">
+					<Card.Content class="flex flex-col gap-3 p-4 pt-0">
 						<input
 							class="h-9 w-full rounded-md border bg-background px-3 text-sm"
 							bind:value={inviteEmail}
@@ -275,8 +297,8 @@
 					</Card.Content>
 				</Card.Root>
 
-				<Card.Root>
-					<Card.Header class="border-b">
+				<Card.Root class="min-w-0 gap-0 overflow-hidden py-0">
+					<Card.Header class="border-b p-4">
 						<Card.Title class="text-base">Pending invites</Card.Title>
 					</Card.Header>
 					<Card.Content class="p-0">
@@ -285,14 +307,14 @@
 						{:else}
 							<div class="divide-y">
 								{#each workspace.invites as invite (invite._id)}
-									<div class="flex items-center justify-between gap-3 p-4">
-										<div>
-											<p class="text-sm font-medium">{invite.email}</p>
+									<div class="flex min-w-0 flex-wrap items-center justify-between gap-3 p-4">
+										<div class="min-w-0">
+											<p class="text-sm font-medium break-all">{invite.email}</p>
 											<p class="text-xs text-muted-foreground">
 												{invite.role} · expires {formatDate(invite.expiresAt)}
 											</p>
 										</div>
-										<div class="flex gap-2">
+										<div class="flex shrink-0 gap-2">
 											<Button
 												variant="outline"
 												size="sm"
@@ -317,29 +339,30 @@
 					</Card.Content>
 				</Card.Root>
 
-				<Card.Root>
-					<Card.Header class="border-b">
+				<Card.Root class="min-w-0 gap-0 overflow-hidden py-0">
+					<Card.Header class="border-b p-4">
 						<Card.Title class="flex items-center gap-2 text-base">
 							<Bell class="size-4 text-primary" />
 							Notifications
 						</Card.Title>
 					</Card.Header>
-					<Card.Content class="space-y-3 p-4">
-						{#each workspace.notifications as notification (notification._id)}
+					<Card.Content class="flex flex-col gap-3 p-4">
+						{#each unreadNotifications as notification (notification._id)}
 							<div class="rounded-lg border p-3 text-sm">
 								<div class="flex items-center justify-between gap-2">
 									<p class="font-medium">{notification.title}</p>
-									{#if !notification.readAt}
-										<span class="size-2 rounded-full bg-primary"></span>
-									{/if}
+									<span class="size-2 rounded-full bg-primary"></span>
 								</div>
 								<p class="mt-1 text-muted-foreground">{notification.body}</p>
 							</div>
 						{:else}
-							<p class="text-sm text-muted-foreground">No notifications yet.</p>
+							<p class="text-sm text-muted-foreground">No unread notifications.</p>
 						{/each}
-						<Button variant="outline" class="w-full" onclick={markNotificationsRead}
-							>Mark all read</Button
+						<Button
+							variant="outline"
+							class="w-full"
+							disabled={unreadNotifications.length === 0 || isBusy}
+							onclick={markNotificationsRead}>Mark all read</Button
 						>
 					</Card.Content>
 				</Card.Root>
@@ -347,9 +370,6 @@
 		</div>
 	{/if}
 
-	{#if message}
-		<p class="text-sm text-primary">{message}</p>
-	{/if}
 	{#if error}
 		<p class="text-sm text-destructive">{error}</p>
 	{/if}
