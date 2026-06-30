@@ -11,7 +11,7 @@
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import { mode, resetMode, setMode, userPrefersMode } from 'mode-watcher';
 	import { onMount } from 'svelte';
-	import AppLogo from '$lib/components/app-logo.svelte';
+	import LandingNav from '$lib/components/landing/landing-nav.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { APP_NAME } from '$lib/constants.js';
 	import {
@@ -41,18 +41,18 @@
 	} from '$lib/theme-builder.js';
 
 	const headingFonts = ['inherit', ...fonts] as const;
-	const publicLinks = [
-		{ label: 'Product', href: '/#product' },
-		{ label: 'Theme Builder', href: '/theme-builder' },
-		{ label: 'Components', href: '/components' },
-		{ label: 'Demo', href: '/auth/demo' }
-	] as const;
 
 	const styleDetails: Record<ThemePreset['style'], string> = {
 		operational: 'Balanced spacing and app-first rhythm.',
+		default: 'The classic shadcn-style baseline.',
+		'new-york': 'Sharper controls and denser app chrome.',
 		compact: 'Denser controls, shorter cards, tighter data views.',
 		editorial: 'More breathing room and larger content sections.',
-		console: 'Sharper, technical, command-center styling.'
+		soft: 'Rounder surfaces with a calmer card treatment.',
+		sharp: 'Crisp borders, flatter cards, stronger structure.',
+		mono: 'Technical typography without the console shell.',
+		console: 'Sharper, technical, command-center styling.',
+		spacious: 'Large panels and relaxed product marketing rhythm.'
 	};
 
 	const menuColorLabels: Record<ThemePreset['menuColor'], string> = {
@@ -223,32 +223,7 @@
 </svelte:head>
 
 <div class="min-h-screen bg-background text-foreground">
-	<header class="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
-		<nav class="mx-auto flex h-16 max-w-[118rem] items-center justify-between px-5 sm:px-8">
-			<a
-				href={resolve('/')}
-				aria-label="Product Plate home"
-				class="flex items-center gap-3 font-semibold"
-			>
-				<AppLogo class="size-8 rounded-lg" />
-				<span>{APP_NAME}</span>
-			</a>
-
-			<div class="hidden items-center gap-7 text-sm md:flex">
-				{#each publicLinks as link (link.label)}
-					<a
-						href={resolve(link.href)}
-						aria-current={link.label === 'Theme Builder' ? 'page' : undefined}
-						class="text-muted-foreground transition-colors hover:text-foreground aria-[current=page]:text-foreground"
-					>
-						{link.label}
-					</a>
-				{/each}
-			</div>
-
-			<Button href={resolve('/auth/demo')} size="sm">Open demo</Button>
-		</nav>
-	</header>
+	<LandingNav active="theme-builder" />
 
 	<main class="theme-workbench">
 		<section class="builder-shell" aria-label="Theme builder">
@@ -664,11 +639,28 @@
 		--mock-padding: 1rem;
 		--mock-radius: var(--radius);
 		--mock-hero-size: clamp(2.1rem, 3.25vw, 3.65rem);
+		position: sticky;
+		top: 5rem;
+		display: flex;
+		max-height: calc(100svh - 6rem);
+		flex-direction: column;
 		overflow: hidden;
 		border-radius: 0.75rem;
 		color: var(--foreground);
 		background: var(--background);
 		font-family: var(--pp-theme-font);
+	}
+
+	.preview-column.style-default {
+		--mock-space: 0.95rem;
+		--mock-padding: 0.95rem;
+		--mock-hero-size: clamp(2rem, 3.1vw, 3.35rem);
+	}
+
+	.preview-column.style-new-york {
+		--mock-space: 0.75rem;
+		--mock-padding: 0.85rem;
+		--mock-hero-size: clamp(1.9rem, 2.9vw, 3.05rem);
 	}
 
 	.preview-column.style-compact {
@@ -684,14 +676,49 @@
 		--mock-hero-size: clamp(2.3rem, 3.7vw, 4.15rem);
 	}
 
+	.preview-column.style-soft {
+		--mock-space: 1.15rem;
+		--mock-padding: 1.15rem;
+		--mock-radius: calc(var(--radius) + 0.3rem);
+		--mock-hero-size: clamp(2.1rem, 3.25vw, 3.55rem);
+	}
+
+	.preview-column.style-sharp {
+		--mock-space: 0.9rem;
+		--mock-padding: 0.95rem;
+		--mock-radius: 0.2rem;
+		--mock-hero-size: clamp(2rem, 3vw, 3.25rem);
+	}
+
+	.preview-column.style-mono {
+		--mock-space: 0.85rem;
+		--mock-padding: 0.95rem;
+		--mock-hero-size: clamp(1.85rem, 2.9vw, 3rem);
+		font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+	}
+
 	.preview-column.style-console {
 		--mock-space: 0.85rem;
 		--mock-padding: 0.9rem;
 		--mock-radius: 0.25rem;
 		font-family:
-			ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+			'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+			'Liberation Mono', monospace;
 	}
 
+	.preview-column.style-spacious {
+		--mock-space: 1.45rem;
+		--mock-padding: 1.45rem;
+		--mock-hero-size: clamp(2.3rem, 3.6vw, 4rem);
+	}
+
+	.preview-column.style-sharp .mock-nav,
+	.preview-column.style-sharp .mock-hero,
+	.preview-column.style-sharp .mock-grid > div,
+	.preview-column.style-sharp .mock-panel,
+	.preview-column.style-sharp .mock-table,
+	.preview-column.style-sharp .mock-form,
+	.preview-column.style-sharp .mock-sidebar-card,
 	.preview-column.style-console .mock-nav,
 	.preview-column.style-console .mock-hero,
 	.preview-column.style-console .mock-grid > div,
@@ -987,7 +1014,9 @@
 	.mock-page {
 		display: grid;
 		grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr);
-		min-height: 54rem;
+		height: min(52rem, calc(100svh - 9rem));
+		min-height: min(40rem, calc(100svh - 9rem));
+		overflow: auto;
 		background:
 			linear-gradient(color-mix(in oklch, var(--primary) 5%, transparent) 1px, transparent 1px),
 			linear-gradient(
@@ -1051,7 +1080,7 @@
 
 	.mock-sidebar-card {
 		margin-top: auto;
-		border: 1px solid var(--sidebar-border);
+		border: var(--pp-theme-border-width) solid var(--sidebar-border);
 		border-radius: var(--mock-radius);
 		background: color-mix(in oklch, var(--sidebar-accent) 50%, transparent);
 		padding: var(--mock-padding);
@@ -1079,10 +1108,12 @@
 	.mock-panel,
 	.mock-table,
 	.mock-form {
-		border: 1px solid var(--border);
+		border: var(--pp-theme-border-width) solid var(--border);
 		border-radius: var(--mock-radius);
 		background: color-mix(in oklch, var(--card) 96%, transparent);
 		color: var(--card-foreground);
+		box-shadow: 0 14px 32px
+			color-mix(in oklch, var(--foreground) var(--pp-theme-shadow-alpha), transparent);
 	}
 
 	.mock-nav {
@@ -1327,6 +1358,13 @@
 
 		.preview-column {
 			order: -1;
+			position: relative;
+			top: auto;
+			max-height: none;
+		}
+
+		.mock-page {
+			height: min(42rem, calc(100svh - 8rem));
 		}
 	}
 

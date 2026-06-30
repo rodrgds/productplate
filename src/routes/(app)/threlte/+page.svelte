@@ -7,6 +7,7 @@
 	import RotateCcwIcon from '@lucide/svelte/icons/rotate-ccw';
 	import { APP_NAME } from '$lib/constants.js';
 	import { Canvas, T } from '@threlte/core';
+	import { OrbitControls } from '@threlte/extras';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { Badge } from '$lib/components/ui/badge';
@@ -86,8 +87,12 @@
 	</div>
 </header>
 
-<main class="min-h-[calc(100vh-4rem)] bg-muted/30 p-4 lg:p-6">
-	<div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_23rem]">
+<main
+	class="min-h-[calc(100svh-4rem)] bg-muted/30 p-0 lg:h-[calc(100svh-4rem)] lg:min-h-0 lg:overflow-hidden lg:p-4"
+>
+	<div
+		class="grid min-h-[calc(100svh-4rem)] gap-0 lg:h-full lg:min-h-0 lg:gap-4 xl:grid-cols-[minmax(0,1fr)_23rem]"
+	>
 		<section class="scene-panel" aria-label="Interactive Threlte scene">
 			<div class="scene-header">
 				<div>
@@ -104,6 +109,13 @@
 			<div class="canvas-wrap">
 				<Canvas>
 					<T.PerspectiveCamera makeDefault position={[0, 0.55, 5.1]} fov={45} />
+					<OrbitControls
+						enableDamping
+						dampingFactor={0.08}
+						enablePan={false}
+						minDistance={2.7}
+						maxDistance={8}
+					/>
 					<T.AmbientLight intensity={0.74} />
 					<T.DirectionalLight position={[3.4, 4.8, 5.2]} intensity={2.35} />
 					<T.DirectionalLight position={[-4, -2, 3]} intensity={0.7} />
@@ -178,12 +190,14 @@
 	.scene-panel,
 	.control-panel {
 		border: 1px solid var(--border);
-		border-radius: 1rem;
 		background: var(--background);
 		box-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 5%, transparent);
 	}
 
 	.scene-panel {
+		display: flex;
+		min-height: 0;
+		flex-direction: column;
 		overflow: hidden;
 	}
 
@@ -233,8 +247,9 @@
 	}
 
 	.canvas-wrap {
-		height: min(62vh, 42rem);
-		min-height: 24rem;
+		flex: 1;
+		min-height: 28rem;
+		cursor: grab;
 		background:
 			linear-gradient(
 				90deg,
@@ -249,10 +264,15 @@
 			100% 100%;
 	}
 
+	.canvas-wrap:active {
+		cursor: grabbing;
+	}
+
 	.control-panel {
 		display: grid;
 		align-content: start;
 		gap: 1.25rem;
+		overflow: auto;
 		padding: 1.25rem;
 	}
 
@@ -381,6 +401,19 @@
 
 		.canvas-wrap {
 			height: 24rem;
+			flex: none;
+			min-height: 24rem;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.scene-panel,
+		.control-panel {
+			border-radius: 1rem;
+		}
+
+		.control-panel {
+			max-height: 100%;
 		}
 	}
 </style>

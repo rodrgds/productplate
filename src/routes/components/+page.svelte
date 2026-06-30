@@ -35,7 +35,7 @@
 </a>
 
 <div class="min-h-screen bg-background text-foreground">
-	<LandingNav />
+	<LandingNav active="components" />
 
 	<main id="main-content">
 		<section class="border-b bg-muted/30 py-16 sm:py-20">

@@ -2,14 +2,13 @@
 	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import Code2Icon from '@lucide/svelte/icons/code-2';
-	import MenuIcon from '@lucide/svelte/icons/menu';
 	import TerminalIcon from '@lucide/svelte/icons/terminal';
 	import { resolve } from '$app/paths';
 	import AppLogo from '$lib/components/app-logo.svelte';
+	import LandingNav from '$lib/components/landing/landing-nav.svelte';
 	import * as Accordion from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
-	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import {
 		APP_DESCRIPTION,
 		APP_NAME,
@@ -20,27 +19,13 @@
 		APP_URL
 	} from '$lib/constants';
 
-	let mobileNavOpen = $state(false);
-
 	const githubUrl = 'https://github.com/rodrgds/productplate';
 	const docsUrl = 'https://github.com/rodrgds/productplate/blob/main/README.md';
 	const securityUrl = 'https://github.com/rodrgds/productplate/blob/main/SECURITY.md';
 	const kickstartUrl = 'https://github.com/rodrgds/productplate/blob/main/START_HERE.md';
 	const to = {
-		home: resolve('/'),
-		demo: resolve('/auth/demo'),
-		components: resolve('/components'),
-		themeBuilder: resolve('/theme-builder')
+		demo: resolve('/auth/demo')
 	};
-
-	const navLinks = [
-		{ label: 'Product', href: '#product' },
-		{ label: 'Kickstart', href: '#kickstart' },
-		{ label: 'Stack', href: '#stack' },
-		{ label: 'Theme Builder', href: to.themeBuilder },
-		{ label: 'Components', href: to.components },
-		{ label: 'FAQ', href: '#faq' }
-	] as const;
 
 	const productSurfaces = [
 		{
@@ -162,84 +147,7 @@
 </a>
 
 <div class="min-h-screen overflow-x-hidden bg-background text-foreground">
-	<header class="border-b bg-background">
-		<nav
-			aria-label="Primary navigation"
-			class="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8"
-		>
-			<a
-				href={resolve('/')}
-				aria-label="Product Plate home"
-				class="flex items-center gap-3 font-semibold"
-			>
-				<AppLogo class="size-8 rounded-lg" />
-				<span>{APP_NAME}</span>
-			</a>
-
-			<div class="hidden items-center gap-7 text-sm lg:flex">
-				{#each navLinks as link (link.label)}
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-					<a href={link.href} class="text-muted-foreground transition-colors hover:text-foreground">
-						{link.label}
-					</a>
-				{/each}
-			</div>
-
-			<div class="flex items-center gap-2">
-				<Button href={githubUrl} variant="ghost" size="sm" class="hidden sm:inline-flex">
-					View source
-				</Button>
-				<Button href={to.demo} size="sm" class="hidden sm:inline-flex">
-					Open live demo
-					<ArrowRightIcon data-icon="inline-end" />
-				</Button>
-
-				<Sheet.Root bind:open={mobileNavOpen}>
-					<Sheet.Trigger>
-						{#snippet child({ props })}
-							<Button
-								{...props}
-								variant="ghost"
-								size="icon"
-								class="lg:hidden"
-								aria-label="Open navigation"
-							>
-								<MenuIcon />
-							</Button>
-						{/snippet}
-					</Sheet.Trigger>
-					<Sheet.Content side="right" class="w-72">
-						<Sheet.Header>
-							<Sheet.Title>Product Plate</Sheet.Title>
-							<Sheet.Description>Explore the starter and its working demo.</Sheet.Description>
-						</Sheet.Header>
-						<div class="flex flex-col gap-1 px-4">
-							<!-- eslint-disable svelte/no-navigation-without-resolve -->
-							{#each navLinks as link (link.label)}
-								<a
-									href={link.href}
-									onclick={() => (mobileNavOpen = false)}
-									class="rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-								>
-									{link.label}
-								</a>
-							{/each}
-							<!-- eslint-enable svelte/no-navigation-without-resolve -->
-						</div>
-						<div class="mt-5 grid gap-2 border-t px-4 pt-5">
-							<Button href={to.demo} onclick={() => (mobileNavOpen = false)}>
-								Open live demo
-								<ArrowRightIcon data-icon="inline-end" />
-							</Button>
-							<Button href={githubUrl} variant="outline" onclick={() => (mobileNavOpen = false)}>
-								View source
-							</Button>
-						</div>
-					</Sheet.Content>
-				</Sheet.Root>
-			</div>
-		</nav>
-	</header>
+	<LandingNav />
 
 	<main id="main-content">
 		<section class="relative border-b">

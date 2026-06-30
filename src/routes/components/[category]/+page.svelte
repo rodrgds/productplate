@@ -27,7 +27,7 @@
 </a>
 
 <div class="min-h-screen bg-background text-foreground">
-	<LandingNav />
+	<LandingNav active="components" />
 
 	<main id="main-content">
 		{#if current}

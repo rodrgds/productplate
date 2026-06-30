@@ -1,5 +1,33 @@
-export const themeStyles = ['operational', 'compact', 'editorial', 'console'] as const;
-export const baseColors = ['neutral', 'zinc', 'stone', 'mauve', 'olive', 'mist'] as const;
+export const themeStyles = [
+	'operational',
+	'compact',
+	'editorial',
+	'console',
+	'default',
+	'new-york',
+	'soft',
+	'sharp',
+	'mono',
+	'spacious'
+] as const;
+export const baseColors = [
+	'neutral',
+	'zinc',
+	'stone',
+	'mauve',
+	'olive',
+	'mist',
+	'slate',
+	'gray',
+	'red',
+	'orange',
+	'amber',
+	'yellow',
+	'lime',
+	'green',
+	'blue',
+	'violet'
+] as const;
 export const accentColors = [
 	'orange',
 	'amber',
@@ -8,9 +36,33 @@ export const accentColors = [
 	'rose',
 	'violet',
 	'teal',
-	'cyan'
+	'cyan',
+	'red',
+	'yellow',
+	'lime',
+	'green',
+	'sky',
+	'indigo',
+	'purple',
+	'fuchsia',
+	'pink'
 ] as const;
-export const chartColors = ['orange', 'blue', 'emerald', 'violet', 'rose', 'cyan'] as const;
+export const chartColors = [
+	'orange',
+	'blue',
+	'emerald',
+	'violet',
+	'rose',
+	'cyan',
+	'red',
+	'amber',
+	'green',
+	'teal',
+	'sky',
+	'indigo',
+	'purple',
+	'fuchsia'
+] as const;
 export const radii = ['none', 'small', 'default', 'medium', 'large'] as const;
 export const fonts = [
 	'inter',
@@ -18,7 +70,12 @@ export const fonts = [
 	'figtree',
 	'system',
 	'jetbrains-mono',
-	'source-sans'
+	'source-sans',
+	'manrope',
+	'archivo',
+	'noto-sans',
+	'roboto-flex',
+	'recursive'
 ] as const;
 export const menuAccents = ['subtle', 'bold'] as const;
 export const menuColors = ['default', 'inverted', 'translucent'] as const;
@@ -56,38 +113,71 @@ type OptionRecord<T extends readonly string[]> = Record<
 
 export const themeStyleMeta: OptionRecord<typeof themeStyles> = {
 	operational: { name: 'Operational' },
+	default: { name: 'Default' },
+	'new-york': { name: 'New York' },
 	compact: { name: 'Compact' },
 	editorial: { name: 'Editorial' },
-	console: { name: 'Console' }
+	soft: { name: 'Soft' },
+	sharp: { name: 'Sharp' },
+	mono: { name: 'Mono' },
+	console: { name: 'Console' },
+	spacious: { name: 'Spacious' }
 };
 
 export const baseColorMeta: OptionRecord<typeof baseColors> = {
 	neutral: { name: 'Neutral', color: '#737373' },
 	zinc: { name: 'Zinc', color: '#71717a' },
+	slate: { name: 'Slate', color: '#64748b' },
 	stone: { name: 'Stone', color: '#78716c' },
+	gray: { name: 'Gray', color: '#6b7280' },
 	mauve: { name: 'Mauve', color: '#79697b' },
 	olive: { name: 'Olive', color: '#7c7c67' },
-	mist: { name: 'Mist', color: '#67787c' }
+	mist: { name: 'Mist', color: '#67787c' },
+	red: { name: 'Red', color: '#ef4444' },
+	orange: { name: 'Orange', color: '#f97316' },
+	amber: { name: 'Amber', color: '#f59e0b' },
+	yellow: { name: 'Yellow', color: '#eab308' },
+	lime: { name: 'Lime', color: '#84cc16' },
+	green: { name: 'Green', color: '#22c55e' },
+	blue: { name: 'Blue', color: '#3b82f6' },
+	violet: { name: 'Violet', color: '#8b5cf6' }
 };
 
 export const accentColorMeta: OptionRecord<typeof accentColors> = {
+	red: { name: 'Red', color: '#ef4444' },
 	orange: { name: 'Orange', color: '#ff6900' },
 	amber: { name: 'Amber', color: '#f59e0b' },
-	blue: { name: 'Blue', color: '#2b7fff' },
+	yellow: { name: 'Yellow', color: '#eab308' },
+	lime: { name: 'Lime', color: '#84cc16' },
+	green: { name: 'Green', color: '#22c55e' },
 	emerald: { name: 'Emerald', color: '#00bc7d' },
-	rose: { name: 'Rose', color: '#ff2056' },
-	violet: { name: 'Violet', color: '#8e51ff' },
 	teal: { name: 'Teal', color: '#00bba7' },
-	cyan: { name: 'Cyan', color: '#00b8db' }
+	cyan: { name: 'Cyan', color: '#00b8db' },
+	sky: { name: 'Sky', color: '#0ea5e9' },
+	blue: { name: 'Blue', color: '#2b7fff' },
+	indigo: { name: 'Indigo', color: '#6366f1' },
+	violet: { name: 'Violet', color: '#8e51ff' },
+	purple: { name: 'Purple', color: '#a855f7' },
+	fuchsia: { name: 'Fuchsia', color: '#d946ef' },
+	pink: { name: 'Pink', color: '#ec4899' },
+	rose: { name: 'Rose', color: '#ff2056' }
 };
 
 export const chartColorMeta: OptionRecord<typeof chartColors> = {
+	red: { name: 'Red', color: '#ef4444' },
 	orange: { name: 'Orange', color: '#f97316' },
-	blue: { name: 'Blue', color: '#3b82f6' },
+	amber: { name: 'Amber', color: '#f59e0b' },
+	green: { name: 'Green', color: '#22c55e' },
 	emerald: { name: 'Emerald', color: '#10b981' },
+	teal: { name: 'Teal', color: '#14b8a6' },
+	cyan: { name: 'Cyan', color: '#06b6d4' },
+	sky: { name: 'Sky', color: '#0ea5e9' },
+	blue: { name: 'Blue', color: '#3b82f6' },
+	indigo: { name: 'Indigo', color: '#6366f1' },
 	violet: { name: 'Violet', color: '#8b5cf6' },
-	rose: { name: 'Rose', color: '#f43f5e' },
-	cyan: { name: 'Cyan', color: '#06b6d4' }
+	purple: { name: 'Purple', color: '#a855f7' },
+	fuchsia: { name: 'Fuchsia', color: '#d946ef' },
+	rose: { name: 'Rose', color: '#f43f5e' }
 };
 
 export const radiusMeta: OptionRecord<typeof radii> = {
@@ -99,15 +189,32 @@ export const radiusMeta: OptionRecord<typeof radii> = {
 };
 
 export const fontMeta: OptionRecord<typeof fonts> = {
-	inter: { name: 'Inter', value: 'Inter, ui-sans-serif, system-ui, sans-serif' },
-	geist: { name: 'Geist', value: 'Geist, ui-sans-serif, system-ui, sans-serif' },
-	figtree: { name: 'Figtree', value: 'Figtree, ui-sans-serif, system-ui, sans-serif' },
-	system: { name: 'System', value: 'ui-sans-serif, system-ui, sans-serif' },
-	'jetbrains-mono': { name: 'JetBrains Mono', value: 'JetBrains Mono, ui-monospace, monospace' },
+	inter: { name: 'Inter', value: '"Inter Variable", ui-sans-serif, system-ui, sans-serif' },
+	geist: { name: 'Geist', value: '"Geist Variable", ui-sans-serif, system-ui, sans-serif' },
+	manrope: { name: 'Manrope', value: '"Manrope Variable", ui-sans-serif, system-ui, sans-serif' },
+	figtree: { name: 'Figtree', value: '"Figtree Variable", ui-sans-serif, system-ui, sans-serif' },
 	'source-sans': {
 		name: 'Source Sans 3',
-		value: 'Source Sans 3, ui-sans-serif, system-ui, sans-serif'
-	}
+		value: '"Source Sans 3 Variable", ui-sans-serif, system-ui, sans-serif'
+	},
+	archivo: { name: 'Archivo', value: '"Archivo Variable", ui-sans-serif, system-ui, sans-serif' },
+	'noto-sans': {
+		name: 'Noto Sans',
+		value: '"Noto Sans Variable", ui-sans-serif, system-ui, sans-serif'
+	},
+	'roboto-flex': {
+		name: 'Roboto Flex',
+		value: '"Roboto Flex Variable", ui-sans-serif, system-ui, sans-serif'
+	},
+	recursive: {
+		name: 'Recursive',
+		value: '"Recursive Variable", ui-sans-serif, system-ui, sans-serif'
+	},
+	'jetbrains-mono': {
+		name: 'JetBrains Mono',
+		value: '"JetBrains Mono Variable", ui-monospace, monospace'
+	},
+	system: { name: 'System', value: 'ui-sans-serif, system-ui, sans-serif' }
 };
 
 const fieldDefinitions = [
@@ -177,21 +284,40 @@ export function decodeThemePreset(code: string): ThemePreset | null {
 const baseOklch: Record<(typeof baseColors)[number], { hue: number; chroma: number }> = {
 	neutral: { hue: 95, chroma: 0.006 },
 	zinc: { hue: 285, chroma: 0.012 },
+	slate: { hue: 250, chroma: 0.018 },
 	stone: { hue: 60, chroma: 0.014 },
+	gray: { hue: 255, chroma: 0.008 },
 	mauve: { hue: 320, chroma: 0.02 },
 	olive: { hue: 105, chroma: 0.018 },
-	mist: { hue: 205, chroma: 0.018 }
+	mist: { hue: 205, chroma: 0.018 },
+	red: { hue: 27, chroma: 0.03 },
+	orange: { hue: 42, chroma: 0.032 },
+	amber: { hue: 75, chroma: 0.03 },
+	yellow: { hue: 96, chroma: 0.026 },
+	lime: { hue: 130, chroma: 0.03 },
+	green: { hue: 150, chroma: 0.028 },
+	blue: { hue: 260, chroma: 0.03 },
+	violet: { hue: 305, chroma: 0.034 }
 };
 
 const accentOklch: Record<(typeof accentColors)[number], { hue: number; chroma: number }> = {
+	red: { hue: 27, chroma: 0.2 },
 	orange: { hue: 42, chroma: 0.19 },
 	amber: { hue: 75, chroma: 0.17 },
-	blue: { hue: 260, chroma: 0.2 },
+	yellow: { hue: 96, chroma: 0.17 },
+	lime: { hue: 130, chroma: 0.16 },
+	green: { hue: 145, chroma: 0.16 },
 	emerald: { hue: 155, chroma: 0.16 },
-	rose: { hue: 20, chroma: 0.2 },
-	violet: { hue: 305, chroma: 0.19 },
 	teal: { hue: 185, chroma: 0.15 },
-	cyan: { hue: 215, chroma: 0.16 }
+	cyan: { hue: 215, chroma: 0.16 },
+	sky: { hue: 235, chroma: 0.18 },
+	blue: { hue: 260, chroma: 0.2 },
+	indigo: { hue: 285, chroma: 0.2 },
+	violet: { hue: 305, chroma: 0.19 },
+	purple: { hue: 315, chroma: 0.2 },
+	fuchsia: { hue: 335, chroma: 0.2 },
+	pink: { hue: 350, chroma: 0.2 },
+	rose: { hue: 20, chroma: 0.2 }
 };
 
 const chartHueOffset = [0, 65, 120, 180, 245];
@@ -200,25 +326,71 @@ const styleVariables: Record<(typeof themeStyles)[number], Record<string, string
 		'--pp-theme-density': '1',
 		'--pp-theme-card-padding': '1rem',
 		'--pp-theme-section-gap': '1rem',
-		'--pp-theme-border-width': '1px'
+		'--pp-theme-border-width': '1px',
+		'--pp-theme-shadow-alpha': '8%'
+	},
+	default: {
+		'--pp-theme-density': '1',
+		'--pp-theme-card-padding': '1rem',
+		'--pp-theme-section-gap': '1rem',
+		'--pp-theme-border-width': '1px',
+		'--pp-theme-shadow-alpha': '6%'
+	},
+	'new-york': {
+		'--pp-theme-density': '0.9',
+		'--pp-theme-card-padding': '0.875rem',
+		'--pp-theme-section-gap': '0.85rem',
+		'--pp-theme-border-width': '1px',
+		'--pp-theme-shadow-alpha': '4%'
 	},
 	compact: {
 		'--pp-theme-density': '0.82',
 		'--pp-theme-card-padding': '0.75rem',
 		'--pp-theme-section-gap': '0.65rem',
-		'--pp-theme-border-width': '1px'
+		'--pp-theme-border-width': '1px',
+		'--pp-theme-shadow-alpha': '4%'
 	},
 	editorial: {
 		'--pp-theme-density': '1.18',
 		'--pp-theme-card-padding': '1.35rem',
 		'--pp-theme-section-gap': '1.35rem',
-		'--pp-theme-border-width': '1px'
+		'--pp-theme-border-width': '1px',
+		'--pp-theme-shadow-alpha': '10%'
+	},
+	soft: {
+		'--pp-theme-density': '1.08',
+		'--pp-theme-card-padding': '1.15rem',
+		'--pp-theme-section-gap': '1.1rem',
+		'--pp-theme-border-width': '1px',
+		'--pp-theme-shadow-alpha': '12%'
+	},
+	sharp: {
+		'--pp-theme-density': '0.96',
+		'--pp-theme-card-padding': '0.95rem',
+		'--pp-theme-section-gap': '0.9rem',
+		'--pp-theme-border-width': '1.5px',
+		'--pp-theme-shadow-alpha': '3%'
+	},
+	mono: {
+		'--pp-theme-density': '0.94',
+		'--pp-theme-card-padding': '0.95rem',
+		'--pp-theme-section-gap': '0.85rem',
+		'--pp-theme-border-width': '1px',
+		'--pp-theme-shadow-alpha': '5%'
 	},
 	console: {
 		'--pp-theme-density': '0.92',
 		'--pp-theme-card-padding': '0.9rem',
 		'--pp-theme-section-gap': '0.85rem',
-		'--pp-theme-border-width': '1.5px'
+		'--pp-theme-border-width': '1.5px',
+		'--pp-theme-shadow-alpha': '3%'
+	},
+	spacious: {
+		'--pp-theme-density': '1.28',
+		'--pp-theme-card-padding': '1.5rem',
+		'--pp-theme-section-gap': '1.55rem',
+		'--pp-theme-border-width': '1px',
+		'--pp-theme-shadow-alpha': '9%'
 	}
 };
 
@@ -230,7 +402,7 @@ export function getThemeVariables(config: ThemePreset) {
 	const base = baseOklch[config.baseColor];
 	const accent = accentOklch[config.accentColor];
 	const chart = accentOklch[config.chartColor];
-	const compact = config.style === 'compact';
+	const compact = ['compact', 'new-york', 'console', 'mono'].includes(config.style);
 	const darkSidebar = config.menuColor === 'inverted';
 	const translucentSidebar = config.menuColor === 'translucent';
 
