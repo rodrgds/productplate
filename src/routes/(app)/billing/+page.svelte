@@ -8,7 +8,7 @@
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Check } from '@lucide/svelte';
 
-	import { useConvexClient } from 'convex-svelte';
+	import { useConvexClient, useQuery } from 'convex-svelte';
 	import type { PageData } from './$types';
 
 	const { data }: { data: PageData } = $props();
@@ -67,6 +67,11 @@
 
 	// Get Convex client for actions (checkout/portal)
 	const client = useConvexClient();
+	const workspaceResponse = useQuery(api.organizations.getCurrent, {});
+	let workspace = $derived(workspaceResponse.data);
+	let syncMessage = $state('');
+	let syncError = $state('');
+	let isSyncingEntitlements = $state(false);
 
 	// Get data from server load function
 	let products = $derived<Product[]>(data.products || []);
@@ -136,6 +141,11 @@
 		};
 	});
 
+	let currentProduct = $derived.by<CustomerProduct | null>(() => {
+		if (!customerData?.products) return null;
+		return customerData.products.find((product) => product.status === 'active') ?? null;
+	});
+
 	// Map products to display format
 	let plans = $derived<Plan[]>(
 		Array.isArray(products)
@@ -158,6 +168,23 @@
 				})
 			: []
 	);
+
+	async function syncEntitlements() {
+		syncMessage = '';
+		syncError = '';
+		isSyncingEntitlements = true;
+		try {
+			const args: { productId?: string; status?: string } = {};
+			if (currentProduct?.id) args.productId = currentProduct.id;
+			if (currentProduct?.status) args.status = currentProduct.status;
+			await client.mutation(api.organizations.syncBillingPlan, args);
+			syncMessage = 'Workspace entitlements synced from billing.';
+		} catch (cause) {
+			syncError = cause instanceof Error ? cause.message : String(cause);
+		} finally {
+			isSyncingEntitlements = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -186,43 +213,84 @@
 		<Separator />
 
 		<!-- Current Plan Section -->
-		<div class="space-y-4">
-			<h3 class="text-lg font-semibold">Current Plan</h3>
-			{#if currentPlan}
-				<Card.Root>
-					<Card.Header>
-						<Card.Title>{currentPlan.name}</Card.Title>
-						<Card.Description>
-							{#if currentPlan.price > 0}
-								${currentPlan.price}/{currentPlan.interval} · Active subscription
-							{:else}
-								You're currently on the {currentPlan.name.toLowerCase()}
-							{/if}
-						</Card.Description>
-					</Card.Header>
-					<Card.Content>
-						<ul class="space-y-2">
-							{#each currentPlan.features as feature, i (i)}
-								<li class="flex items-center gap-2">
-									<Check class="h-4 w-4 text-primary" />
-									<span class="text-sm">{feature}</span>
-								</li>
-							{/each}
-						</ul>
-					</Card.Content>
-					<Card.Footer>
-						<Button variant="outline" onclick={handleManageSubscription}>Manage Subscription</Button
-						>
-					</Card.Footer>
-				</Card.Root>
-			{:else}
-				<Card.Root>
-					<Card.Header>
-						<Card.Title>No Active Plan</Card.Title>
-						<Card.Description>Choose a plan below to get started</Card.Description>
-					</Card.Header>
-				</Card.Root>
-			{/if}
+		<div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+			<div class="space-y-4">
+				<h3 class="text-lg font-semibold">Current Plan</h3>
+				{#if currentPlan}
+					<Card.Root>
+						<Card.Header>
+							<Card.Title>{currentPlan.name}</Card.Title>
+							<Card.Description>
+								{#if currentPlan.price > 0}
+									${currentPlan.price}/{currentPlan.interval} · Active subscription
+								{:else}
+									You're currently on the {currentPlan.name.toLowerCase()}
+								{/if}
+							</Card.Description>
+						</Card.Header>
+						<Card.Content>
+							<ul class="space-y-2">
+								{#each currentPlan.features as feature, i (i)}
+									<li class="flex items-center gap-2">
+										<Check class="h-4 w-4 text-primary" />
+										<span class="text-sm">{feature}</span>
+									</li>
+								{/each}
+							</ul>
+						</Card.Content>
+						<Card.Footer>
+							<Button variant="outline" onclick={handleManageSubscription}
+								>Manage Subscription</Button
+							>
+						</Card.Footer>
+					</Card.Root>
+				{:else}
+					<Card.Root>
+						<Card.Header>
+							<Card.Title>No Active Plan</Card.Title>
+							<Card.Description>Choose a plan below to get started</Card.Description>
+						</Card.Header>
+					</Card.Root>
+				{/if}
+			</div>
+
+			<Card.Root class="self-start">
+				<Card.Header>
+					<Card.Title>Workspace entitlements</Card.Title>
+					<Card.Description>
+						Apply the active Autumn product to the current organization limits.
+					</Card.Description>
+				</Card.Header>
+				<Card.Content class="space-y-4">
+					<div class="rounded-lg border p-3 text-sm">
+						<p class="font-medium">Workspace plan</p>
+						<p class="text-muted-foreground">
+							{workspace?.organization.planKey ?? 'No workspace yet'}
+						</p>
+					</div>
+					<div class="grid gap-2">
+						{#each workspace?.entitlements ?? [] as entitlement (entitlement._id)}
+							<div class="flex items-center justify-between gap-3 text-sm">
+								<span>{entitlement.key.replaceAll('_', ' ')}</span>
+								<span class="text-muted-foreground">
+									{entitlement.enabled ? 'On' : 'Off'}{entitlement.limit
+										? ` · ${entitlement.limit}`
+										: ''}
+								</span>
+							</div>
+						{/each}
+					</div>
+					<Button class="w-full" onclick={syncEntitlements} disabled={isSyncingEntitlements}>
+						{isSyncingEntitlements ? 'Syncing...' : 'Sync entitlements'}
+					</Button>
+					{#if syncMessage}
+						<p class="text-sm text-primary">{syncMessage}</p>
+					{/if}
+					{#if syncError}
+						<p class="text-sm text-destructive">{syncError}</p>
+					{/if}
+				</Card.Content>
+			</Card.Root>
 		</div>
 
 		<!-- Available Plans Section -->

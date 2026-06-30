@@ -14,7 +14,10 @@
 		Cuboid,
 		MapPinned,
 		CircleQuestionMark,
-		ChartLine
+		ChartLine,
+		Building2,
+		Code2,
+		Palette
 	} from '@lucide/svelte';
 	import NavMain from './nav-main.svelte';
 	import NavSecondary from './nav-secondary.svelte';
@@ -45,6 +48,16 @@
 			title: 'Billing',
 			url: '/billing',
 			icon: CreditCard
+		},
+		{
+			title: 'Workspace',
+			url: '/workspace',
+			icon: Building2
+		},
+		{
+			title: 'Developer',
+			url: '/developer',
+			icon: Code2
 		},
 		{
 			title: 'Assistant',
@@ -83,6 +96,11 @@
 				icon: Settings
 			},
 			{
+				title: 'Theme Builder',
+				url: '/theme-builder',
+				icon: Palette
+			},
+			{
 				title: 'Get Help',
 				url: '#',
 				icon: CircleQuestionMark
@@ -93,6 +111,11 @@
 				name: 'Users',
 				url: '/admin/users',
 				icon: Users
+			},
+			{
+				name: 'Organizations',
+				url: '/admin/organizations',
+				icon: Building2
 			},
 			{
 				name: 'Analytics',

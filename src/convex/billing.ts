@@ -90,7 +90,7 @@ export const checkout = action({
 		// Now proceed with checkout
 		return await ctx.runAction(api.autumn.checkout, {
 			productId: args.productId,
-			successUrl: `${process.env.SITE_URL}/dashboard`
+			successUrl: `${process.env.SITE_URL}/billing`
 		});
 	}
 });
@@ -105,7 +105,7 @@ export const billingPortal = action({
 
 		// Now proceed with billing portal
 		return await ctx.runAction(api.autumn.billingPortal, {
-			returnUrl: `${process.env.SITE_URL}/dashboard`
+			returnUrl: `${process.env.SITE_URL}/billing`
 		});
 	}
 });

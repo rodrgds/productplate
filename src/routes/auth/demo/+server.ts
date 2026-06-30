@@ -32,7 +32,11 @@ async function readAuthFailure(response: Response) {
 async function postAuth(fetch: typeof globalThis.fetch, url: URL, path: string, body: object) {
 	return await fetch(new URL(`/api/auth/${path}`, url), {
 		method: 'POST',
-		headers: authJsonHeaders,
+		headers: {
+			...authJsonHeaders,
+			origin: url.origin,
+			referer: new URL(resolve('/auth/demo'), url).toString()
+		},
 		body: JSON.stringify(body),
 		redirect: 'manual'
 	});
@@ -73,6 +77,10 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 
 	if (!isSuccessfulAuthResponse(signUp)) {
 		error(502, `Demo account setup failed: ${await readAuthFailure(signUp)}`);
+	}
+
+	if (getSetCookieHeaders(signUp.headers).length > 0) {
+		return redirectWithAuthCookies(signUp);
 	}
 
 	const signIn = await postAuth(fetch, url, 'sign-in/email', signInBody);

@@ -11,7 +11,13 @@
 import type * as auth from "../auth.js";
 import type * as autumn from "../autumn.js";
 import type * as billing from "../billing.js";
+import type * as crons from "../crons.js";
+import type * as developer from "../developer.js";
+import type * as emails from "../emails.js";
 import type * as http from "../http.js";
+import type * as maintenance from "../maintenance.js";
+import type * as notifications from "../notifications.js";
+import type * as organizations from "../organizations.js";
 import type * as storage from "../storage.js";
 import type * as userProfiles from "../userProfiles.js";
 
@@ -25,7 +31,13 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   autumn: typeof autumn;
   billing: typeof billing;
+  crons: typeof crons;
+  developer: typeof developer;
+  emails: typeof emails;
   http: typeof http;
+  maintenance: typeof maintenance;
+  notifications: typeof notifications;
+  organizations: typeof organizations;
   storage: typeof storage;
   userProfiles: typeof userProfiles;
 }>;
