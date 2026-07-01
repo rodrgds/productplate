@@ -87,9 +87,8 @@
 							</Button>
 						{/snippet}
 					</DropdownMenu.Trigger>
-					<DropdownMenu.Content class="w-48" align="end" sideOffset={8}>
+					<DropdownMenu.Content class="z-[140] w-48" align="end" sideOffset={8}>
 						<DropdownMenu.Group>
-							<DropdownMenu.Label>Account</DropdownMenu.Label>
 							<DropdownMenu.Item onSelect={() => navigateTo('/auth/sign-in')}>
 								<LogInIcon />
 								Sign in
@@ -104,7 +103,6 @@
 							<DropdownMenu.Item onSelect={() => navigateTo('/auth/demo')}>
 								<PlayIcon />
 								Open live demo
-								<DropdownMenu.Shortcut>Demo</DropdownMenu.Shortcut>
 							</DropdownMenu.Item>
 						</DropdownMenu.Group>
 					</DropdownMenu.Content>
