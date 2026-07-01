@@ -18,13 +18,9 @@
 		<a
 			href={resolve('/')}
 			aria-label={`${APP_NAME} home`}
-			class="inline-flex w-fit items-center gap-2 rounded-lg text-lg font-semibold transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+			class="inline-flex w-fit items-center gap-3 rounded-lg font-semibold tracking-tight transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
 		>
-			<div
-				class="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"
-			>
-				<AppLogo class="size-4" />
-			</div>
+			<AppLogo class="size-8 rounded-lg" />
 			{APP_NAME}
 		</a>
 		<div class="space-y-4">
@@ -46,14 +42,10 @@
 			<a
 				href={resolve('/')}
 				aria-label={`${APP_NAME} home`}
-				class="mb-8 inline-flex w-full items-center justify-center gap-2 rounded-lg transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none lg:hidden"
+				class="mb-8 inline-flex w-full items-center justify-center gap-3 rounded-lg font-semibold tracking-tight transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none lg:hidden"
 			>
-				<div
-					class="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"
-				>
-					<AppLogo class="size-4" />
-				</div>
-				<span class="text-lg font-semibold">{APP_NAME}</span>
+				<AppLogo class="size-8 rounded-lg" />
+				<span>{APP_NAME}</span>
 			</a>
 			{@render children()}
 		</div>
