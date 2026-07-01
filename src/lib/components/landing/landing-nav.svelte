@@ -1,15 +1,15 @@
 <script lang="ts">
-	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
 	import Code2Icon from '@lucide/svelte/icons/code-2';
 	import LogInIcon from '@lucide/svelte/icons/log-in';
 	import MenuIcon from '@lucide/svelte/icons/menu';
 	import PlayIcon from '@lucide/svelte/icons/play';
 	import UserPlusIcon from '@lucide/svelte/icons/user-plus';
+	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import AppLogo from '$lib/components/app-logo.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import * as Popover from '$lib/components/ui/popover/index.js';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import { APP_NAME } from '$lib/constants';
 
@@ -32,14 +32,18 @@
 		{ label: 'Sign up', href: '/auth/sign-up', icon: UserPlusIcon },
 		{ label: 'Open live demo', href: '/auth/demo', icon: PlayIcon }
 	] as const;
+	type EntryHref = (typeof entryItems)[number]['href'];
 
 	let { active }: Props = $props();
 	let mobileNavOpen = $state(false);
-	let enterOpen = $state(false);
 
 	function closeMenus() {
 		mobileNavOpen = false;
-		enterOpen = false;
+	}
+
+	function navigateTo(href: EntryHref) {
+		closeMenus();
+		void goto(resolve(href));
 	}
 </script>
 
@@ -74,31 +78,37 @@
 					<Code2Icon data-icon="inline-start" />
 					View source
 				</Button>
-				<Popover.Root bind:open={enterOpen}>
-					<Popover.Trigger>
-						<Button variant="default" size="sm" aria-label="Open entry menu">
-							Enter
-							<ChevronDownIcon data-icon="inline-end" />
-						</Button>
-					</Popover.Trigger>
-					<Popover.Content class="w-56" align="end">
-						<div class="grid gap-1">
-							{#each entryItems as item (item.label)}
-								<a
-									href={resolve(item.href)}
-									class="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-									onclick={closeMenus}
-								>
-									<item.icon class="size-4" />
-									<span>{item.label}</span>
-									{#if item.label === 'Open live demo'}
-										<ArrowRightIcon class="ml-auto size-4" />
-									{/if}
-								</a>
-							{/each}
-						</div>
-					</Popover.Content>
-				</Popover.Root>
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger>
+						{#snippet child({ props })}
+							<Button {...props} variant="default" size="sm" aria-label="Open entry menu">
+								Enter
+								<ChevronDownIcon data-icon="inline-end" />
+							</Button>
+						{/snippet}
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content class="w-48" align="end" sideOffset={8}>
+						<DropdownMenu.Group>
+							<DropdownMenu.Label>Account</DropdownMenu.Label>
+							<DropdownMenu.Item onSelect={() => navigateTo('/auth/sign-in')}>
+								<LogInIcon />
+								Sign in
+							</DropdownMenu.Item>
+							<DropdownMenu.Item onSelect={() => navigateTo('/auth/sign-up')}>
+								<UserPlusIcon />
+								Sign up
+							</DropdownMenu.Item>
+						</DropdownMenu.Group>
+						<DropdownMenu.Separator />
+						<DropdownMenu.Group>
+							<DropdownMenu.Item onSelect={() => navigateTo('/auth/demo')}>
+								<PlayIcon />
+								Open live demo
+								<DropdownMenu.Shortcut>Demo</DropdownMenu.Shortcut>
+							</DropdownMenu.Item>
+						</DropdownMenu.Group>
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
 			</div>
 
 			<Sheet.Root bind:open={mobileNavOpen}>

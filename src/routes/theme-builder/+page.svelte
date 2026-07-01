@@ -508,7 +508,9 @@
 								<a href="#pricing">Pricing</a>
 								<a href="#support">Support</a>
 							</nav>
-							<button type="button">Invite</button>
+							<Button type="button" variant="outline" size="sm" class="mock-preview-button"
+								>Invite</Button
+							>
 						</header>
 
 						<section class="mock-hero">
@@ -520,8 +522,8 @@
 									share the same tokens.
 								</p>
 								<div class="mock-actions">
-									<button type="button">Start project</button>
-									<button type="button">Read docs</button>
+									<Button type="button" class="mock-preview-button">Start project</Button>
+									<Button type="button" variant="outline" class="mock-preview-button">Read docs</Button>
 								</div>
 							</div>
 
@@ -591,7 +593,9 @@
 										<option value="member">Member</option>
 									</select>
 								</label>
-								<button type="button">Send invite</button>
+								<Button type="button" class="mock-preview-button mock-preview-button-full"
+									>Send invite</Button
+								>
 							</form>
 						</section>
 					</div>
@@ -605,7 +609,7 @@
 	.theme-workbench {
 		max-width: 118rem;
 		margin-inline: auto;
-		padding: clamp(0.75rem, 2vw, 1.25rem);
+		padding: clamp(0.5rem, 1.4vw, 0.9rem);
 	}
 
 	.builder-shell {
@@ -624,9 +628,9 @@
 
 	.customizer {
 		position: sticky;
-		top: 5rem;
+		top: 4.5rem;
 		display: flex;
-		max-height: calc(100svh - 6rem);
+		max-height: calc(100svh - 4.75rem);
 		flex-direction: column;
 		gap: 1rem;
 		overflow: auto;
@@ -640,9 +644,9 @@
 		--mock-radius: var(--radius);
 		--mock-hero-size: clamp(2.1rem, 3.25vw, 3.65rem);
 		position: sticky;
-		top: 5rem;
+		top: 4.5rem;
 		display: flex;
-		max-height: calc(100svh - 6rem);
+		max-height: calc(100svh - 4.75rem);
 		flex-direction: column;
 		overflow: hidden;
 		border-radius: 0.75rem;
@@ -1014,8 +1018,8 @@
 	.mock-page {
 		display: grid;
 		grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr);
-		height: min(52rem, calc(100svh - 9rem));
-		min-height: min(40rem, calc(100svh - 9rem));
+		height: min(56rem, calc(100svh - 8rem));
+		min-height: min(42rem, calc(100svh - 8rem));
 		overflow: auto;
 		background:
 			linear-gradient(color-mix(in oklch, var(--primary) 5%, transparent) 1px, transparent 1px),
@@ -1150,22 +1154,19 @@
 		gap: 0.75rem;
 	}
 
-	.mock-nav a,
-	.mock-nav button,
-	.mock-actions button,
-	.mock-form button {
+	.mock-nav a {
 		color: var(--muted-foreground);
 		font-size: 0.82rem;
 		font-weight: 750;
 	}
 
-	.mock-nav button,
-	.mock-actions button,
-	.mock-form button {
-		border: 1px solid var(--border);
+	:global(.mock-preview-button) {
+		width: fit-content;
 		border-radius: calc(var(--mock-radius) * 0.85);
-		background: var(--background);
-		padding: 0.55rem 0.8rem;
+	}
+
+	:global(.mock-preview-button-full) {
+		width: 100%;
 	}
 
 	.mock-hero {
@@ -1201,13 +1202,6 @@
 	.mock-actions {
 		flex-wrap: wrap;
 		margin-top: 1.25rem;
-	}
-
-	.mock-actions button:first-child,
-	.mock-form button {
-		border-color: var(--primary);
-		background: var(--primary);
-		color: var(--primary-foreground);
 	}
 
 	.mock-panel {
@@ -1364,7 +1358,7 @@
 		}
 
 		.mock-page {
-			height: min(42rem, calc(100svh - 8rem));
+			height: min(44rem, calc(100svh - 7.5rem));
 		}
 	}
 
