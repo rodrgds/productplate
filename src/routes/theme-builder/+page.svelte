@@ -523,7 +523,9 @@
 								</p>
 								<div class="mock-actions">
 									<Button type="button" class="mock-preview-button">Start project</Button>
-									<Button type="button" variant="outline" class="mock-preview-button">Read docs</Button>
+									<Button type="button" variant="outline" class="mock-preview-button"
+										>Read docs</Button
+									>
 								</div>
 							</div>
 
