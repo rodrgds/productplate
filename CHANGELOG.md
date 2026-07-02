@@ -4,6 +4,15 @@ All notable changes to Product Plate will be documented in this file.
 
 Product Plate follows semantic versioning while it is useful for template consumers. Before `v1.0.0`, breaking changes can still happen, but they should be called out clearly in release notes.
 
+## Unreleased
+
+### Added
+
+- Workspace and organization model with members, invites, entitlements, notifications, API keys, webhooks, audit logs, and usage counters.
+- Public docs, blog, changelog, legal starter pages, and theme builder.
+- Request IDs, default security headers, and optional request logging.
+- Expanded `START_HERE.md` coverage for workspaces, developer surfaces, admin/operator surfaces, docs cleanup, screenshots, and theme builder cleanup.
+
 ## [0.1.0] - 2026-06-25
 
 ### Added
