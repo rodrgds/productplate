@@ -51,12 +51,13 @@ The hosted demo creates a fresh disposable account and opens the authenticated a
 ## What is wired
 
 - **App:** SvelteKit 2, Svelte 5, TypeScript, Tailwind CSS v4, shadcn-svelte.
-- **Backend:** Convex functions, realtime data, storage, and generated types.
-- **Accounts:** Better Auth, email/password, Google OAuth wiring, reset flows, protected routes.
+- **Backend:** Convex functions, realtime data, storage, organizations, notifications, API keys, webhooks, and generated types.
+- **Accounts:** Better Auth, email/password, Google OAuth wiring, reset flows, onboarding, profiles, protected routes, and admin roles.
 - **Billing:** Autumn checkout, subscription state, and customer portal patterns.
 - **AI:** Vercel AI SDK route, streaming assistant UI, Markdown, suggestions, and tool calls.
-- **Product UI:** onboarding, dashboard, profile, settings, admin, editor, graph, map, 3D, uploads.
-- **Delivery:** Bun, Vitest, Playwright, PWA support, GitHub Actions, Cloudflare Pages.
+- **Product UI:** dashboard, profile/settings, workspace invites, developer keys/webhooks, admin, editor, graph, map, 3D, uploads.
+- **Public UI:** landing page, docs, blog, changelog, legal templates, component gallery, and theme builder.
+- **Delivery:** Bun, Vitest, Playwright, PWA support, request IDs, security headers, GitHub Actions, Cloudflare Pages.
 
 ## Start here
 
@@ -69,7 +70,7 @@ Before installing dependencies, open [`START_HERE.md`](./START_HERE.md) in your 
 
 1. Ask what you are building.
 2. Recommend what to keep, reshape, remove, or decide later.
-3. Select one active backend, auth, billing, and AI path.
+3. Select one active backend, auth, billing, AI, team, developer, and public-site path.
 4. Build the smallest coherent product loop.
 5. Update identity, routes, docs, tests, and deployment settings.
 
@@ -132,13 +133,16 @@ Use [`.env.example`](./.env.example) for local configuration and [`.env.server.e
 ```text
 src/routes/                 Public, auth, API, and product routes
 src/routes/(app)/           Authenticated app shell and product examples
+src/routes/docs/            Public setup and architecture docs page
+src/routes/theme-builder/   Theme-token builder for kickstart styling
 src/lib/components/ui/      shadcn-svelte primitives
 src/lib/components/ai/      Streaming assistant and tool components
 src/lib/components/landing/ Reusable marketing component gallery
 static/screenshots/         Product screenshots used by the site and README
-src/convex/                 Schema, auth, billing, storage, and functions
+src/hooks.server.ts         Request IDs, security headers, optional request logs
+src/convex/                 Schema, auth, billing, orgs, developer APIs, storage, crons
 _template_options/          Inactive provider and database scaffolds
-docs/                       Integration and framework guidance
+docs/                       Integration, theme, template-option, observability/security guidance
 ```
 
 ## Deployment

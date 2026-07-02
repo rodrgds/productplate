@@ -17,7 +17,9 @@ Product Plate is a public, batteries-included SvelteKit starter. It shortens the
 - `START_HERE.md` is the default handoff prompt for turning the starter into a specific product.
 - The hosted `/auth/demo` entrypoint creates a fresh disposable demo account per visitor and should be deleted or replaced during kickstart.
 - `_template_options` stores inactive scaffolds for alternate billing and data choices. The final app should keep one active stack and remove unused options.
-- Default stack: SvelteKit, Svelte 5, Convex, Better Auth, Autumn, Tailwind CSS v4, shadcn-svelte, Bun.
+- Public docs, blog, changelog, legal pages, component gallery, theme builder, workspace, developer, and admin screens are starter surfaces. Kickstart should keep only the ones that support the selected product.
+- Default stack: SvelteKit, Svelte 5, Convex, Better Auth, Autumn, Tailwind CSS v4, shadcn-svelte, Bun, Cloudflare Pages.
+- Current platform patterns include organizations, invites, entitlements, notifications, hashed API keys, hashed webhook secrets, request IDs, security headers, and optional request logging.
 
 ## Brand Personality
 

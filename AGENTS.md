@@ -21,6 +21,7 @@
 - For new product forks, start with `START_HERE.md`. The agent should ask product basics first, recommend what to keep/remove, activate one stack, then update docs.
 - The public `/auth/demo` route creates a fresh disposable demo account for each hosted-preview visitor. Kickstart agents should delete `src/routes/auth/demo`, `src/lib/demo-account.ts`, and demo-account CTAs once the real product path exists.
 - `_template_options/` contains inactive scaffolds for alternate billing and data choices. Do not import from it in active app code. Copy the selected scaffold into the app, then delete unused options.
+- Public docs, blog, changelog, legal pages, component gallery, theme builder, workspace, developer, and admin screens are starter surfaces. Keep, rewrite, or remove them based on the selected product loop instead of leaving Product Plate copy in place.
 
 ## Svelte Best Practices
 
@@ -54,6 +55,9 @@ Refer to the following documents for detailed information on specific topics. Th
 - `docs/better_auth.md`: A guide to using Better Auth for the project's authentication system, with links to official documentation.
 - `docs/convex.md`: Guidelines and best practices for Convex (database schema, queries, mutations).
 - `docs/tailwind_v4.md`: Overview of Tailwind CSS v4, including the new CSS-first customization and dynamic utilities.
+- `docs/template-options.md`: Selection-model guidance for inactive provider and database scaffolds.
+- `docs/themes.md`: Theme presets and token guidance for activating one coherent product identity.
+- `docs/observability-security.md`: Request logging, security headers, hashed API key/webhook secret, and access-control defaults.
 - `docs/svelte/overview.md`: Comprehensive Svelte 5 guide covering component patterns, state management, and conventions.
 - `docs/svelte/advanced_state_management.md`: Patterns for reusable state stores and a guide on avoiding common pitfalls with effects.
 - `docs/svelte/animations_and_integrations.md`: Guide to Svelte 5's animation features and integrating third-party libraries.
