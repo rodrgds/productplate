@@ -4,6 +4,7 @@
 	import Code2Icon from '@lucide/svelte/icons/code-2';
 	import TerminalIcon from '@lucide/svelte/icons/terminal';
 	import { resolve } from '$app/paths';
+	import type { PageData } from './$types';
 	import AppLogo from '$lib/components/app-logo.svelte';
 	import LandingNav from '$lib/components/landing/landing-nav.svelte';
 	import * as Accordion from '$lib/components/ui/accordion';
@@ -18,6 +19,8 @@
 		APP_TWITTER_CARD,
 		APP_URL
 	} from '$lib/constants';
+
+	let { data }: { data: PageData } = $props();
 
 	const githubUrl = 'https://github.com/rodrgds/productplate';
 	const docsUrl = 'https://github.com/rodrgds/productplate/blob/main/README.md';
@@ -147,7 +150,7 @@
 </a>
 
 <div class="min-h-screen overflow-x-hidden bg-background text-foreground">
-	<LandingNav />
+	<LandingNav isAuthenticated={data.isAuthenticated} />
 
 	<main id="main-content">
 		<section class="relative border-b">

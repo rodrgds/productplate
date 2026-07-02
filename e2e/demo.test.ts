@@ -24,6 +24,19 @@ test('home page presents Product Plate and its starter capabilities', async ({ p
 	await expect(page.getByRole('heading', { name: /Before you fork/i })).toBeVisible();
 });
 
+test('home entry points signed-in visitors back to the app', async ({ page }) => {
+	await page.goto('/auth/demo');
+	await page.waitForURL('**/dashboard');
+
+	await page.goto('/');
+
+	await expect(page.getByRole('link', { name: /Go to app/i }).first()).toHaveAttribute(
+		'href',
+		'/dashboard'
+	);
+	await expect(page.getByRole('button', { name: /^Enter$/i })).toHaveCount(0);
+});
+
 test('landing component gallery presents reusable marketing sections', async ({ page }) => {
 	await page.goto('/components');
 	await expect(page).toHaveTitle(/Components/);
@@ -55,9 +68,9 @@ test('demo workspace includes the map and interactive 3D starter routes', async 
 
 	await page.goto('/map');
 	await expect(page.getByRole('heading', { name: 'Map', exact: true })).toBeVisible();
-	await expect(page.getByRole('button', { name: /Select Lisbon/i })).toBeVisible();
-	await page.getByRole('button', { name: /Select Berlin/i }).click();
-	await expect(page.getByRole('heading', { name: /Berlin rollout/i })).toBeVisible();
+	await expect(page.getByRole('region', { name: /Workspace map/i })).toBeVisible();
+	await expect(page.getByRole('img', { name: /Berlin marker/i })).toBeVisible();
+	await expect(page.getByRole('button', { name: /Zoom in/i })).toBeVisible();
 
 	await page.goto('/threlte');
 	await expect(page.getByRole('heading', { name: 'Threlte', exact: true })).toBeVisible();

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
 	import Code2Icon from '@lucide/svelte/icons/code-2';
 	import LogInIcon from '@lucide/svelte/icons/log-in';
@@ -15,6 +16,7 @@
 
 	interface Props {
 		active?: 'theme-builder' | 'components';
+		isAuthenticated?: boolean;
 	}
 
 	const navItems = [
@@ -34,7 +36,7 @@
 	] as const;
 	type EntryHref = (typeof entryItems)[number]['href'];
 
-	let { active }: Props = $props();
+	let { active, isAuthenticated = false }: Props = $props();
 	let mobileNavOpen = $state(false);
 
 	function closeMenus() {
@@ -78,35 +80,42 @@
 					<Code2Icon data-icon="inline-start" />
 					View source
 				</Button>
-				<DropdownMenu.Root>
-					<DropdownMenu.Trigger>
-						{#snippet child({ props })}
-							<Button {...props} variant="default" size="sm" aria-label="Open entry menu">
-								Enter
-								<ChevronDownIcon data-icon="inline-end" />
-							</Button>
-						{/snippet}
-					</DropdownMenu.Trigger>
-					<DropdownMenu.Content class="z-[140] w-48" align="end" sideOffset={8}>
-						<DropdownMenu.Group>
-							<DropdownMenu.Item onSelect={() => navigateTo('/auth/sign-in')}>
-								<LogInIcon />
-								Sign in
-							</DropdownMenu.Item>
-							<DropdownMenu.Item onSelect={() => navigateTo('/auth/sign-up')}>
-								<UserPlusIcon />
-								Sign up
-							</DropdownMenu.Item>
-						</DropdownMenu.Group>
-						<DropdownMenu.Separator />
-						<DropdownMenu.Group>
-							<DropdownMenu.Item onSelect={() => navigateTo('/auth/demo')}>
-								<PlayIcon />
-								Open live demo
-							</DropdownMenu.Item>
-						</DropdownMenu.Group>
-					</DropdownMenu.Content>
-				</DropdownMenu.Root>
+				{#if isAuthenticated}
+					<Button href={resolve('/dashboard')} variant="default" size="sm">
+						Go to app
+						<ArrowRightIcon data-icon="inline-end" />
+					</Button>
+				{:else}
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger>
+							{#snippet child({ props })}
+								<Button {...props} variant="default" size="sm" aria-label="Open entry menu">
+									Enter
+									<ChevronDownIcon data-icon="inline-end" />
+								</Button>
+							{/snippet}
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content class="z-[140] w-48" align="end" sideOffset={8}>
+							<DropdownMenu.Group>
+								<DropdownMenu.Item onSelect={() => navigateTo('/auth/sign-in')}>
+									<LogInIcon />
+									Sign in
+								</DropdownMenu.Item>
+								<DropdownMenu.Item onSelect={() => navigateTo('/auth/sign-up')}>
+									<UserPlusIcon />
+									Sign up
+								</DropdownMenu.Item>
+							</DropdownMenu.Group>
+							<DropdownMenu.Separator />
+							<DropdownMenu.Group>
+								<DropdownMenu.Item onSelect={() => navigateTo('/auth/demo')}>
+									<PlayIcon />
+									Open live demo
+								</DropdownMenu.Item>
+							</DropdownMenu.Group>
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
+				{/if}
 			</div>
 
 			<Sheet.Root bind:open={mobileNavOpen}>
@@ -147,16 +156,23 @@
 							<Code2Icon data-icon="inline-start" />
 							View source
 						</Button>
-						{#each entryItems as item (item.label)}
-							<Button
-								href={resolve(item.href)}
-								variant={item.label === 'Open live demo' ? 'default' : 'secondary'}
-								onclick={closeMenus}
-							>
-								<item.icon data-icon="inline-start" />
-								{item.label}
+						{#if isAuthenticated}
+							<Button href={resolve('/dashboard')} onclick={closeMenus}>
+								Go to app
+								<ArrowRightIcon data-icon="inline-end" />
 							</Button>
-						{/each}
+						{:else}
+							{#each entryItems as item (item.label)}
+								<Button
+									href={resolve(item.href)}
+									variant={item.label === 'Open live demo' ? 'default' : 'secondary'}
+									onclick={closeMenus}
+								>
+									<item.icon data-icon="inline-start" />
+									{item.label}
+								</Button>
+							{/each}
+						{/if}
 					</div>
 				</Sheet.Content>
 			</Sheet.Root>
