@@ -81,6 +81,7 @@ export const menuAccents = ['subtle', 'bold'] as const;
 export const menuColors = ['default', 'inverted', 'translucent'] as const;
 export const themePresetStorageKey = 'product-plate-theme-preset';
 export const themePresetChangeEvent = 'product-plate-theme-preset-change';
+export const themeRuntimeStyleElementId = 'product-plate-theme-runtime';
 
 export interface ThemePreset {
 	style: (typeof themeStyles)[number];
@@ -394,6 +395,24 @@ const styleVariables: Record<(typeof themeStyles)[number], Record<string, string
 	}
 };
 
+const themeBootstrapRuntime = {
+	defaultThemePreset,
+	fieldDefinitions,
+	baseOklch,
+	accentOklch,
+	chartHueOffset,
+	styleVariables,
+	radiusValues: Object.fromEntries(
+		radii.map((radius) => [radius, radiusMeta[radius].value ?? radiusMeta.default.value])
+	) as Record<(typeof radii)[number], string>,
+	fontValues: Object.fromEntries(fonts.map((font) => [font, fontMeta[font].value])) as Record<
+		(typeof fonts)[number],
+		string
+	>
+};
+
+type ThemeBootstrapRuntime = typeof themeBootstrapRuntime;
+
 function oklch(lightness: number, chroma: number, hue: number, alpha?: string) {
 	return `oklch(${lightness.toFixed(3)} ${chroma.toFixed(3)} ${Math.round(hue)}${alpha ? ` / ${alpha}` : ''})`;
 }
@@ -503,33 +522,164 @@ export function getThemeVariables(config: ThemePreset) {
 }
 
 export function getThemeCss(config: ThemePreset) {
-	const variables = getThemeVariables(config);
+	return createThemeCss(config);
+}
+
+export function createThemeCss(
+	config: ThemePreset,
+	runtime: ThemeBootstrapRuntime = themeBootstrapRuntime,
+	selectors = { light: ':root', dark: '.dark' }
+) {
+	function toOklch(lightness: number, chroma: number, hue: number, alpha?: string) {
+		return `oklch(${lightness.toFixed(3)} ${chroma.toFixed(3)} ${Math.round(hue)}${alpha ? ` / ${alpha}` : ''})`;
+	}
+
+	const base =
+		runtime.baseOklch[config.baseColor] ?? runtime.baseOklch[runtime.defaultThemePreset.baseColor];
+	const accent =
+		runtime.accentOklch[config.accentColor] ??
+		runtime.accentOklch[runtime.defaultThemePreset.accentColor];
+	const chart =
+		runtime.accentOklch[config.chartColor] ??
+		runtime.accentOklch[runtime.defaultThemePreset.chartColor];
+	const compact = ['compact', 'new-york', 'console', 'mono'].includes(config.style);
+	const darkSidebar = config.menuColor === 'inverted';
+	const translucentSidebar = config.menuColor === 'translucent';
+	const font =
+		runtime.fontValues[config.font] ?? runtime.fontValues[runtime.defaultThemePreset.font];
 	const headingFont =
 		config.headingFont === 'inherit'
-			? fontMeta[config.font].value
-			: fontMeta[config.headingFont].value;
+			? font
+			: (runtime.fontValues[config.headingFont] ??
+				runtime.fontValues[runtime.defaultThemePreset.font]);
+	const styleVariables =
+		runtime.styleVariables[config.style] ??
+		runtime.styleVariables[runtime.defaultThemePreset.style];
 	const light = {
-		...variables.light,
-		...variables.charts,
-		...variables.style,
-		'--pp-theme-font': fontMeta[config.font].value,
-		'--pp-theme-heading-font': headingFont
+		'--radius':
+			runtime.radiusValues[config.radius] ??
+			runtime.radiusValues[runtime.defaultThemePreset.radius],
+		'--background': toOklch(0.988, base.chroma / 2, base.hue),
+		'--foreground': toOklch(0.19, base.chroma, base.hue),
+		'--card': toOklch(0.998, base.chroma / 3, base.hue),
+		'--card-foreground': toOklch(0.19, base.chroma, base.hue),
+		'--popover': toOklch(0.998, base.chroma / 3, base.hue),
+		'--popover-foreground': toOklch(0.19, base.chroma, base.hue),
+		'--primary': toOklch(0.58, accent.chroma, accent.hue),
+		'--primary-foreground': toOklch(0.985, 0.006, accent.hue),
+		'--secondary': toOklch(compact ? 0.945 : 0.955, base.chroma, base.hue),
+		'--secondary-foreground': toOklch(0.22, base.chroma, base.hue),
+		'--muted': toOklch(compact ? 0.94 : 0.955, base.chroma, base.hue),
+		'--muted-foreground': toOklch(0.5, base.chroma + 0.002, base.hue),
+		'--accent': toOklch(
+			0.94,
+			config.menuAccent === 'bold' ? accent.chroma / 2 : base.chroma,
+			accent.hue
+		),
+		'--accent-foreground': toOklch(0.22, base.chroma, base.hue),
+		'--destructive': toOklch(0.577, 0.245, 27),
+		'--border': toOklch(0.89, base.chroma + 0.001, base.hue),
+		'--input': toOklch(0.89, base.chroma + 0.001, base.hue),
+		'--ring': toOklch(0.64, accent.chroma, accent.hue),
+		'--signal': toOklch(0.62, accent.chroma, accent.hue),
+		'--signal-foreground': toOklch(0.985, 0.006, accent.hue),
+		'--signal-soft': toOklch(0.88, accent.chroma / 2, accent.hue),
+		'--sidebar': darkSidebar
+			? toOklch(0.2, base.chroma, base.hue)
+			: translucentSidebar
+				? toOklch(0.985, base.chroma / 2, base.hue, '78%')
+				: toOklch(0.975, base.chroma / 1.5, base.hue),
+		'--sidebar-foreground': darkSidebar
+			? toOklch(0.965, base.chroma, base.hue)
+			: toOklch(0.19, base.chroma, base.hue),
+		'--sidebar-primary': toOklch(0.58, accent.chroma, accent.hue),
+		'--sidebar-primary-foreground': toOklch(0.985, 0.006, accent.hue),
+		'--sidebar-accent': toOklch(
+			0.94,
+			config.menuAccent === 'bold' ? accent.chroma / 2 : base.chroma,
+			accent.hue
+		),
+		'--sidebar-accent-foreground': toOklch(0.22, base.chroma, base.hue),
+		'--sidebar-border': toOklch(0.89, base.chroma + 0.001, base.hue),
+		'--sidebar-ring': toOklch(0.64, accent.chroma, accent.hue)
 	};
 	const dark = {
-		...variables.dark,
-		...variables.charts,
-		...variables.style,
-		'--pp-theme-font': fontMeta[config.font].value,
+		'--background': toOklch(0.16, base.chroma, base.hue),
+		'--foreground': toOklch(0.96, base.chroma / 1.5, base.hue),
+		'--card': toOklch(0.2, base.chroma + 0.001, base.hue),
+		'--card-foreground': toOklch(0.96, base.chroma / 1.5, base.hue),
+		'--popover': toOklch(0.2, base.chroma + 0.001, base.hue),
+		'--popover-foreground': toOklch(0.96, base.chroma / 1.5, base.hue),
+		'--primary': toOklch(0.72, accent.chroma, accent.hue),
+		'--primary-foreground': toOklch(0.17, accent.chroma / 6, accent.hue),
+		'--secondary': toOklch(0.25, base.chroma + 0.002, base.hue),
+		'--secondary-foreground': toOklch(0.96, base.chroma / 1.5, base.hue),
+		'--muted': toOklch(0.25, base.chroma + 0.002, base.hue),
+		'--muted-foreground': toOklch(0.7, base.chroma + 0.003, base.hue),
+		'--accent': toOklch(
+			0.28,
+			config.menuAccent === 'bold' ? accent.chroma / 2 : base.chroma + 0.003,
+			accent.hue
+		),
+		'--accent-foreground': toOklch(0.96, base.chroma / 1.5, base.hue),
+		'--destructive': toOklch(0.704, 0.191, 22),
+		'--border': toOklch(1, 0, 0, '10%'),
+		'--input': toOklch(1, 0, 0, '15%'),
+		'--ring': toOklch(0.72, accent.chroma, accent.hue),
+		'--signal': toOklch(0.72, accent.chroma, accent.hue),
+		'--signal-foreground': toOklch(0.17, accent.chroma / 6, accent.hue),
+		'--signal-soft': toOklch(0.34, accent.chroma / 2, accent.hue),
+		'--sidebar': toOklch(0.205, base.chroma, base.hue),
+		'--sidebar-foreground': toOklch(0.985, 0, 0),
+		'--sidebar-primary': toOklch(0.72, accent.chroma, accent.hue),
+		'--sidebar-primary-foreground': toOklch(0.17, accent.chroma / 6, accent.hue),
+		'--sidebar-accent': toOklch(
+			0.269,
+			config.menuAccent === 'bold' ? accent.chroma / 2 : 0,
+			accent.hue
+		),
+		'--sidebar-accent-foreground': toOklch(0.985, 0, 0),
+		'--sidebar-border': toOklch(1, 0, 0, '10%'),
+		'--sidebar-ring': toOklch(0.72, accent.chroma, accent.hue)
+	};
+	const charts = Object.fromEntries(
+		runtime.chartHueOffset.map((offset, index) => [
+			`--chart-${index + 1}`,
+			toOklch(index === 0 ? 0.64 : 0.58 + index * 0.045, chart.chroma, chart.hue + offset)
+		])
+	);
+	const lightTheme = {
+		...light,
+		...charts,
+		...styleVariables,
+		'--pp-theme-font': font,
 		'--pp-theme-heading-font': headingFont
 	};
-	const lightLines = Object.entries(light).map(([key, value]) => `\t${key}: ${value};`);
-	const darkLines = Object.entries(dark).map(([key, value]) => `\t${key}: ${value};`);
+	const darkTheme = {
+		...dark,
+		...charts,
+		...styleVariables,
+		'--pp-theme-font': font,
+		'--pp-theme-heading-font': headingFont
+	};
+	const lightLines = Object.entries(lightTheme).map(([key, value]) => `\t${key}: ${value};`);
+	const darkLines = Object.entries(darkTheme).map(([key, value]) => `\t${key}: ${value};`);
 
-	return `:root {\n${lightLines.join('\n')}\n}\n\n.dark {\n${darkLines.join('\n')}\n}`;
+	return `${selectors.light} {\n${lightLines.join('\n')}\n}\n\n${selectors.dark} {\n${darkLines.join('\n')}\n}`;
 }
 
 export function getThemeRuntimeCss(config: ThemePreset) {
-	return `${getThemeCss(config)}
+	return createThemeRuntimeCss(config);
+}
+
+export function createThemeRuntimeCss(
+	config: ThemePreset,
+	runtime: ThemeBootstrapRuntime = themeBootstrapRuntime
+) {
+	return `${createThemeCss(config, runtime, {
+		light: ':root[data-product-plate-preset]',
+		dark: ':root.dark[data-product-plate-preset]'
+	})}
 
 body {
 \tfont-family: var(--pp-theme-font);
@@ -541,6 +691,86 @@ h3,
 .theme-heading {
 \tfont-family: var(--pp-theme-heading-font);
 }`;
+}
+
+export function setInitialThemePreset({
+	storageKey = themePresetStorageKey,
+	styleElementId = themeRuntimeStyleElementId,
+	defaultPresetCode = encodeThemePreset(defaultThemePreset),
+	runtime = themeBootstrapRuntime
+}: {
+	storageKey?: string;
+	styleElementId?: string;
+	defaultPresetCode?: string;
+	runtime?: ThemeBootstrapRuntime;
+} = {}) {
+	if (typeof document === 'undefined') return;
+
+	const rootElement = document.documentElement;
+	const base62 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+
+	function fromSerializedBase62(value: string) {
+		let result = 0;
+		for (const character of value) {
+			const index = base62.indexOf(character);
+			if (index === -1) return -1;
+			result = result * 62 + index;
+		}
+		return result;
+	}
+
+	function decodeSerializedPreset(code: string) {
+		if (!code.startsWith('p')) return null;
+		const bits = fromSerializedBase62(code.slice(1));
+		if (bits < 0) return null;
+		const decoded: Record<string, string> = {};
+		let offset = 0;
+
+		for (const field of runtime.fieldDefinitions) {
+			const index = Math.floor(bits / 2 ** offset) % 2 ** field.bits;
+			decoded[field.key] = field.values[index] ?? field.values[0];
+			offset += field.bits;
+		}
+
+		return { ...runtime.defaultThemePreset, ...decoded } as ThemePreset;
+	}
+
+	let storedPresetCode: string | null = null;
+
+	try {
+		storedPresetCode = localStorage.getItem(storageKey);
+	} catch {
+		storedPresetCode = null;
+	}
+
+	const normalizedPresetCode = storedPresetCode?.trim().replace(/^--preset\s+/, '');
+	const parsedPreset = normalizedPresetCode ? decodeSerializedPreset(normalizedPresetCode) : null;
+	const preset = parsedPreset ?? runtime.defaultThemePreset;
+	const appliedPresetCode = parsedPreset ? normalizedPresetCode : defaultPresetCode;
+	let styleElement = document.getElementById(styleElementId) as HTMLStyleElement | null;
+
+	if (!styleElement) {
+		styleElement = document.createElement('style');
+		styleElement.id = styleElementId;
+		document.head.appendChild(styleElement);
+	}
+
+	styleElement.textContent = createThemeRuntimeCss(preset, runtime);
+	rootElement.dataset.productPlatePreset = appliedPresetCode;
+}
+
+export function createInitialThemePresetExpression() {
+	return `(() => {
+const createThemeCss = ${createThemeCss.toString()};
+const createThemeRuntimeCss = ${createThemeRuntimeCss.toString()};
+const setInitialThemePreset = ${setInitialThemePreset.toString()};
+setInitialThemePreset(${JSON.stringify({
+		storageKey: themePresetStorageKey,
+		styleElementId: themeRuntimeStyleElementId,
+		defaultPresetCode: encodeThemePreset(defaultThemePreset),
+		runtime: themeBootstrapRuntime
+	})});
+})();`;
 }
 
 export function getPreviewStyle(config: ThemePreset, scheme: 'light' | 'dark' = 'light') {

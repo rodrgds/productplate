@@ -1,16 +1,18 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import {
+		createInitialThemePresetExpression,
 		defaultThemePreset,
 		encodeThemePreset,
 		getThemeRuntimeCss,
 		parseThemePreset,
 		themePresetChangeEvent,
-		themePresetStorageKey
+		themePresetStorageKey,
+		themeRuntimeStyleElementId
 	} from '$lib/theme-builder.js';
 
-	const styleElementId = 'product-plate-theme-runtime';
 	const defaultPresetCode = encodeThemePreset(defaultThemePreset);
+	const initialThemePresetScript = `<script>${createInitialThemePresetExpression()}<` + '/script>';
 
 	function writeTheme(code: string | null | undefined) {
 		if (!browser) return;
@@ -21,11 +23,13 @@
 			parsedPreset === null
 				? defaultPresetCode
 				: (code ?? defaultPresetCode).trim().replace(/^--preset\s+/, '');
-		let styleElement = document.getElementById(styleElementId) as HTMLStyleElement | null;
+		let styleElement = document.getElementById(
+			themeRuntimeStyleElementId
+		) as HTMLStyleElement | null;
 
 		if (!styleElement) {
 			styleElement = document.createElement('style');
-			styleElement.id = styleElementId;
+			styleElement.id = themeRuntimeStyleElementId;
 			document.head.appendChild(styleElement);
 		}
 
@@ -56,3 +60,8 @@
 		};
 	});
 </script>
+
+<svelte:head>
+	<!-- eslint-disable-next-line svelte/no-at-html-tags, prefer-template -->
+	{@html initialThemePresetScript}
+</svelte:head>
