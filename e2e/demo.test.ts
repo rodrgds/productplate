@@ -37,6 +37,30 @@ test('home entry points signed-in visitors back to the app', async ({ page }) =>
 	await expect(page.getByRole('button', { name: /^Enter$/i })).toHaveCount(0);
 });
 
+test('mobile landing navigation opens above the sticky header', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.goto('/');
+
+	await page.getByRole('button', { name: /open navigation/i }).click();
+
+	const sheetTitle = page.locator('[data-slot="sheet-title"]');
+	await expect(sheetTitle).toHaveText('Product Plate');
+
+	await expect
+		.poll(async () =>
+			sheetTitle.evaluate((node) => {
+				const rect = node.getBoundingClientRect();
+				const elementAtTitleCenter = document.elementFromPoint(
+					rect.left + rect.width / 2,
+					rect.top + rect.height / 2
+				);
+
+				return elementAtTitleCenter === node || node.contains(elementAtTitleCenter);
+			})
+		)
+		.toBe(true);
+});
+
 test('landing component gallery presents reusable marketing sections', async ({ page }) => {
 	await page.goto('/components');
 	await expect(page).toHaveTitle(/Components/);
