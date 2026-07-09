@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./docs/images/reddit.png" alt="Product Plate product starter overview" width="100%" />
+  <img src="./docs/images/reddit.png?v=2026-07-09-refresh" alt="Product Plate product starter overview" width="100%" />
 </p>
 
 <h1 align="center">Product Plate</h1>
@@ -40,12 +40,22 @@ The hosted demo creates a fresh disposable account and opens the authenticated a
 - [Open the live demo](https://productplate.pages.dev/auth/demo)
 
 <p align="center">
-  <img src="./static/screenshots/dashboard.png" alt="Product Plate dashboard" width="100%" />
+  <img src="./static/screenshots/dashboard.png?v=2026-07-09-refresh" alt="Product Plate dashboard" width="100%" />
 </p>
 
 <p align="center">
-  <img src="./static/screenshots/onboarding-filled.png" alt="Product Plate onboarding" width="49%" />
-  <img src="./static/screenshots/editor.png" alt="Product Plate editor" width="49%" />
+  <img src="./static/screenshots/onboarding-filled.png?v=2026-07-09-refresh" alt="Product Plate onboarding" width="49%" />
+  <img src="./static/screenshots/editor.png?v=2026-07-09-refresh" alt="Product Plate editor" width="49%" />
+</p>
+
+<p align="center">
+  <img src="./static/screenshots/flow.png?v=2026-07-09-refresh" alt="Product Plate workflow editor" width="49%" />
+  <img src="./static/screenshots/map.png?v=2026-07-09-refresh" alt="Product Plate map workspace" width="49%" />
+</p>
+
+<p align="center">
+  <img src="./static/screenshots/threlte.png?v=2026-07-09-refresh" alt="Product Plate 3D workspace" width="49%" />
+  <img src="./static/screenshots/assistant.png?v=2026-07-09-refresh" alt="Product Plate AI assistant" width="49%" />
 </p>
 
 ## What is wired
