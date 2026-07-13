@@ -1,10 +1,92 @@
 { pkgs, ... }:
 
+let
+  rawBun = pkgs.stdenvNoCC.mkDerivation {
+    pname = "bun";
+    version = "1.3.3";
+
+    src = pkgs.fetchzip {
+      url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.3/bun-linux-x64-baseline.zip";
+      hash = "sha256-RY9FSb9iXm2+mmy2BIhhPbdFovsv0agz/eT0jfaspl0=";
+    };
+
+    nativeBuildInputs = [ pkgs.autoPatchelfHook ];
+    buildInputs = [ pkgs.stdenv.cc.cc.lib ];
+    dontUnpack = true;
+
+    installPhase = ''
+      runHook preInstall
+      install -Dm755 "$src/bun" "$out/bin/bun"
+      ln -s bun "$out/bin/bunx"
+      runHook postInstall
+    '';
+  };
+
+  bunLauncher = pkgs.writeText "product-plate-bun-launcher.mjs" ''
+    import { execve } from "node:process";
+
+    const [bunCommand, ...args] = process.argv.slice(2);
+    execve(bunCommand, [bunCommand, "--no-env-file", ...args], process.env);
+  '';
+
+  mkBunWrapper =
+    name:
+    pkgs.writeShellApplication {
+      inherit name;
+      text = ''
+        env_args=()
+        for env_file in .env .env.local; do
+          if [[ -f "$env_file" ]]; then
+            env_args+=("--env-file=$env_file")
+          fi
+        done
+
+        exec "${pkgs.nodejs_22}/bin/node" "''${env_args[@]}" \
+          "${bunLauncher}" "${rawBun}/bin/${name}" "$@"
+      '';
+    };
+
+  bun = mkBunWrapper "bun";
+  bunx = mkBunWrapper "bunx";
+  bunWrappers = pkgs.symlinkJoin {
+    name = "product-plate-bun-wrappers";
+    paths = [
+      bun
+      bunx
+    ];
+  };
+
+  frozenInstall = pkgs.writeShellApplication {
+    name = "product-plate-frozen-install";
+    runtimeInputs = [ pkgs.coreutils ];
+    text = ''
+      project_root=$PWD
+      install_root=$(mktemp -d "$project_root/../.product-plate-install.XXXXXX")
+      trap 'rm -rf "$install_root"' EXIT
+
+      cp "$project_root/package.json" "$install_root/package.json"
+      cp "$project_root/bun.lock" "$install_root/bun.lock"
+
+      cd "$install_root"
+      env -i \
+        HOME="$HOME" \
+        PATH="${rawBun}/bin:${pkgs.nodejs_22}/bin:${pkgs.coreutils}/bin" \
+        "${rawBun}/bin/bun" --no-env-file install --frozen-lockfile "$@"
+
+      mkdir -p "$install_root/node_modules"
+      rm -rf "$project_root/node_modules"
+      mv "$install_root/node_modules" "$project_root/node_modules"
+    '';
+  };
+in
 {
   languages.javascript = {
     enable = true;
-    bun.enable = true;
     package = pkgs.nodejs_22;
+    bun = {
+      enable = true;
+      package = bunWrappers;
+    };
   };
 
   packages = [
@@ -14,89 +96,7 @@
   ];
 
   env.NODE_OPTIONS = "--max-old-space-size=4096";
-
-  git-hooks = {
-    enable = true;
-    default_stages = [ "pre-commit" "pre-push" ];
-
-    hooks = {
-      staged-quality = {
-        enable = true;
-        name = "staged quality";
-        stages = [ "pre-commit" ];
-        pass_filenames = false;
-        entry = ''
-          bash -euo pipefail -c '
-            files="$(git diff --cached --name-only --diff-filter=ACMR)"
-            [ -n "$files" ] || exit 0
-
-            js_files="$(printf "%s\n" "$files" | grep -E "\.(js|ts|svelte)$" || true)"
-            format_files="$(printf "%s\n" "$files" | grep -E "\.(json|css|md)$" || true)"
-
-            if [ -n "$js_files" ]; then
-              printf "%s\n" "$js_files" | xargs bun eslint --fix
-              printf "%s\n" "$js_files" | xargs bun prettier --write
-            fi
-
-            if [ -n "$format_files" ]; then
-              printf "%s\n" "$format_files" | xargs bun prettier --write
-            fi
-
-            printf "%s\n" "$files" | xargs git add
-            bun run test:unit
-          '
-        '';
-      };
-
-      push-quality = {
-        enable = true;
-        name = "push quality";
-        stages = [ "pre-push" ];
-        pass_filenames = false;
-        entry = ''
-          bash -euo pipefail -c '
-            export PUBLIC_CONVEX_URL="''${PUBLIC_CONVEX_URL:-https://fake-convex-url.convex.cloud}"
-            export PUBLIC_CONVEX_SITE_URL="''${PUBLIC_CONVEX_SITE_URL:-https://fake-convex-site-url.convex.site}"
-            export SITE_URL="''${SITE_URL:-https://fake-site-url.com}"
-            export NODE_OPTIONS="''${NODE_OPTIONS:---max-old-space-size=4096}"
-
-            # Only inspect files that changed versus the upstream branch.
-            # eslint uses type-aware linting, so a full repo run is ~60s;
-            # limiting to changed files keeps the pre-push hook snappy and
-            # still catches issues introduced by this push.
-            upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo origin/main)"
-            files="$(git diff --name-only --diff-filter=ACMR "$upstream"...HEAD 2>/dev/null || git diff --name-only --diff-filter=ACMR HEAD~5...HEAD)"
-            [ -n "$files" ] || { echo "No files changed; skipping pre-push checks."; exit 0; }
-
-            js_files="$(printf "%s\n" "$files" | grep -E "\.(js|ts|svelte)$" || true)"
-            format_files="$(printf "%s\n" "$files" | grep -E "\.(json|css|md)$" || true)"
-
-            if [ -n "$js_files" ]; then
-              echo "Running ESLint --fix on changed JS/TS/Svelte files..."
-              printf "%s\n" "$js_files" | xargs bun eslint --fix
-            fi
-
-            if [ -n "$format_files" ] || [ -n "$js_files" ]; then
-              echo "Running prettier --write on changed files..."
-              to_format="$(printf "%s\n" "$js_files" "$format_files" | grep -v "^$" | sort -u)"
-              printf "%s\n" "$to_format" | xargs bun prettier --write
-            fi
-
-            # Stage any autofixes so they end up in the push.
-            printf "%s\n" "$files" | xargs git add
-
-            echo "Running typecheck..."
-            bun run check
-
-            echo "Running unit tests..."
-            bun run test:unit
-
-            echo "Pre-push checks passed. Run \`bun run verify\` to also build."
-          '
-        '';
-      };
-    };
-  };
+  dotenv.disableHint = true;
 
   processes = {
     web.exec = "bun run dev";
@@ -104,22 +104,25 @@
   };
 
   scripts = {
-    install.exec = "bun install --frozen-lockfile";
-    dev.exec = "bun run dev";
-    convex-dev.exec = "bun convex dev";
-    check.exec = "bun run check";
-    lint.exec = "bun run lint";
-    test-unit.exec = "bun run test:unit";
-    test-e2e.exec = "bun run test:e2e";
-    build.exec = "bun run build";
-    verify.exec = "bun run verify";
+    install.exec = "${frozenInstall}/bin/product-plate-frozen-install";
     setup.exec = ''
-      bun install --frozen-lockfile
+      ${frozenInstall}/bin/product-plate-frozen-install
       if [ ! -f .env.local ]; then
         cp .env.example .env.local
         echo "Created .env.local from .env.example"
       fi
     '';
+    dev.exec = "bun run dev";
+    convex-dev.exec = "bun convex dev";
+    check.exec = "bun run check";
+    typecheck.exec = "bun run check";
+    format-check.exec = "bun run format:check";
+    lint.exec = "bun run lint";
+    test-unit.exec = "bun run test:unit";
+    test-e2e.exec = "bun run test:e2e";
+    build.exec = "bun run build";
+    verify.exec = "bun run verify";
+    verify-full.exec = "bun run verify:full";
   };
 
   enterShell = ''
@@ -129,16 +132,24 @@
     echo "  Bun:  $(bun --version)"
     echo "  Node: $(node --version)"
     echo ""
-    echo "  setup       Install dependencies and create .env.local"
-    echo "  devenv up   Run SvelteKit and Convex together"
-    echo "  dev          Run SvelteKit"
-    echo "  convex-dev   Run Convex"
-    echo "  verify       Lint, typecheck, test, and build"
+    echo "  setup         Frozen install and create .env.local if missing"
+    echo "  devenv up     Run SvelteKit and Convex together"
+    echo "  dev           Run SvelteKit"
+    echo "  convex-dev    Run Convex"
+    echo "  check         Type-check Svelte and TypeScript"
+    echo "  format-check  Check formatting without changing files"
+    echo "  lint          Check formatting and ESLint"
+    echo "  test-unit     Run unit tests"
+    echo "  test-e2e      Run Playwright tests"
+    echo "  build         Build for production"
+    echo "  verify        Run NAS-safe lint, typecheck, and unit tests"
+    echo "  verify-full   Add the resource-heavy production build"
     echo ""
   '';
 
   enterTest = ''
     bun --version
+    bun -e 'console.log("bun runtime ok")'
     node --version
     git --version
   '';

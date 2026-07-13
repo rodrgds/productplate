@@ -9,12 +9,13 @@
 
 ## Key Conventions
 
-- Package Management: IMPORTANT: Always use `bun` for all package management operations (`bun install`, `bun add`, etc.). YOU MUST NOT use `npm` or `yarn`.
+- Package Management: IMPORTANT: Always use `bun` for all package management operations (`bun install`, `bun add`, etc.). YOU MUST NOT use `npm` or `yarn` and MUST NOT install tools globally.
+- Development Environment: Inside the direnv environment, run the named commands directly (for example, `setup`, `dev`, or `verify`). Outside direnv, use `devenv shell -- <command>` (for example, `devenv shell -- setup`). `verify` is the normal NAS-safe lint/typecheck/unit gate; `verify-full` additionally runs the memory-heavy production build on a release-capable machine.
 - Backend Development: Convex backend logic lives in the `src/convex/` directory.
 - File-based Routing: Use SvelteKit's file-based routing system in `src/routes/`.
 - Shared Code: Place reusable code in `src/lib/`.
 - Use `git mv` instead of creating a new file and deleting the old one or just `mv` if moving existing files that have been committed already.
-- Do not commit changes on your own. Humans will do that after approval.
+- Do not commit changes on your own. An explicit user request to commit authorizes it despite this default; otherwise humans commit after approval.
 - Before making edits in files involving Svelte 5 or Convex, make sure you read the svelte/overview.md and convex.md documentation or you have it in your context.
 - Most of the time, `bun dev` and `bun convex dev` will be running in another terminal already. No need to run those commands yourself.
 - Use TDD by default whenever the task has a testable behavior surface: write or update a focused failing test first, implement the smallest useful change, then run the relevant test command before finishing. Skip TDD only for wiring/docs-only changes, throwaway prototypes, or when the user explicitly asks not to.

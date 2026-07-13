@@ -11,13 +11,15 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
+		"format:check": "prettier --check .",
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest run",
 		"test:e2e": "playwright test",
 		"test:e2e:auth": "playwright test e2e/auth-onboarding.test.ts",
 		"screenshots:readme": "bun docs/scripts/capture-readme-screenshots.ts",
 		"test": "bun run test:unit",
-		"verify": "bun run lint && bun run check && bun run test:unit && bun run build"
+		"verify": "bun run lint && bun run check && bun run test:unit",
+		"verify:full": "bun run verify && bun run build"
 	},
 	"devDependencies": {
 		"@dnd-kit-svelte/svelte": "^0.1.6",

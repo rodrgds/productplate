@@ -84,14 +84,24 @@ Before installing dependencies, open [`START_HERE.md`](./START_HERE.md) in your 
 4. Build the smallest coherent product loop.
 5. Update identity, routes, docs, tests, and deployment settings.
 
-Then run the selected stack:
+Product Plate pins Bun 1.3.3 in its devenv. With direnv installed, allow the environment once, then run the named commands directly:
 
 ```sh
-bun install
-cp .env.example .env.local
-bun convex dev
-bun dev
+direnv allow
+setup
+convex-dev
+dev
 ```
+
+Without direnv, enter the same pinned environment for each command:
+
+```sh
+devenv shell -- setup
+devenv shell -- convex-dev
+devenv shell -- dev
+```
+
+`setup` performs a frozen install and creates `.env.local` from `.env.example` only when `.env.local` is missing. It never overwrites existing local configuration. The install is staged beside the repository and moves `node_modules` into the project, keeping dependency state on the durable `/workspace` filesystem rather than `/tmp`.
 
 Open `http://localhost:5173`.
 
@@ -125,18 +135,27 @@ AUTUMN_SECRET_KEY=
 
 Use [`.env.example`](./.env.example) for local configuration and [`.env.server.example`](./.env.server.example) for production-only secrets.
 
+The devenv Bun wrapper asks Node to parse `.env` and `.env.local` as data, then invokes the pinned Bun binary with `--no-env-file`. Dotenv files are never sourced or evaluated as shell code, and their contents are not embedded in the Nix store. Raw Bun setup also uses `--no-env-file` in a clean environment.
+
 ## Commands
 
-| Command             | Purpose                            |
-| ------------------- | ---------------------------------- |
-| `bun dev`           | Start SvelteKit                    |
-| `bun convex dev`    | Start Convex                       |
-| `bun run check`     | Typecheck Svelte and TypeScript    |
-| `bun run lint`      | Check formatting and ESLint        |
-| `bun run test:unit` | Run Vitest                         |
-| `bun run test:e2e`  | Run Playwright                     |
-| `bun run build`     | Build for production               |
-| `bun run verify`    | Run lint, checks, tests, and build |
+Run these names directly inside direnv or as `devenv shell -- <command>` outside it. No Git hook rewrites or stages files; run `verify` explicitly before handoff or commit. Use `verify-full` on a release-capable machine when the resource-heavy production build is required.
+
+| Command        | Purpose                                        |
+| -------------- | ---------------------------------------------- |
+| `install`      | Install exactly from `bun.lock`                |
+| `setup`        | Frozen install; create `.env.local` if missing |
+| `dev`          | Start SvelteKit                                |
+| `convex-dev`   | Start Convex                                   |
+| `check`        | Typecheck Svelte and TypeScript                |
+| `typecheck`    | Alias for `check`                              |
+| `format-check` | Check formatting without changes               |
+| `lint`         | Check formatting and ESLint                    |
+| `test-unit`    | Run Vitest                                     |
+| `test-e2e`     | Run Playwright                                 |
+| `build`        | Build for production                           |
+| `verify`       | Run lint, checks, and unit tests               |
+| `verify-full`  | Run `verify`, then build for production        |
 
 ## Project map
 
