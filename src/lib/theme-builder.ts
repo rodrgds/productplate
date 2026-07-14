@@ -82,6 +82,7 @@ export const menuColors = ['default', 'inverted', 'translucent'] as const;
 export const themePresetStorageKey = 'product-plate-theme-preset';
 export const themePresetChangeEvent = 'product-plate-theme-preset-change';
 export const themeRuntimeStyleElementId = 'product-plate-theme-runtime';
+export const themePendingAttribute = 'data-product-plate-theme-pending';
 
 export interface ThemePreset {
 	style: (typeof themeStyles)[number];
@@ -757,6 +758,28 @@ export function setInitialThemePreset({
 
 	styleElement.textContent = createThemeRuntimeCss(preset, runtime);
 	rootElement.dataset.productPlatePreset = appliedPresetCode;
+}
+
+export async function revealInitialTheme({
+	fontsReady,
+	rootElement
+}: {
+	fontsReady?: Promise<unknown>;
+	rootElement?: HTMLElement | null;
+} = {}) {
+	const targetRoot =
+		rootElement ?? (typeof document === 'undefined' ? null : document.documentElement);
+	if (!targetRoot) return;
+
+	const ready =
+		fontsReady ??
+		(typeof document !== 'undefined' && document.fonts ? document.fonts.ready : Promise.resolve());
+
+	try {
+		await ready;
+	} finally {
+		targetRoot.removeAttribute(themePendingAttribute);
+	}
 }
 
 export function createInitialThemePresetExpression() {

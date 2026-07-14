@@ -225,7 +225,11 @@
 <div class="min-h-screen bg-background text-foreground">
 	<LandingNav active="theme-builder" />
 
-	<main class="theme-workbench">
+	<main
+		class="theme-workbench"
+		class:theme-workbench-pending={!hasLoadedStoredTheme}
+		aria-busy={!hasLoadedStoredTheme}
+	>
 		<section class="builder-shell" aria-label="Theme builder">
 			<aside class="customizer" aria-label="Theme controls">
 				<div class="customizer-top">
@@ -612,6 +616,10 @@
 		max-width: 118rem;
 		margin-inline: auto;
 		padding: clamp(0.5rem, 1.4vw, 0.9rem);
+	}
+
+	.theme-workbench-pending {
+		visibility: hidden;
 	}
 
 	.builder-shell {

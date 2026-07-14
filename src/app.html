@@ -1,8 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-product-plate-theme-pending>
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<style>
+			html[data-product-plate-theme-pending] {
+				background: var(--background, oklch(0.988 0.003 95));
+			}
+
+			html[data-product-plate-theme-pending] body {
+				visibility: hidden;
+			}
+		</style>
+		<noscript>
+			<style>
+				html[data-product-plate-theme-pending] body {
+					visibility: visible;
+				}
+			</style>
+		</noscript>
 		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 		<link rel="apple-touch-icon" href="/pwa-192x192.png" />
 		<script
@@ -11,6 +27,11 @@
 			data-website-id="fd94e81c-e47d-4ad4-b095-aa4a52b03c06"
 		></script>
 		%sveltekit.head%
+		<script>
+			window.setTimeout(() => {
+				document.documentElement.removeAttribute('data-product-plate-theme-pending');
+			}, 3000);
+		</script>
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>

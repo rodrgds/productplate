@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
 	encodeThemePreset,
 	getThemeRuntimeCss,
+	revealInitialTheme,
 	setInitialThemePreset,
+	themePendingAttribute,
 	themePresetStorageKey,
 	themeRuntimeStyleElementId,
 	type ThemePreset
@@ -30,5 +32,22 @@ describe('theme runtime bootstrap', () => {
 
 		expect(styleElement?.textContent).toBe(getThemeRuntimeCss(preset));
 		expect(document.documentElement.dataset.productPlatePreset).toBe(presetCode);
+	});
+
+	it('keeps the initial document hidden until the selected font is ready', async () => {
+		let resolveFonts: (() => void) | undefined;
+		const fontsReady = new Promise<void>((resolve) => {
+			resolveFonts = resolve;
+		});
+
+		document.documentElement.setAttribute(themePendingAttribute, '');
+		const revealPromise = revealInitialTheme({ fontsReady });
+
+		expect(document.documentElement.hasAttribute(themePendingAttribute)).toBe(true);
+
+		resolveFonts?.();
+		await revealPromise;
+
+		expect(document.documentElement.hasAttribute(themePendingAttribute)).toBe(false);
 	});
 });

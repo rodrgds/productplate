@@ -6,6 +6,7 @@
 		encodeThemePreset,
 		getThemeRuntimeCss,
 		parseThemePreset,
+		revealInitialTheme,
 		themePresetChangeEvent,
 		themePresetStorageKey,
 		themeRuntimeStyleElementId
@@ -41,6 +42,7 @@
 		if (!browser) return;
 
 		writeTheme(localStorage.getItem(themePresetStorageKey));
+		void revealInitialTheme();
 
 		const handleThemeChange = (event: Event) => {
 			const detail = (event as CustomEvent<string>).detail;
@@ -62,6 +64,8 @@
 </script>
 
 <svelte:head>
-	<!-- eslint-disable-next-line svelte/no-at-html-tags, prefer-template -->
+	<!-- eslint-disable svelte/no-at-html-tags, svelte/no-unused-svelte-ignore -->
+	<!-- svelte-ignore hydration_html_changed -->
 	{@html initialThemePresetScript}
+	<!-- eslint-enable svelte/no-at-html-tags, svelte/no-unused-svelte-ignore -->
 </svelte:head>
