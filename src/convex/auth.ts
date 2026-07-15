@@ -5,8 +5,10 @@ import { type DataModel } from './_generated/dataModel';
 import { query } from './_generated/server';
 import { v } from 'convex/values';
 import { betterAuth } from 'better-auth';
+import type { BetterAuthOptions } from 'better-auth/minimal';
 import { admin } from 'better-auth/plugins';
 import authSchema from './betterAuth/schema';
+import authConfig from './auth.config';
 
 function getRuntimeEnv(key: string) {
 	return typeof process === 'undefined' ? undefined : process.env[key];
@@ -67,7 +69,42 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 	}
 });
 
-export const createAuth = (
+function escapeHtml(value: string) {
+	return value
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;')
+		.replaceAll("'", '&#039;');
+}
+
+async function sendAuthEmail(args: { to: string; subject: string; html: string }) {
+	const resendApiKey = process.env.RESEND_API_KEY;
+	if (!resendApiKey) {
+		throw new Error('Email delivery is unavailable because RESEND_API_KEY is not configured.');
+	}
+
+	const response = await fetch('https://api.resend.com/emails', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${resendApiKey}`
+		},
+		body: JSON.stringify({
+			from: process.env.RESET_EMAIL_FROM || 'App <no-reply@yourdomain.com>',
+			to: args.to,
+			subject: args.subject,
+			...(process.env.RESET_EMAIL_REPLY_TO ? { reply_to: process.env.RESET_EMAIL_REPLY_TO } : {}),
+			html: args.html
+		})
+	});
+
+	if (!response.ok) {
+		throw new Error(`Email delivery failed with status ${response.status}.`);
+	}
+}
+
+export const createAuthOptions = (
 	ctx: GenericCtx<DataModel>,
 	{ optionsOnly } = { optionsOnly: false }
 ) => {
@@ -76,7 +113,7 @@ export const createAuth = (
 	// the server expect localhost's insecure cookie in production.
 	const siteUrl = getSiteUrl();
 
-	return betterAuth({
+	return {
 		// disable logging when createAuth is called just to generate options.
 		// this is not required, but there's a lot of noise in logs without it.
 		logger: {
@@ -90,6 +127,7 @@ export const createAuth = (
 		account: {
 			accountLinking: {
 				enabled: true,
+				disableImplicitLinking: true,
 				trustedProviders: ['google']
 			}
 		},
@@ -98,48 +136,18 @@ export const createAuth = (
 		user: {
 			changeEmail: {
 				enabled: true,
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				sendChangeEmailVerification: async ({ user, newEmail, url, token }, _request) => {
-					const resendApiKey = process.env.RESEND_API_KEY;
-					const from = process.env.RESET_EMAIL_FROM || 'App <no-reply@yourdomain.com>';
-					if (!resendApiKey) {
-						console.error('RESEND_API_KEY not set. Unable to send email change verification.');
-						return;
-					}
-					try {
-						const res = await fetch('https://api.resend.com/emails', {
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json',
-								Authorization: `Bearer ${resendApiKey}`
-							},
-							body: JSON.stringify({
-								from,
-								to: user.email, // Send to current email to approve change
-								subject: 'Approve email change',
-								...(process.env.RESET_EMAIL_REPLY_TO
-									? { reply_to: process.env.RESET_EMAIL_REPLY_TO }
-									: {}),
-								html: `<p>Hello ${user.name ?? 'there'},</p>
-<p>We received a request to change your email address to <strong>${newEmail}</strong>.</p>
+				sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+					await sendAuthEmail({
+						to: user.email,
+						subject: 'Approve email change',
+						html: `<p>Hello ${escapeHtml(user.name ?? 'there')},</p>
+<p>We received a request to change your email address to <strong>${escapeHtml(newEmail)}</strong>.</p>
 <p>Click the button below to approve this change:</p>
-<p><a href="${url}" style="display:inline-block;padding:10px 16px;background:#111827;color:#fff;border-radius:6px;text-decoration:none">Approve Email Change</a></p>
+<p><a href="${escapeHtml(url)}" style="display:inline-block;padding:10px 16px;background:#111827;color:#fff;border-radius:6px;text-decoration:none">Approve Email Change</a></p>
 <p>If the button doesn't work, copy and paste this URL into your browser:</p>
-<p><a href="${url}">${url}</a></p>
+						<p><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></p>
 <p>If you didn't request this change, please ignore this email or contact support.</p>`
-							})
-						});
-						if (!res.ok) {
-							const text = await res.text();
-							console.error(
-								'Resend API error sending email change verification:',
-								res.status,
-								text
-							);
-						}
-					} catch (e) {
-						console.error('Failed to send email change verification:', e);
-					}
+					});
 				}
 			}
 		},
@@ -148,45 +156,17 @@ export const createAuth = (
 			enabled: true,
 			requireEmailVerification: false,
 			// Send password reset emails via Resend
-			// token and _request are available if you need custom templates or logging
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			sendResetPassword: async ({ user, url, token }, _request) => {
-				const resendApiKey = process.env.RESEND_API_KEY;
-				const from = process.env.RESET_EMAIL_FROM || 'App <no-reply@yourdomain.com>';
-				if (!resendApiKey) {
-					console.error('RESEND_API_KEY not set. Unable to send reset password email.');
-					return;
-				}
-				const resetUrl = url; // Better Auth provides the full URL with token
-				try {
-					const res = await fetch('https://api.resend.com/emails', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							Authorization: `Bearer ${resendApiKey}`
-						},
-						body: JSON.stringify({
-							from,
-							to: user.email,
-							subject: 'Reset your password',
-							...(process.env.RESET_EMAIL_REPLY_TO
-								? { reply_to: process.env.RESET_EMAIL_REPLY_TO }
-								: {}),
-							html: `<p>Hello ${user.name ?? 'there'},</p>
+			sendResetPassword: async ({ user, url }) => {
+				await sendAuthEmail({
+					to: user.email,
+					subject: 'Reset your password',
+					html: `<p>Hello ${escapeHtml(user.name ?? 'there')},</p>
 <p>We received a request to reset your password. Click the button below to set a new password:</p>
-<p><a href="${resetUrl}" style="display:inline-block;padding:10px 16px;background:#111827;color:#fff;border-radius:6px;text-decoration:none">Reset Password</a></p>
+<p><a href="${escapeHtml(url)}" style="display:inline-block;padding:10px 16px;background:#111827;color:#fff;border-radius:6px;text-decoration:none">Reset Password</a></p>
 <p>If the button doesn't work, copy and paste this URL into your browser:</p>
-<p><a href="${resetUrl}">${resetUrl}</a></p>
+					<p><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></p>
 <p>If you didn't request this, you can safely ignore this email.</p>`
-						})
-					});
-					if (!res.ok) {
-						const text = await res.text();
-						console.error('Resend API error sending reset email:', res.status, text);
-					}
-				} catch (e) {
-					console.error('Failed to send reset password email:', e);
-				}
+				});
 			}
 		},
 		socialProviders: {
@@ -201,12 +181,17 @@ export const createAuth = (
 		},
 		plugins: [
 			// The Convex plugin is required for Convex compatibility
-			convex(),
+			convex({ authConfig }),
 			// Admin plugin for roles/impersonation/banning APIs
 			admin()
 		]
-	});
+	} satisfies BetterAuthOptions;
 };
+
+export const createAuth = (
+	ctx: GenericCtx<DataModel>,
+	options: { optionsOnly?: boolean } = { optionsOnly: false }
+) => betterAuth(createAuthOptions(ctx, { optionsOnly: options.optionsOnly ?? false }));
 
 // Example function for getting the current user
 // Feel free to edit, omit, etc.
@@ -214,11 +199,6 @@ export const getCurrentUser = query({
 	args: {},
 	returns: v.union(authUserValidator, v.null()),
 	handler: async (ctx) => {
-		try {
-			return await authComponent.getAuthUser(ctx);
-		} catch {
-			// Return null when unauthenticated
-			return null;
-		}
+		return (await authComponent.safeGetAuthUser(ctx)) ?? null;
 	}
 });

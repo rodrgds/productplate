@@ -1,4 +1,9 @@
-const convexSiteUrl = process.env.CONVEX_SITE_URL ?? process.env.PUBLIC_CONVEX_SITE_URL;
+import type { AuthConfig } from 'convex/server';
+
+const convexSiteUrl =
+	process.env.CONVEX_SITE_URL ??
+	process.env.PUBLIC_CONVEX_SITE_URL ??
+	'https://placeholder.convex.cloud';
 
 export default {
 	providers: [
@@ -7,4 +12,4 @@ export default {
 			applicationID: 'convex'
 		}
 	]
-};
+} satisfies AuthConfig;

@@ -7,23 +7,24 @@ function trimTrailingSlash(value: string) {
 	return value.endsWith('/') ? value.slice(0, -1) : value;
 }
 
-function syncRuntimeSiteUrl(origin?: string) {
+function syncRuntimeAuthEnvironment(origin?: string) {
 	try {
 		const siteUrl = env.SITE_URL ?? env.CF_PAGES_URL ?? origin;
-		if (siteUrl && typeof process !== 'undefined') {
-			process.env.SITE_URL = trimTrailingSlash(siteUrl);
+		if (typeof process !== 'undefined') {
+			if (siteUrl) process.env.SITE_URL = trimTrailingSlash(siteUrl);
+			if (env.BETTER_AUTH_SECRET) process.env.BETTER_AUTH_SECRET = env.BETTER_AUTH_SECRET;
 		}
 	} catch {
 		// process.env not available (e.g. Cloudflare Workers)
 	}
 }
 
-syncRuntimeSiteUrl();
+syncRuntimeAuthEnvironment();
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const startedAt = Date.now();
 	const requestId = event.request.headers.get('x-request-id') ?? crypto.randomUUID();
-	syncRuntimeSiteUrl(event.url.origin);
+	syncRuntimeAuthEnvironment(event.url.origin);
 	event.locals.requestId = requestId;
 	event.locals.token = await getToken(createAuth, event.cookies);
 

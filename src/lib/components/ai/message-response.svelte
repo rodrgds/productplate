@@ -1,8 +1,5 @@
 <script lang="ts">
-	import { Streamdown } from 'svelte-streamdown';
-	import Code from 'svelte-streamdown/code';
-	import Mermaid from 'svelte-streamdown/mermaid';
-	import Math from 'svelte-streamdown/math';
+	import { Streamdown, createMathPlugin, createMermaidPlugin } from 'streamdown-svelte';
 	import { cn } from '$lib/utils.js';
 	let {
 		class: className,
@@ -13,11 +10,17 @@
 		content: string;
 		animation?: boolean;
 	} = $props();
+
+	const plugins = {
+		math: createMathPlugin({ singleDollarTextMath: true }),
+		mermaid: createMermaidPlugin()
+	};
 </script>
 
 <Streamdown
 	class={cn('size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0', className)}
-	components={{ code: Code, mermaid: Mermaid, math: Math }}
-	animation={animation ? {} : undefined}
+	{plugins}
+	animation={{ enabled: animation ?? false }}
+	parseIncompleteMarkdown={true}
 	{content}
 />

@@ -1,8 +1,5 @@
 <script lang="ts">
-	import { Streamdown } from 'svelte-streamdown';
-	import Code from 'svelte-streamdown/code';
-	import Mermaid from 'svelte-streamdown/mermaid';
-	import Math from 'svelte-streamdown/math';
+	import { Streamdown, createMathPlugin, createMermaidPlugin } from 'streamdown-svelte';
 	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
 	import { cn } from '$lib/utils.js';
 
@@ -13,6 +10,11 @@
 		class?: string;
 		text: string;
 	} = $props();
+
+	const plugins = {
+		math: createMathPlugin({ singleDollarTextMath: true }),
+		mermaid: createMermaidPlugin()
+	};
 </script>
 
 <Collapsible.Content
@@ -22,5 +24,5 @@
 		className
 	)}
 >
-	<Streamdown content={text} components={{ code: Code, mermaid: Mermaid, math: Math }} />
+	<Streamdown content={text} {plugins} parseIncompleteMarkdown={true} />
 </Collapsible.Content>
