@@ -3,8 +3,10 @@ import {
 	LandingBentoFeatures,
 	LandingComparisonTable,
 	LandingCtaBand,
+	LandingDashboardHero,
 	LandingFaqSection,
 	LandingFeatureComparison,
+	LandingFeatureSpotlight,
 	LandingFeatureTabs,
 	LandingFinalCta,
 	LandingHero,
@@ -17,10 +19,13 @@ import {
 	LandingPricingComparison,
 	LandingPricingMatrix,
 	LandingProcessTimeline,
+	LandingProblemSolution,
 	LandingStatsGrid,
 	LandingStatsStrip,
 	LandingTestimonialMarquee,
-	LandingTestimonialWall
+	LandingTestimonialWall,
+	LandingUseCaseSwitcher,
+	LandingWorkflowSteps
 } from '$lib/components/landing';
 import type { Component } from 'svelte';
 
@@ -44,7 +49,8 @@ export const categories: readonly Category[] = [
 		blurb: 'Above-the-fold openers with product previews and video dialogs.',
 		components: [
 			{ key: 'hero', label: 'Product hero', Component: LandingHero },
-			{ key: 'video-dialog', label: 'Hero video dialog', Component: LandingHeroVideoDialog }
+			{ key: 'video-dialog', label: 'Hero video dialog', Component: LandingHeroVideoDialog },
+			{ key: 'dashboard-hero', label: 'Dashboard hero', Component: LandingDashboardHero }
 		]
 	},
 	{
@@ -57,7 +63,11 @@ export const categories: readonly Category[] = [
 			{ key: 'feature-comparison', label: 'Comparison table', Component: LandingFeatureComparison },
 			{ key: 'image-comparison', label: 'Image comparison', Component: LandingComparisonTable },
 			{ key: 'timeline', label: 'Process timeline', Component: LandingProcessTimeline },
-			{ key: 'orbiting', label: 'Orbiting circles', Component: LandingOrbitingCircles }
+			{ key: 'orbiting', label: 'Orbiting circles', Component: LandingOrbitingCircles },
+			{ key: 'problem-solution', label: 'Problem and outcome', Component: LandingProblemSolution },
+			{ key: 'workflow-steps', label: 'Workflow steps', Component: LandingWorkflowSteps },
+			{ key: 'use-case-switcher', label: 'Use-case switcher', Component: LandingUseCaseSwitcher },
+			{ key: 'feature-spotlight', label: 'Feature spotlight', Component: LandingFeatureSpotlight }
 		]
 	},
 	{
