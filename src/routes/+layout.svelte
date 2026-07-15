@@ -1,8 +1,7 @@
 <script lang="ts">
 	import '../app.css';
-	import '@uppy/core/css/style.min.css';
-	import '@uppy/dashboard/css/style.min.css';
 	import favicon from '$lib/assets/favicon.svg';
+	import { onMount } from 'svelte';
 	import { ModeWatcher } from 'mode-watcher';
 	import { createSvelteAuthClient } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { authClient } from '$lib/auth-client';
@@ -26,6 +25,15 @@
 	let { children } = $props();
 
 	let webManifest = $derived(pwaInfo ? pwaInfo.webManifest.linkTag : '');
+
+	onMount(() => {
+		if (pwaInfo || !('serviceWorker' in navigator)) return;
+		void navigator.serviceWorker
+			.getRegistrations()
+			.then((registrations) =>
+				Promise.all(registrations.map((registration) => registration.unregister()))
+			);
+	});
 </script>
 
 <svelte:head>
@@ -66,4 +74,6 @@
 
 {@render children?.()}
 
-<PwaReloadPrompt />
+{#if pwaInfo}
+	<PwaReloadPrompt />
+{/if}

@@ -14,11 +14,14 @@ import {
 	APP_ORIENTATION
 } from './src/lib/constants';
 
+const enablePwa = process.env.ENABLE_PWA === 'true';
+
 export default defineConfig({
 	plugins: [
 		tailwindcss(),
 		sveltekit(),
 		SvelteKitPWA({
+			disable: !enablePwa,
 			base: '/',
 			buildBase: '/',
 			registerType: 'prompt',
@@ -54,32 +57,23 @@ export default defineConfig({
 				]
 			},
 			workbox: {
-				globPatterns: ['client/**/*.{js,css,html,ico,png,svg,webmanifest,woff,woff2,ttf,json}'],
-				globIgnores: ['client/screenshots/**'],
+				// Keep install metadata available without eagerly downloading every product route.
+				globPatterns: ['client/favicon.svg', 'client/manifest.webmanifest', 'client/pwa-*.png'],
 				modifyURLPrefix: {
 					'client/': ''
 				},
 				runtimeCaching: [
 					{
-						urlPattern: ({ request }) => request.destination === 'image',
+						urlPattern: ({ request, url, sameOrigin }) =>
+							request.destination === 'image' &&
+							sameOrigin &&
+							(url.pathname.startsWith('/screenshots/') || url.pathname.startsWith('/stack/')),
 						handler: 'CacheFirst',
 						options: {
 							cacheName: 'images',
 							expiration: {
 								maxEntries: 100,
 								maxAgeSeconds: 60 * 60 * 24 * 30
-							}
-						}
-					},
-					{
-						urlPattern: ({ url }) => url.pathname.startsWith('/api/public/'),
-						handler: 'NetworkFirst',
-						options: {
-							cacheName: 'public-api',
-							networkTimeoutSeconds: 3,
-							expiration: {
-								maxEntries: 50,
-								maxAgeSeconds: 60 * 60
 							}
 						}
 					}

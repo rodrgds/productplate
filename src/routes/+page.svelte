@@ -79,7 +79,10 @@
 		},
 		{ label: 'Revenue', value: 'Autumn billing with checkout and customer portal patterns' },
 		{ label: 'AI', value: 'Vercel AI SDK, streaming assistant UI, Markdown, and tool calls' },
-		{ label: 'Delivery', value: 'Bun, Vitest, Playwright, PWA support, and Cloudflare Pages' }
+		{
+			label: 'Delivery',
+			value: 'Bun, Vitest, Playwright, opt-in PWA support, and Cloudflare Pages'
+		}
 	] as const;
 
 	const stackLogos = [
@@ -108,7 +111,7 @@
 		{
 			question: 'What works before I customize it?',
 			answer:
-				'Authentication, onboarding, profiles, protected routes, billing scaffolding, realtime Convex data, file uploads, AI chat patterns, tests, PWA support, and Cloudflare deployment configuration are already in the repository.'
+				'Authentication, onboarding, profiles, protected routes, billing scaffolding, realtime Convex data, file uploads, AI chat patterns, tests, opt-in PWA support, and Cloudflare deployment configuration are already in the repository.'
 		},
 		{
 			question: 'Do I need to adopt a framework on top of SvelteKit?',

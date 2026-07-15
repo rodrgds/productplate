@@ -67,7 +67,7 @@ The hosted demo creates a fresh disposable account and opens the authenticated a
 - **AI:** Vercel AI SDK route, streaming assistant UI, Markdown, suggestions, and tool calls.
 - **Product UI:** dashboard, profile/settings, workspace invites, developer API keys, admin, editor, graph, map, 3D, uploads.
 - **Public UI:** landing page, docs, blog, changelog, legal templates, component gallery, and theme builder.
-- **Delivery:** Bun, Vitest, Playwright, PWA support, request IDs, security headers, GitHub Actions, Cloudflare Pages.
+- **Delivery:** Bun, Vitest, Playwright, opt-in PWA support, request IDs, security headers, GitHub Actions, Cloudflare Pages.
 
 ## Start here
 
@@ -131,7 +131,12 @@ GOOGLE_CLIENT_SECRET=
 RESEND_API_KEY=
 OPENROUTER_API_KEY=
 AUTUMN_SECRET_KEY=
+ENABLE_PWA=false
 ```
+
+PWA generation is off by default. Set `ENABLE_PWA=true` only after choosing a cache policy for
+your product; the starter's opt-in worker caches install assets and public marketing images, not
+authenticated pages or API responses.
 
 Use [`.env.example`](./.env.example) for local configuration and [`.env.server.example`](./.env.server.example) for production-only secrets.
 
@@ -155,7 +160,7 @@ Run these names directly inside direnv or as `devenv shell -- <command>` outside
 | `test-e2e`     | Run Playwright                                 |
 | `build`        | Build for production                           |
 | `verify`       | Run lint, checks, and unit tests               |
-| `verify-full`  | Run `verify`, then build for production        |
+| `verify-full`  | Run `verify`, audit dependencies, then build   |
 
 ## Project map
 

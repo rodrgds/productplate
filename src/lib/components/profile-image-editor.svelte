@@ -9,6 +9,8 @@
 	import { toast } from 'svelte-sonner';
 	import { useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api.js';
+	import '@uppy/core/css/style.min.css';
+	import '@uppy/dashboard/css/style.min.css';
 	import '@uppy/svelte/css/style.css';
 	import '@uppy/svelte/css/image-editor.css';
 	import ProfileImageSources from './profile-image-sources.svelte';
