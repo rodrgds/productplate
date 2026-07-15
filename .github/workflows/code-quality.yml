@@ -31,6 +31,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Install browser
+        run: bunx playwright install --with-deps chromium
+
       - name: Lint
         run: bun run lint
 
@@ -42,3 +45,6 @@ jobs:
 
       - name: Build
         run: bun run build
+
+      - name: Browser smoke tests
+        run: bun run test:e2e:ci

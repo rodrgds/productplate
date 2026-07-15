@@ -64,7 +64,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          wranglerVersion: '4.93.1'
+          wranglerVersion: '4.110.0'
           command: pages deploy ./.svelte-kit/cloudflare --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME || 'productplate' }} --branch=${{ github.head_ref || github.ref_name }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
