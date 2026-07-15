@@ -1,6 +1,7 @@
 import {
 	LandingAppleCardsCarousel,
 	LandingBentoFeatures,
+	LandingCaseStudy,
 	LandingComparisonTable,
 	LandingCtaBand,
 	LandingDashboardHero,
@@ -20,10 +21,12 @@ import {
 	LandingPricingMatrix,
 	LandingProcessTimeline,
 	LandingProblemSolution,
+	LandingReleaseTimeline,
 	LandingStatsGrid,
 	LandingStatsStrip,
 	LandingTestimonialMarquee,
 	LandingTestimonialWall,
+	LandingTrustCenter,
 	LandingUseCaseSwitcher,
 	LandingWorkflowSteps
 } from '$lib/components/landing';
@@ -73,10 +76,13 @@ export const categories: readonly Category[] = [
 	{
 		id: 'proof',
 		title: 'Proof',
-		blurb: 'Testimonial mosaics, marquees, and dimensional image walls.',
+		blurb: 'Customer evidence, trust programs, testimonials, and product momentum.',
 		components: [
 			{ key: 'wall', label: 'Testimonial mosaic', Component: LandingTestimonialWall },
-			{ key: 'marquee', label: 'Testimonial marquee', Component: LandingTestimonialMarquee }
+			{ key: 'marquee', label: 'Testimonial marquee', Component: LandingTestimonialMarquee },
+			{ key: 'case-study', label: 'Customer case study', Component: LandingCaseStudy },
+			{ key: 'trust-center', label: 'Trust center', Component: LandingTrustCenter },
+			{ key: 'release-timeline', label: 'Release momentum', Component: LandingReleaseTimeline }
 		]
 	},
 	{

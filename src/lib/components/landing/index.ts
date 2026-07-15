@@ -1,5 +1,6 @@
 export { default as LandingAppleCardsCarousel } from './landing-apple-cards-carousel.svelte';
 export { default as LandingBentoFeatures } from './landing-bento-features.svelte';
+export { default as LandingCaseStudy } from './landing-case-study.svelte';
 export { default as LandingComparisonTable } from './landing-comparison-table.svelte';
 export { default as LandingCtaBand } from './landing-cta-band.svelte';
 export { default as LandingDashboardHero } from './landing-dashboard-hero.svelte';
@@ -21,10 +22,12 @@ export { default as LandingPricingComparison } from './landing-pricing-compariso
 export { default as LandingPricingMatrix } from './landing-pricing-matrix.svelte';
 export { default as LandingProcessTimeline } from './landing-process-timeline.svelte';
 export { default as LandingProblemSolution } from './landing-problem-solution.svelte';
+export { default as LandingReleaseTimeline } from './landing-release-timeline.svelte';
 export { default as LandingStatsGrid } from './landing-stats-grid.svelte';
 export { default as LandingStatsStrip } from './landing-stats-strip.svelte';
 export { default as LandingStickyScrollReveal } from './landing-sticky-scroll-reveal.svelte';
 export { default as LandingTestimonialMarquee } from './landing-testimonial-marquee.svelte';
 export { default as LandingTestimonialWall } from './landing-testimonial-wall.svelte';
+export { default as LandingTrustCenter } from './landing-trust-center.svelte';
 export { default as LandingUseCaseSwitcher } from './landing-use-case-switcher.svelte';
 export { default as LandingWorkflowSteps } from './landing-workflow-steps.svelte';
