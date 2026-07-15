@@ -75,8 +75,7 @@
 		}
 
 		await runAction(
-			() =>
-				convex.mutation(api.organizations.ensureCurrent, { workspaceName: 'Product workspace' }),
+			() => convex.mutation(api.organizations.ensureCurrent, {}),
 			'Workspace initialized.'
 		);
 	}

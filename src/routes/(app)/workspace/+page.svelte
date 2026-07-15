@@ -8,7 +8,7 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { Bell, Building2, Check, Copy, MailPlus, ShieldCheck, Users } from '@lucide/svelte';
-	import type { Id } from '$convex/_generated/dataModel.js';
+	import type { Doc, Id } from '$convex/_generated/dataModel.js';
 	import { toast } from 'svelte-sonner';
 
 	const convex = useConvexClient();
@@ -23,7 +23,9 @@
 	let administration = $derived(administrationResponse.data);
 	let entitlements = $derived(billingResponse.data?.entitlements ?? []);
 	let unreadNotifications = $derived(
-		(notificationsResponse.data ?? []).filter((notification) => !notification.readAt)
+		(notificationsResponse.data ?? []).filter(
+			(notification: Doc<'notifications'>) => !notification.readAt
+		)
 	);
 	let inviteEmail = $state('');
 	let inviteRole = $state<'admin' | 'member' | 'viewer'>('member');
@@ -57,8 +59,7 @@
 			return;
 		}
 		await runAction(
-			() =>
-				convex.mutation(api.organizations.ensureCurrent, { workspaceName: 'Product workspace' }),
+			() => convex.mutation(api.organizations.ensureCurrent, {}),
 			'Workspace created.'
 		);
 	}

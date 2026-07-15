@@ -1,5 +1,6 @@
 import {
 	internalMutation,
+	internalQuery,
 	mutation,
 	query,
 	type MutationCtx,
@@ -9,6 +10,7 @@ import { v } from 'convex/values';
 import { paginationOptsValidator, paginationResultValidator } from 'convex/server';
 import { authComponent } from './auth';
 import type { Doc, Id } from './_generated/dataModel';
+import { onboardingFormSchema } from '../lib/forms/schemas.js';
 
 const organizationRoleValidator = v.union(
 	v.literal('owner'),
@@ -75,6 +77,11 @@ const entitlementValidator = v.object({
 });
 
 const workspaceSummaryValidator = v.object({
+	organization: organizationValidator,
+	membership: memberValidator
+});
+
+const workspaceListItemValidator = v.object({
 	organization: organizationValidator,
 	membership: memberValidator
 });
@@ -183,7 +190,20 @@ function randomToken(byteLength = 24) {
 	return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
-async function getFirstActiveMembership(ctx: QueryCtx | MutationCtx, userId: string) {
+async function getProfile(ctx: QueryCtx | MutationCtx, userId: string) {
+	return await ctx.db
+		.query('userProfiles')
+		.withIndex('by_userId', (q) => q.eq('userId', userId))
+		.first();
+}
+
+async function getActiveMembership(ctx: QueryCtx | MutationCtx, userId: string) {
+	const profile = await getProfile(ctx, userId);
+	if (profile?.activeOrganizationId) {
+		const selected = await getMembership(ctx, profile.activeOrganizationId, userId);
+		if (selected) return selected;
+	}
+
 	const membership = await ctx.db
 		.query('organizationMembers')
 		.withIndex('by_userId_and_status', (q) => q.eq('userId', userId).eq('status', 'active'))
@@ -424,16 +444,66 @@ async function ensureWorkspaceForUser(
 	user: CurrentAuthUser,
 	workspaceName?: string
 ) {
-	const existingMembership = await getFirstActiveMembership(ctx, user._id);
+	const existingMembership = await getActiveMembership(ctx, user._id);
 	if (existingMembership) return existingMembership.orgId;
 
-	return await createOrganizationForUser(ctx, {
+	const orgId = await createOrganizationForUser(ctx, {
 		name: workspaceName?.trim() || `${user.name || 'My'} workspace`,
 		userId: user._id,
 		email: user.email,
 		displayName: user.name
 	});
+	const profile = await getProfile(ctx, user._id);
+	if (profile) {
+		await ctx.db.patch(profile._id, { activeOrganizationId: orgId, updatedAt: Date.now() });
+	}
+	return orgId;
 }
+
+export const completeOnboarding = mutation({
+	args: {
+		displayName: v.string(),
+		bio: v.string(),
+		role: v.string(),
+		workspaceName: v.string(),
+		image: v.optional(v.string())
+	},
+	returns: workspaceSummaryValidator,
+	handler: async (ctx, args) => {
+		const validation = onboardingFormSchema.safeParse(args);
+		if (!validation.success) {
+			throw new Error(validation.error.issues[0]?.message ?? 'Invalid form data.');
+		}
+
+		const user = await requireCurrentUser(ctx);
+		const now = Date.now();
+		const orgId = await ensureWorkspaceForUser(ctx, user, validation.data.workspaceName);
+		const existingProfile = await getProfile(ctx, user._id);
+		const profileData = {
+			displayName: validation.data.displayName,
+			bio: validation.data.bio,
+			role: validation.data.role,
+			workspaceName: validation.data.workspaceName,
+			image: args.image,
+			activeOrganizationId: orgId,
+			updatedAt: now
+		};
+
+		if (existingProfile) {
+			await ctx.db.patch(existingProfile._id, profileData);
+		} else {
+			await ctx.db.insert('userProfiles', {
+				userId: user._id,
+				...profileData,
+				onboardingCompletedAt: now
+			});
+		}
+
+		const summary = await getWorkspaceSummary(ctx, orgId, user._id);
+		if (!summary) throw new Error('Workspace was not found after onboarding.');
+		return summary;
+	}
+});
 
 export const ensureCurrent = mutation({
 	args: {
@@ -457,10 +527,53 @@ export const getCurrent = query({
 		const user = await authComponent.safeGetAuthUser(ctx);
 		if (!user) return null;
 
-		const membership = await getFirstActiveMembership(ctx, user._id);
+		const membership = await getActiveMembership(ctx, user._id);
 		if (!membership) return null;
 
 		return await getWorkspaceSummary(ctx, membership.orgId, user._id);
+	}
+});
+
+export const listCurrent = query({
+	args: {},
+	returns: v.array(workspaceListItemValidator),
+	handler: async (ctx) => {
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) return [];
+		const memberships = await ctx.db
+			.query('organizationMembers')
+			.withIndex('by_userId_and_status', (q) => q.eq('userId', user._id).eq('status', 'active'))
+			.take(50);
+		const workspaces = await Promise.all(
+			memberships.map(async (membership) => {
+				const organization = await ctx.db.get(membership.orgId);
+				return organization ? { organization, membership } : null;
+			})
+		);
+		return workspaces
+			.filter((workspace): workspace is NonNullable<typeof workspace> => workspace !== null)
+			.sort((a, b) => a.organization.name.localeCompare(b.organization.name));
+	}
+});
+
+export const setCurrent = mutation({
+	args: { orgId: v.id('organizations') },
+	returns: workspaceSummaryValidator,
+	handler: async (ctx, args) => {
+		const user = await requireCurrentUser(ctx);
+		const membership = await getMembership(ctx, args.orgId, user._id);
+		if (!membership) throw new Error('You do not have access to this workspace.');
+		const organization = await ctx.db.get(args.orgId);
+		if (!organization) throw new Error('Workspace not found.');
+		const profile = await getProfile(ctx, user._id);
+		if (!profile) throw new Error('Complete onboarding before selecting a workspace.');
+
+		await ctx.db.patch(profile._id, {
+			activeOrganizationId: args.orgId,
+			workspaceName: organization.name,
+			updatedAt: Date.now()
+		});
+		return { organization, membership };
 	}
 });
 
@@ -482,7 +595,7 @@ export const getMemberAdministration = query({
 	handler: async (ctx) => {
 		const user = await authComponent.safeGetAuthUser(ctx);
 		if (!user) return null;
-		const membership = await getFirstActiveMembership(ctx, user._id);
+		const membership = await getActiveMembership(ctx, user._id);
 		if (!membership || roleRank[membership.role] < roleRank.admin) return null;
 
 		const members = await ctx.db
@@ -506,7 +619,7 @@ export const getBillingOverview = query({
 	handler: async (ctx) => {
 		const user = await authComponent.safeGetAuthUser(ctx);
 		if (!user) return null;
-		const membership = await getFirstActiveMembership(ctx, user._id);
+		const membership = await getActiveMembership(ctx, user._id);
 		if (!membership || roleRank[membership.role] < roleRank.admin) return null;
 		const organization = await ctx.db.get(membership.orgId);
 		if (!organization) return null;
@@ -646,6 +759,15 @@ export const acceptInvite = mutation({
 			status: 'accepted',
 			updatedAt: now
 		});
+		const profile = await getProfile(ctx, user._id);
+		if (profile) {
+			const organization = await ctx.db.get(invite.orgId);
+			await ctx.db.patch(profile._id, {
+				activeOrganizationId: invite.orgId,
+				...(organization ? { workspaceName: organization.name } : {}),
+				updatedAt: now
+			});
+		}
 		await ctx.db.insert('notifications', {
 			orgId: invite.orgId,
 			userId: user._id,
@@ -817,18 +939,20 @@ export const adminListOrganizations = query({
 
 export const applyVerifiedBillingPlan = internalMutation({
 	args: {
-		userId: v.string(),
+		orgId: v.id('organizations'),
+		actorUserId: v.string(),
 		productId: v.union(v.string(), v.null()),
 		status: v.string()
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		const membership = await getFirstActiveMembership(ctx, args.userId);
-		if (!membership) throw new Error('Create a workspace before syncing billing.');
-		const orgId = membership.orgId;
+		const orgId = args.orgId;
+		const organization = await ctx.db.get(orgId);
+		if (!organization) throw new Error('Workspace not found.');
 		const productId = args.status === 'active' && args.productId ? args.productId : 'starter';
 		const plan = billingPlanEntitlements[productId] ?? billingPlanEntitlements.starter;
 		const now = Date.now();
+		const planChanged = organization.planKey !== plan.planKey;
 
 		await ctx.db.patch(orgId, {
 			planKey: plan.planKey,
@@ -842,22 +966,51 @@ export const applyVerifiedBillingPlan = internalMutation({
 				source: productId === 'starter' ? 'plan' : 'billing'
 			}))
 		);
-		await ctx.db.insert('notifications', {
-			orgId,
-			userId: args.userId,
-			type: 'billing',
-			title: 'Billing entitlements synced',
-			body: `Workspace plan is now ${plan.planKey}.`,
-			actionUrl: '/billing',
-			createdAt: now
-		});
-		await insertAuditLog(ctx, {
-			orgId,
-			action: 'billing.entitlements_synced',
-			target: plan.planKey,
-			metadata: { status: args.status, productId: args.productId ?? 'starter' }
-		});
+		if (planChanged) {
+			await ctx.db.insert('notifications', {
+				orgId,
+				userId: args.actorUserId,
+				type: 'billing',
+				title: 'Billing entitlements synced',
+				body: `Workspace plan is now ${plan.planKey}.`,
+				actionUrl: '/billing',
+				createdAt: now
+			});
+			await insertAuditLog(ctx, {
+				orgId,
+				action: 'billing.entitlements_synced',
+				target: plan.planKey,
+				metadata: { status: args.status, productId: args.productId ?? 'starter' }
+			});
+		}
 		return null;
+	}
+});
+
+export const getCurrentBillingContext = internalQuery({
+	args: {},
+	returns: v.object({
+		orgId: v.id('organizations'),
+		customerId: v.string(),
+		organizationName: v.string(),
+		actorUserId: v.string(),
+		actorEmail: v.string()
+	}),
+	handler: async (ctx) => {
+		const user = await requireCurrentUser(ctx);
+		const membership = await getActiveMembership(ctx, user._id);
+		if (!membership || roleRank[membership.role] < roleRank.admin) {
+			throw new Error('Billing requires a workspace owner or administrator.');
+		}
+		const organization = await ctx.db.get(membership.orgId);
+		if (!organization) throw new Error('Workspace not found.');
+		return {
+			orgId: organization._id,
+			customerId: `org_${organization._id}`,
+			organizationName: organization.name,
+			actorUserId: user._id,
+			actorEmail: user.email
+		};
 	}
 });
 

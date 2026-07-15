@@ -15,6 +15,7 @@ export default defineSchema({
 		bio: v.string(),
 		role: v.string(),
 		workspaceName: v.string(),
+		activeOrganizationId: v.optional(v.id('organizations')),
 		image: v.optional(v.string()),
 		imageStorageId: v.optional(v.id('_storage')),
 		onboardingCompletedAt: v.number(),

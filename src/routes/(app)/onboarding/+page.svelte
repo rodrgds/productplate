@@ -54,7 +54,7 @@
 					await authClient.updateUser({
 						name: validatedForm.data.displayName
 					});
-					await convex.mutation(api.userProfiles.completeOnboarding, validatedForm.data);
+					await convex.mutation(api.organizations.completeOnboarding, validatedForm.data);
 					completed = true;
 					redirectTimer = setTimeout(() => {
 						goto(resolve('/dashboard'));

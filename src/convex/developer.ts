@@ -195,10 +195,19 @@ export const getCurrentSettings = query({
 	handler: async (ctx) => {
 		const user = await authComponent.safeGetAuthUser(ctx);
 		if (!user) return null;
-		const membership = await ctx.db
-			.query('organizationMembers')
-			.withIndex('by_userId_and_status', (q) => q.eq('userId', user._id).eq('status', 'active'))
+		const profile = await ctx.db
+			.query('userProfiles')
+			.withIndex('by_userId', (q) => q.eq('userId', user._id))
 			.first();
+		const selectedMembership = profile?.activeOrganizationId
+			? await getMembership(ctx, profile.activeOrganizationId, user._id)
+			: null;
+		const membership =
+			selectedMembership ??
+			(await ctx.db
+				.query('organizationMembers')
+				.withIndex('by_userId_and_status', (q) => q.eq('userId', user._id).eq('status', 'active'))
+				.first());
 		if (!membership || roleRank[membership.role] < roleRank.admin) return null;
 
 		const apiKeys = await ctx.db

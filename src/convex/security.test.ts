@@ -6,6 +6,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { api, components, internal } from './_generated/api';
 import schema from './schema';
 import betterAuthSchema from './betterAuth/schema';
+import type { Doc } from './_generated/dataModel';
 
 const modules = import.meta.glob('./**/!(*.test).ts');
 const betterAuthModules = import.meta.glob('./betterAuth/**/*.ts');
@@ -59,6 +60,112 @@ async function createAuthenticatedUser(
 }
 
 describe('authorization boundaries', () => {
+	test('onboarding creates the named workspace and selects it', async () => {
+		const t = createTestBackend();
+		const owner = await createAuthenticatedUser(t, {
+			id: 'onboarding-owner',
+			sessionId: 'onboarding-session',
+			email: 'onboarding@example.com'
+		});
+
+		await owner.client.mutation(api.organizations.completeOnboarding, {
+			displayName: 'Alex Rivera',
+			bio: 'Building a focused product.',
+			role: 'Founder',
+			workspaceName: 'Acme Lab'
+		});
+
+		const workspace = await owner.client.query(api.organizations.getCurrent, {});
+		expect(workspace?.organization.name).toBe('Acme Lab');
+		expect(workspace?.membership.role).toBe('owner');
+	});
+
+	test('workspace-scoped queries follow the explicitly selected workspace', async () => {
+		const t = createTestBackend();
+		const owner = await createAuthenticatedUser(t, {
+			id: 'multi-workspace-owner',
+			sessionId: 'multi-workspace-session',
+			email: 'multi-workspace@example.com'
+		});
+		const first = await owner.client.mutation(api.organizations.completeOnboarding, {
+			displayName: 'Workspace owner',
+			bio: 'Building across workspaces.',
+			role: 'Founder',
+			workspaceName: 'First workspace'
+		});
+		const secondOrgId = await t.run(async (ctx) => {
+			const now = Date.now();
+			const orgId = await ctx.db.insert('organizations', {
+				name: 'Selected workspace',
+				slug: 'selected-workspace',
+				ownerUserId: 'another-owner',
+				planKey: 'starter',
+				createdAt: now,
+				updatedAt: now
+			});
+			await ctx.db.insert('organizationMembers', {
+				orgId,
+				userId: owner.userId,
+				email: 'multi-workspace@example.com',
+				role: 'admin',
+				status: 'active',
+				joinedAt: now,
+				updatedAt: now
+			});
+			return orgId;
+		});
+
+		await owner.client.mutation(api.organizations.setCurrent, { orgId: secondOrgId });
+
+		const current = await owner.client.query(api.organizations.getCurrent, {});
+		expect(current?.organization._id).toBe(secondOrgId);
+		expect(current?.organization._id).not.toBe(first.organization._id);
+		const billing = await owner.client.query(api.organizations.getBillingOverview, {});
+		expect(billing?.organization._id).toBe(secondOrgId);
+	});
+
+	test('billing context rejects non-admin workspace members', async () => {
+		const t = createTestBackend();
+		const owner = await createAuthenticatedUser(t, {
+			id: 'billing-owner',
+			sessionId: 'billing-owner-session',
+			email: 'billing-owner@example.com'
+		});
+		const workspace = await owner.client.mutation(api.organizations.ensureCurrent, {
+			workspaceName: 'Billing workspace'
+		});
+		const member = await createAuthenticatedUser(t, {
+			id: 'billing-member',
+			sessionId: 'billing-member-session',
+			email: 'billing-member@example.com'
+		});
+		await t.run(async (ctx) => {
+			await ctx.db.insert('organizationMembers', {
+				orgId: workspace.organization._id,
+				userId: member.userId,
+				email: 'billing-member@example.com',
+				role: 'member',
+				status: 'active',
+				joinedAt: Date.now(),
+				updatedAt: Date.now()
+			});
+			await ctx.db.insert('userProfiles', {
+				userId: member.userId,
+				displayName: 'Billing member',
+				bio: '',
+				role: 'Member',
+				workspaceName: 'Billing workspace',
+				activeOrganizationId: workspace.organization._id,
+				onboardingCompletedAt: Date.now(),
+				updatedAt: Date.now()
+			});
+		});
+
+		await expect(
+			member.client.query(internal.organizations.getCurrentBillingContext, {})
+		).rejects.toThrow('owner or administrator');
+	});
+
 	test('only workspace administrators receive member emails and invite tokens', async () => {
 		const t = createTestBackend();
 		const owner = await createAuthenticatedUser(t, {
@@ -100,7 +207,9 @@ describe('authorization boundaries', () => {
 
 		expect(await viewer.client.query(api.organizations.getMemberAdministration, {})).toBeNull();
 		const administration = await owner.client.query(api.organizations.getMemberAdministration, {});
-		expect(administration?.members.map((member) => member.email)).toContain('viewer@example.com');
+		expect(
+			administration?.members.map((member: Doc<'organizationMembers'>) => member.email)
+		).toContain('viewer@example.com');
 		expect(administration?.invites[0]?.token).toBe('secret-invite-token');
 	});
 

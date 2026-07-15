@@ -22,12 +22,27 @@
 	import NavSecondary from './nav-secondary.svelte';
 	import NavAdmin from './nav-admin.svelte';
 	import NavUser from './nav-user.svelte';
+	import TeamSwitcher from './team-switcher.svelte';
 	import type { ComponentProps } from 'svelte';
 	import { APP_NAME } from '$lib/constants.js';
 	import AppLogo from '$lib/components/app-logo.svelte';
+	import type { Doc } from '$convex/_generated/dataModel.js';
+
+	interface WorkspaceOptionSource {
+		organization: Doc<'organizations'>;
+	}
 
 	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
+	const workspacesResponse = useQuery(api.organizations.listCurrent, {});
+	const currentWorkspaceResponse = useQuery(api.organizations.getCurrent, {});
 	let user = $derived(currentUserResponse.data);
+	let workspaceOptions = $derived(
+		(workspacesResponse.data ?? []).map((workspace: WorkspaceOptionSource) => ({
+			id: workspace.organization._id,
+			name: workspace.organization.name,
+			plan: workspace.organization.planKey
+		}))
+	);
 
 	const userData = $derived({
 		name: user?.name ?? 'User',
@@ -124,18 +139,25 @@
 
 <Sidebar.Root collapsible="icon" {...restProps}>
 	<Sidebar.Header>
-		<Sidebar.Menu>
-			<Sidebar.MenuItem>
-				<Sidebar.MenuButton class="data-[slot=sidebar-menu-button]:!p-1.5">
-					{#snippet child({ props })}
-						<a href={resolve('/')} {...props}>
-							<AppLogo class="!size-5" />
-							<span class="text-base font-semibold">{APP_NAME}</span>
-						</a>
-					{/snippet}
-				</Sidebar.MenuButton>
-			</Sidebar.MenuItem>
-		</Sidebar.Menu>
+		{#if workspaceOptions.length > 0}
+			<TeamSwitcher
+				teams={workspaceOptions}
+				activeId={currentWorkspaceResponse.data?.organization._id}
+			/>
+		{:else}
+			<Sidebar.Menu>
+				<Sidebar.MenuItem>
+					<Sidebar.MenuButton class="data-[slot=sidebar-menu-button]:!p-1.5">
+						{#snippet child({ props })}
+							<a href={resolve('/')} {...props}>
+								<AppLogo class="!size-5" />
+								<span class="text-base font-semibold">{APP_NAME}</span>
+							</a>
+						{/snippet}
+					</Sidebar.MenuButton>
+				</Sidebar.MenuItem>
+			</Sidebar.Menu>
+		{/if}
 	</Sidebar.Header>
 	<Sidebar.Content>
 		<NavMain items={data.navMain} />

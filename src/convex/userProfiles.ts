@@ -1,7 +1,7 @@
 import { mutation, query, type DatabaseReader } from './_generated/server';
 import { v } from 'convex/values';
 import { authComponent } from './auth';
-import { onboardingFormSchema, accountProfileUpdateSchema } from '../lib/forms/schemas.js';
+import { accountProfileUpdateSchema } from '../lib/forms/schemas.js';
 import { DEMO_PROFILE, isDemoAccountEmail } from '../lib/demo-account.js';
 
 const profileValidator = v.object({
@@ -12,6 +12,7 @@ const profileValidator = v.object({
 	bio: v.string(),
 	role: v.string(),
 	workspaceName: v.string(),
+	activeOrganizationId: v.optional(v.id('organizations')),
 	image: v.optional(v.string()),
 	imageStorageId: v.optional(v.id('_storage')),
 	onboardingCompletedAt: v.number(),
@@ -47,48 +48,6 @@ export const getByUserId = query({
 		const user = await authComponent.safeGetAuthUser(ctx);
 		if (!user) return null;
 		return await getFirstProfileByUserId(ctx.db, args.userId);
-	}
-});
-
-export const completeOnboarding = mutation({
-	args: {
-		displayName: v.string(),
-		bio: v.string(),
-		role: v.string(),
-		workspaceName: v.string(),
-		image: v.optional(v.string())
-	},
-	returns: profileValidator,
-	handler: async (ctx, args) => {
-		const user = await authComponent.getAuthUser(ctx);
-		const now = Date.now();
-
-		const validation = onboardingFormSchema.safeParse(args);
-		if (!validation.success) {
-			throw new Error(validation.error.issues[0]?.message ?? 'Invalid form data.');
-		}
-
-		const existing = await getFirstProfileByUserId(ctx.db, user._id);
-
-		if (existing) {
-			await ctx.db.patch(existing._id, {
-				...args,
-				updatedAt: now
-			});
-			const updated = await ctx.db.get(existing._id);
-			if (!updated) throw new Error('Profile was not found after update.');
-			return updated;
-		}
-
-		const profileId = await ctx.db.insert('userProfiles', {
-			userId: user._id,
-			...args,
-			onboardingCompletedAt: now,
-			updatedAt: now
-		});
-		const profile = await ctx.db.get(profileId);
-		if (!profile) throw new Error('Profile was not found after creation.');
-		return profile;
 	}
 });
 

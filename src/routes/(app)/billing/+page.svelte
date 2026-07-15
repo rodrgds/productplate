@@ -54,9 +54,6 @@
 	const client = useConvexClient();
 	const workspaceResponse = useQuery(api.organizations.getBillingOverview, {});
 	let workspace = $derived(workspaceResponse.data);
-	let syncMessage = $state('');
-	let syncError = $state('');
-	let isSyncingEntitlements = $state(false);
 
 	// Get data from server load function
 	let products = $derived<Product[]>(data.products || []);
@@ -150,20 +147,6 @@
 				})
 			: []
 	);
-
-	async function syncEntitlements() {
-		syncMessage = '';
-		syncError = '';
-		isSyncingEntitlements = true;
-		try {
-			await client.action(api.billing.syncCurrentPlan, {});
-			syncMessage = 'Workspace entitlements synced from billing.';
-		} catch (cause) {
-			syncError = cause instanceof Error ? cause.message : String(cause);
-		} finally {
-			isSyncingEntitlements = false;
-		}
-	}
 </script>
 
 <svelte:head>
@@ -190,6 +173,16 @@
 		</div>
 
 		<Separator />
+		{#if !workspaceResponse.isLoading && !workspace}
+			<Card.Root>
+				<Card.Header>
+					<Card.Title>Billing access is restricted</Card.Title>
+					<Card.Description>
+						Only workspace owners and administrators can manage plans and payment details.
+					</Card.Description>
+				</Card.Header>
+			</Card.Root>
+		{/if}
 
 		<!-- Current Plan Section -->
 		<div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -218,7 +211,7 @@
 							</ul>
 						</Card.Content>
 						<Card.Footer>
-							<Button variant="outline" onclick={handleManageSubscription}
+							<Button variant="outline" onclick={handleManageSubscription} disabled={!workspace}
 								>Manage Subscription</Button
 							>
 						</Card.Footer>
@@ -237,7 +230,7 @@
 				<Card.Header>
 					<Card.Title>Workspace entitlements</Card.Title>
 					<Card.Description>
-						Apply the active Autumn product to the current organization limits.
+						Automatically synchronized from the active organization billing customer.
 					</Card.Description>
 				</Card.Header>
 				<Card.Content class="space-y-4">
@@ -259,19 +252,6 @@
 							</div>
 						{/each}
 					</div>
-					<Button
-						class="w-full"
-						onclick={syncEntitlements}
-						disabled={isSyncingEntitlements || !workspace}
-					>
-						{isSyncingEntitlements ? 'Syncing...' : 'Sync entitlements'}
-					</Button>
-					{#if syncMessage}
-						<p class="text-sm text-primary">{syncMessage}</p>
-					{/if}
-					{#if syncError}
-						<p class="text-sm text-destructive">{syncError}</p>
-					{/if}
 				</Card.Content>
 			</Card.Root>
 		</div>
@@ -306,7 +286,11 @@
 							{#if plan.isCurrent}
 								<Button variant="outline" disabled class="w-full">Current Plan</Button>
 							{:else}
-								<Button class="w-full" onclick={() => handleCheckout(plan.id)}>
+								<Button
+									class="w-full"
+									onclick={() => handleCheckout(plan.id)}
+									disabled={!workspace}
+								>
 									{plan.price === 0 ? 'Downgrade' : 'Upgrade'}
 								</Button>
 							{/if}

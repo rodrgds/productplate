@@ -1,9 +1,8 @@
 import { action, type ActionCtx } from './_generated/server';
 import { v } from 'convex/values';
-import { api, internal } from './_generated/api';
+import { internal } from './_generated/api';
 import { Autumn } from 'autumn-js';
 import { z } from 'zod/v3';
-import { authComponent } from './auth';
 
 if (!process.env.SITE_URL && process.env.BETTER_AUTH_URL) {
 	process.env.SITE_URL = process.env.BETTER_AUTH_URL;
@@ -98,25 +97,46 @@ function parseCustomer(value: unknown) {
 	};
 }
 
-async function loadCustomer(ctx: ActionCtx) {
-	const user = await authComponent.getAuthUser(ctx);
+type ParsedCustomer = ReturnType<typeof parseCustomer>;
+
+interface BillingContext {
+	orgId: import('./_generated/dataModel').Id<'organizations'>;
+	customerId: string;
+	organizationName: string;
+	actorUserId: string;
+	actorEmail: string;
+}
+
+async function getBillingContext(ctx: ActionCtx): Promise<BillingContext> {
+	return await ctx.runQuery(internal.organizations.getCurrentBillingContext, {});
+}
+
+async function loadCustomer(ctx: ActionCtx): Promise<{
+	billingContext: BillingContext;
+	autumn: Autumn;
+	customer: ParsedCustomer;
+}> {
+	const billingContext = await getBillingContext(ctx);
 	const autumn = new Autumn({ secretKey: process.env.AUTUMN_SECRET_KEY ?? '' });
-	let response: unknown;
+	let response = await autumn.customers.get(billingContext.customerId);
 
-	try {
-		response = await autumn.customers.get(user._id);
-	} catch (error) {
-		if (!isCustomerNotFound(error)) throw error;
-		await ctx.runAction(api.autumn.createCustomer, {});
-		response = await autumn.customers.get(user._id);
+	if (response.error && isCustomerNotFound(response.error)) {
+		const created = await autumn.customers.create({
+			id: billingContext.customerId,
+			name: billingContext.organizationName,
+			email: billingContext.actorEmail,
+			metadata: { organizationId: billingContext.orgId }
+		});
+		if (created.error) throw created.error;
+		response = await autumn.customers.get(billingContext.customerId);
 	}
+	if (response.error) throw response.error;
 
-	if (isCustomerNotFound(response)) {
-		await ctx.runAction(api.autumn.createCustomer, {});
-		response = await autumn.customers.get(user._id);
-	}
-
-	return { user, customer: parseCustomer(response) };
+	return {
+		billingContext,
+		autumn,
+		customer: parseCustomer(response.data)
+	};
 }
 
 export const getCustomer = action({
@@ -126,9 +146,22 @@ export const getCustomer = action({
 		error: v.union(v.string(), v.null()),
 		statusCode: v.number()
 	}),
-	handler: async (ctx) => {
+	handler: async (
+		ctx
+	): Promise<{
+		data: ParsedCustomer | null;
+		error: string | null;
+		statusCode: number;
+	}> => {
 		try {
-			const { customer } = await loadCustomer(ctx);
+			const { billingContext, customer } = await loadCustomer(ctx);
+			const activeProduct = customer.products.find((product) => product.status === 'active');
+			await ctx.runMutation(internal.organizations.applyVerifiedBillingPlan, {
+				orgId: billingContext.orgId,
+				actorUserId: billingContext.actorUserId,
+				productId: activeProduct?.id ?? null,
+				status: activeProduct?.status ?? 'inactive'
+			});
 			return { data: customer, error: null, statusCode: 200 };
 		} catch (error) {
 			console.error('Error getting Autumn customer:', error);
@@ -140,11 +173,12 @@ export const getCustomer = action({
 export const syncCurrentPlan = action({
 	args: {},
 	returns: v.object({ planKey: v.string() }),
-	handler: async (ctx) => {
-		const { user, customer } = await loadCustomer(ctx);
+	handler: async (ctx): Promise<{ planKey: string }> => {
+		const { billingContext, customer } = await loadCustomer(ctx);
 		const activeProduct = customer.products.find((product) => product.status === 'active');
 		await ctx.runMutation(internal.organizations.applyVerifiedBillingPlan, {
-			userId: user._id,
+			orgId: billingContext.orgId,
+			actorUserId: billingContext.actorUserId,
 			productId: activeProduct?.id ?? null,
 			status: activeProduct?.status ?? 'inactive'
 		});
@@ -169,10 +203,15 @@ export const checkout = action({
 		if (!args.productId.trim() || args.productId.length > 100) {
 			throw new Error('Invalid billing product.');
 		}
-		await ctx.runAction(api.autumn.createCustomer, {});
-		const result: unknown = await ctx.runAction(api.autumn.checkout, {
-			productId: args.productId,
-			successUrl: `${process.env.SITE_URL}/billing`
+		const { autumn, billingContext } = await loadCustomer(ctx);
+		const result: unknown = await autumn.checkout({
+			customer_id: billingContext.customerId,
+			product_id: args.productId,
+			success_url: `${process.env.SITE_URL}/billing`,
+			customer_data: {
+				name: billingContext.organizationName,
+				email: billingContext.actorEmail
+			}
 		});
 		return { url: extractActionUrl(result) };
 	}
@@ -182,9 +221,9 @@ export const billingPortal = action({
 	args: {},
 	returns: actionUrlValidator,
 	handler: async (ctx): Promise<{ url: string | null }> => {
-		await ctx.runAction(api.autumn.createCustomer, {});
-		const result: unknown = await ctx.runAction(api.autumn.billingPortal, {
-			returnUrl: `${process.env.SITE_URL}/billing`
+		const { autumn, billingContext } = await loadCustomer(ctx);
+		const result: unknown = await autumn.customers.billingPortal(billingContext.customerId, {
+			return_url: `${process.env.SITE_URL}/billing`
 		});
 		return { url: extractActionUrl(result) };
 	}
