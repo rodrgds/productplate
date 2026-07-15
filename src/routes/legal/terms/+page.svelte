@@ -16,10 +16,7 @@
 		customers.
 	</p>
 	<section class="space-y-3 text-sm leading-6 text-muted-foreground">
-		<p>
-			Customers are responsible for their account access, workspace content, API keys, and webhook
-			destinations.
-		</p>
+		<p>Customers are responsible for their account access, workspace content, and API keys.</p>
 		<p>
 			The service may include third-party infrastructure for authentication, billing, email,
 			analytics, and storage.

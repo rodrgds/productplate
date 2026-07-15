@@ -24,14 +24,14 @@ Build runtime provider abstraction only when the product truly sells through mul
 | Billing  | Autumn                        | Stripe direct, Polar, Creem, none                                  |
 | AI       | AI SDK route and assistant UI | Keep backend only or remove                                        |
 | Teams    | Organizations and invites     | Single-user profile/settings only                                  |
-| Platform | API keys and webhooks         | API keys only or no developer surface                              |
+| Platform | API keys                      | Activate webhooks or remove the developer surface                  |
 | Demo     | `/auth/demo` disposable demo  | Delete during kickstart or replace with a product-specific demo    |
 
 ## Current Starter Surfaces
 
 - Authenticated app: dashboard, billing, workspace, developer, assistant, editor, flow, map, Threlte, settings, admin users, admin organizations.
 - Public site: landing, docs, blog, changelog, legal templates, component gallery, theme builder, auth screens, disposable demo.
-- Backend: Convex auth, billing, organizations, entitlements, notifications, storage, API keys, webhooks, maintenance jobs, and the template-event HTTP endpoint.
+- Backend: Convex auth, billing, organizations, entitlements, notifications, storage, API keys, maintenance jobs, and the template-event HTTP endpoint.
 
 The kickstart agent should keep only the surfaces that support the selected product loop. Everything else should be deleted or documented as source material.
 

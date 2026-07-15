@@ -207,6 +207,23 @@ describe('authorization boundaries', () => {
 		expect(workspace?.membership.role).toBe('owner');
 	});
 
+	test('developer settings expose API keys without claiming inactive webhooks', async () => {
+		const t = createTestBackend();
+		const owner = await createAuthenticatedUser(t, {
+			id: 'developer-owner',
+			sessionId: 'developer-session',
+			email: 'developer@example.com'
+		});
+
+		await owner.client.mutation(api.organizations.ensureCurrent, {
+			workspaceName: 'Developer workspace'
+		});
+
+		const settings = await owner.client.query(api.developer.getCurrentSettings, {});
+		expect(settings).toMatchObject({ apiKeys: [] });
+		expect(settings).not.toHaveProperty('webhooks');
+	});
+
 	test('workspace-scoped queries follow the explicitly selected workspace', async () => {
 		const t = createTestBackend();
 		const owner = await createAuthenticatedUser(t, {

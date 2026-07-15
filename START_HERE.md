@@ -117,7 +117,7 @@ Billing:
 - None/waitlist, recommended if the first launch does not charge.
 
 Developer/platform:
-- Keep API keys, hashed webhook secrets, webhook delivery logs, and retry/maintenance functions when the product exposes an API, integrations, or outbound events.
+- Activate webhook delivery only after choosing a provider and adding signing, delivery, retry, and failure-path tests. The starter retains inactive compatibility tables but does not claim a working outbound pipeline.
 - Keep only API-key patterns when the product needs private programmatic access but no outgoing webhooks.
 - Remove developer tooling when the product has no platform surface.
 
@@ -276,14 +276,14 @@ Final response:
 ## Current Template Defaults
 
 - Frontend: SvelteKit, Svelte 5, Tailwind CSS v4, shadcn-svelte.
-- Backend: Convex in `src/convex` with auth, organizations, entitlements, notifications, storage, API keys, webhooks, maintenance jobs, and generated types.
+- Backend: Convex in `src/convex` with auth, organizations, entitlements, notifications, storage, API keys, maintenance jobs, and generated types.
 - Auth: Better Auth.
 - Billing: Autumn backed by Stripe.
 - AI: Vercel AI SDK chat route and assistant UI.
 - Product surfaces: onboarding, dashboard, profile/settings, workspace, developer tools, admin/operator screens, editor, graph, map, 3D, docs, legal pages, theme builder, and component gallery.
 - Package manager: bun.
 - Deployment: Cloudflare Pages plus Convex.
-- Security/observability: request IDs, security headers, optional request logs, hashed API keys, hashed webhook secrets.
+- Security/observability: request IDs, security headers, optional request logs, and hashed API keys.
 - Public preview: `/auth/demo` creates a fresh disposable demo account and should usually be deleted during kickstart.
 - Inactive options: `_template_options` contains scaffold material for alternate billing and database choices.
 

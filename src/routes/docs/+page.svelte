@@ -19,7 +19,7 @@
 	</section>
 
 	<section class="grid gap-4 md:grid-cols-3">
-		{#each [['Start', 'Run Bun, Convex, Better Auth, and the guided kickstart flow.'], ['Customize', 'Choose a stack path, theme, billing model, and demo cleanup plan.'], ['Ship', 'Use tests, Cloudflare deployment, API keys, webhooks, and operator screens.']] as item (item[0])}
+		{#each [['Start', 'Run Bun, Convex, Better Auth, and the guided kickstart flow.'], ['Customize', 'Choose a stack path, theme, billing model, and demo cleanup plan.'], ['Ship', 'Use tests, Cloudflare deployment, API keys, and operator screens.']] as item (item[0])}
 			<article class="rounded-lg border bg-card p-5">
 				<h2 class="font-semibold">{item[0]}</h2>
 				<p class="mt-2 text-sm text-muted-foreground">{item[1]}</p>
@@ -35,8 +35,8 @@
 			admin surfaces.
 		</p>
 		<p>
-			<code>src/convex</code> contains auth, billing, organizations, entitlements, notifications, API
-			keys, and webhooks.
+			<code>src/convex</code> contains auth, billing, organizations, entitlements, notifications, and
+			API keys.
 		</p>
 		<p>
 			<code>docs/observability-security.md</code> covers request logging, security headers, and secret-handling

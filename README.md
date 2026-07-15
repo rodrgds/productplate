@@ -61,11 +61,11 @@ The hosted demo creates a fresh disposable account and opens the authenticated a
 ## What is wired
 
 - **App:** SvelteKit 2, Svelte 5, TypeScript, Tailwind CSS v4, shadcn-svelte.
-- **Backend:** Convex functions, realtime data, storage, organizations, notifications, API keys, webhooks, and generated types.
+- **Backend:** Convex functions, realtime data, storage, organizations, notifications, API keys, and generated types.
 - **Accounts:** Better Auth, email/password, Google OAuth wiring, reset flows, onboarding, profiles, protected routes, and admin roles.
 - **Billing:** Autumn checkout, subscription state, and customer portal patterns.
 - **AI:** Vercel AI SDK route, streaming assistant UI, Markdown, suggestions, and tool calls.
-- **Product UI:** dashboard, profile/settings, workspace invites, developer keys/webhooks, admin, editor, graph, map, 3D, uploads.
+- **Product UI:** dashboard, profile/settings, workspace invites, developer API keys, admin, editor, graph, map, 3D, uploads.
 - **Public UI:** landing page, docs, blog, changelog, legal templates, component gallery, and theme builder.
 - **Delivery:** Bun, Vitest, Playwright, PWA support, request IDs, security headers, GitHub Actions, Cloudflare Pages.
 

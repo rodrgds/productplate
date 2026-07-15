@@ -127,7 +127,6 @@ const defaultEntitlements: readonly {
 }[] = [
 	{ key: 'members', enabled: true, limit: 3 },
 	{ key: 'api_keys', enabled: true, limit: 3 },
-	{ key: 'webhooks', enabled: true, limit: 2 },
 	{ key: 'ai_messages', enabled: true, limit: 250 },
 	{ key: 'advanced_admin', enabled: false }
 ];
@@ -144,7 +143,6 @@ const billingPlanEntitlements: Record<
 		entitlements: [
 			{ key: 'members', enabled: true, limit: 3 },
 			{ key: 'api_keys', enabled: true, limit: 3 },
-			{ key: 'webhooks', enabled: true, limit: 2 },
 			{ key: 'ai_messages', enabled: true, limit: 250 },
 			{ key: 'advanced_admin', enabled: false }
 		]
@@ -154,7 +152,6 @@ const billingPlanEntitlements: Record<
 		entitlements: [
 			{ key: 'members', enabled: true, limit: 10 },
 			{ key: 'api_keys', enabled: true, limit: 10 },
-			{ key: 'webhooks', enabled: true, limit: 10 },
 			{ key: 'ai_messages', enabled: true, limit: 5000 },
 			{ key: 'advanced_admin', enabled: true }
 		]
@@ -164,7 +161,6 @@ const billingPlanEntitlements: Record<
 		entitlements: [
 			{ key: 'members', enabled: true, limit: 25 },
 			{ key: 'api_keys', enabled: true, limit: 25 },
-			{ key: 'webhooks', enabled: true, limit: 25 },
 			{ key: 'ai_messages', enabled: true, limit: 25000 },
 			{ key: 'advanced_admin', enabled: true }
 		]
@@ -425,7 +421,7 @@ async function createOrganizationForUser(
 		userId: args.userId,
 		type: 'system',
 		title: 'Workspace ready',
-		body: 'Your starter workspace now has members, entitlements, API keys, webhooks, and notifications wired.',
+		body: 'Your starter workspace now has members, entitlements, API keys, and notifications wired.',
 		actionUrl: '/workspace',
 		createdAt: now
 	});
@@ -628,10 +624,12 @@ export const getBillingOverview = query({
 		if (!membership || roleRank[membership.role] < roleRank.admin) return null;
 		const organization = await ctx.db.get(membership.orgId);
 		if (!organization) return null;
-		const entitlements = await ctx.db
-			.query('entitlements')
-			.withIndex('by_orgId', (q) => q.eq('orgId', membership.orgId))
-			.take(50);
+		const entitlements = (
+			await ctx.db
+				.query('entitlements')
+				.withIndex('by_orgId', (q) => q.eq('orgId', membership.orgId))
+				.take(50)
+		).filter((entitlement) => entitlement.key !== 'webhooks');
 		return { organization, membership, entitlements };
 	}
 });

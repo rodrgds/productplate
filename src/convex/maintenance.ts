@@ -49,29 +49,6 @@ export const pruneReadNotifications = internalMutation({
 	}
 });
 
-export const queueWebhookRetries = internalMutation({
-	args: {},
-	returns: v.number(),
-	handler: async (ctx) => {
-		const now = Date.now();
-		const deliveries = await ctx.db
-			.query('webhookDeliveries')
-			.withIndex('by_status_and_nextAttemptAt', (q) =>
-				q.eq('status', 'failed').lte('nextAttemptAt', now)
-			)
-			.take(50);
-
-		for (const delivery of deliveries) {
-			await ctx.db.patch(delivery._id, {
-				status: 'pending',
-				updatedAt: now
-			});
-		}
-
-		return deliveries.length;
-	}
-});
-
 export const pruneOperationalData = internalMutation({
 	args: {},
 	returns: v.number(),

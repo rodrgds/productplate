@@ -567,7 +567,7 @@
 							</div>
 							<div>
 								<h2>Developer</h2>
-								<p>API keys, webhooks, scopes, and events.</p>
+								<p>API keys, scopes, revocation, and usage.</p>
 							</div>
 						</section>
 

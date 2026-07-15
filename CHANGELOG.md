@@ -8,7 +8,7 @@ Product Plate follows semantic versioning while it is useful for template consum
 
 ### Added
 
-- Workspace and organization model with members, invites, entitlements, notifications, API keys, webhooks, audit logs, and usage counters.
+- Workspace and organization model with members, invites, entitlements, notifications, API keys, audit logs, and usage counters.
 - Public docs, blog, changelog, legal starter pages, and theme builder.
 - Request IDs, default security headers, and optional request logging.
 - Expanded `START_HERE.md` coverage for workspaces, developer surfaces, admin/operator surfaces, docs cleanup, screenshots, and theme builder cleanup.

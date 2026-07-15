@@ -7,7 +7,7 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { useConvexClient, useQuery } from 'convex-svelte';
-	import { Check, Code2, Copy, KeyRound, PlugZap } from '@lucide/svelte';
+	import { Check, Code2, Copy, KeyRound } from '@lucide/svelte';
 	import type { Id } from '$convex/_generated/dataModel.js';
 	import { toast } from 'svelte-sonner';
 
@@ -21,11 +21,7 @@
 	let workspace = $derived(developerSettingsResponse.data);
 	let apiKeyName = $state('Production key');
 	let apiKeyScopes = $state('events:write');
-	let webhookUrl = $state('https://example.com/api/webhooks/product');
-	let webhookEvents = $state('template.event.created');
-	let webhookDescription = $state('Product events');
 	let revealedKey = $state('');
-	let revealedSecret = $state('');
 	let copied = $state('');
 	let error = $state('');
 	let isBusy = $state(false);
@@ -101,30 +97,6 @@
 			'API key revoked.'
 		);
 	}
-
-	async function createWebhook() {
-		if (!workspace) return;
-		await runAction(async () => {
-			const result = await convex.mutation(api.developer.createWebhookEndpoint, {
-				orgId: workspace.orgId,
-				url: webhookUrl,
-				description: webhookDescription,
-				events: splitList(webhookEvents)
-			});
-			revealedSecret = result.secret;
-		}, 'Webhook created. Copy the signing secret now.');
-	}
-
-	async function toggleWebhook(webhookId: Id<'webhookEndpoints'>, enabled: boolean) {
-		await runAction(
-			() =>
-				convex.mutation(api.developer.toggleWebhookEndpoint, {
-					webhookId,
-					enabled
-				}),
-			enabled ? 'Webhook enabled.' : 'Webhook disabled.'
-		);
-	}
 </script>
 
 <svelte:head>
@@ -152,9 +124,7 @@
 		<Card.Root class="max-w-xl gap-0 py-0">
 			<Card.Header class="p-4 pb-3">
 				<Card.Title>Initialize developer settings</Card.Title>
-				<Card.Description
-					>Create the workspace record before issuing keys or webhooks.</Card.Description
-				>
+				<Card.Description>Create the workspace record before issuing API keys.</Card.Description>
 			</Card.Header>
 			<Card.Content class="p-4 pt-0">
 				<Button onclick={ensureWorkspace} disabled={isBusy || !clientCurrentUser}>
@@ -166,9 +136,9 @@
 		<Card.Root class="max-w-xl gap-0 py-0">
 			<Card.Header class="p-4">
 				<Card.Title>Developer settings unavailable</Card.Title>
-				<Card.Description
-					>Your {workspaceSummary.membership.role} role does not include API key or webhook administration.</Card.Description
-				>
+				<Card.Description>
+					Your {workspaceSummary.membership.role} role does not include API key administration.
+				</Card.Description>
 			</Card.Header>
 		</Card.Root>
 	{:else}
@@ -226,52 +196,6 @@
 						</div>
 					</Card.Content>
 				</Card.Root>
-
-				<Card.Root class="min-w-0 gap-0 overflow-hidden py-0">
-					<Card.Header class="border-b p-4">
-						<Card.Title class="flex items-center gap-2 text-base">
-							<PlugZap class="size-4 text-primary" />
-							Webhooks
-						</Card.Title>
-						<Card.Description
-							>Endpoint registry with signing secrets and event filters.</Card.Description
-						>
-					</Card.Header>
-					<Card.Content class="p-0">
-						<div class="divide-y">
-							{#each workspace.webhooks as webhook (webhook._id)}
-								<div
-									class="grid min-w-0 gap-3 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
-								>
-									<div class="min-w-0">
-										<div class="flex flex-wrap items-center gap-2">
-											<p class="font-medium">{webhook.description}</p>
-											<Badge variant={webhook.enabled ? 'default' : 'secondary'}>
-												{webhook.enabled ? 'Enabled' : 'Disabled'}
-											</Badge>
-										</div>
-										<p class="text-sm break-all text-muted-foreground">{webhook.url}</p>
-										<p class="text-xs text-muted-foreground">{webhook.events.join(', ')}</p>
-									</div>
-									<Button
-										variant="outline"
-										size="sm"
-										onclick={() => toggleWebhook(webhook._id, !webhook.enabled)}
-									>
-										{webhook.enabled ? 'Disable' : 'Enable'}
-									</Button>
-								</div>
-							{:else}
-								<div class="p-4">
-									<p class="text-sm font-medium">No webhooks yet</p>
-									<p class="mt-1 text-sm text-muted-foreground">
-										Register an endpoint when you are ready to receive product events.
-									</p>
-								</div>
-							{/each}
-						</div>
-					</Card.Content>
-				</Card.Root>
 			</div>
 
 			<div class="grid min-w-0 auto-rows-max content-start gap-4 self-start">
@@ -302,43 +226,6 @@
 						{/if}
 					</Card.Content>
 				</Card.Root>
-
-				<Card.Root class="min-w-0 gap-0 overflow-hidden py-0">
-					<Card.Header class="p-4 pb-3">
-						<Card.Title class="text-base">Create webhook</Card.Title>
-					</Card.Header>
-					<Card.Content class="flex flex-col gap-3 p-4 pt-0">
-						<input
-							class="h-9 w-full rounded-md border bg-background px-3 text-sm"
-							bind:value={webhookDescription}
-						/>
-						<input
-							class="h-9 w-full rounded-md border bg-background px-3 text-sm"
-							bind:value={webhookUrl}
-						/>
-						<input
-							class="h-9 w-full rounded-md border bg-background px-3 text-sm"
-							bind:value={webhookEvents}
-						/>
-						<Button class="w-full" onclick={createWebhook} disabled={isBusy}>Create webhook</Button>
-						{#if revealedSecret}
-							<div class="rounded-lg border bg-muted p-3 text-sm">
-								<p class="mb-2 font-medium">Signing secret</p>
-								<div class="flex min-w-0 gap-2">
-									<code class="min-w-0 flex-1 truncate">{revealedSecret}</code>
-									<Button
-										variant="ghost"
-										size="icon"
-										onclick={() => copy(revealedSecret, 'secret')}
-									>
-										{#if copied === 'secret'}<Check />{:else}<Copy />{/if}
-									</Button>
-								</div>
-							</div>
-						{/if}
-					</Card.Content>
-				</Card.Root>
-
 				<Card.Root class="min-w-0 gap-0 overflow-hidden py-0">
 					<Card.Header class="border-b p-4">
 						<Card.Title class="flex items-center gap-2 text-base">

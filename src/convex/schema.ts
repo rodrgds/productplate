@@ -117,6 +117,7 @@ export default defineSchema({
 		.index('by_orgId', ['orgId'])
 		.index('by_orgId_and_revokedAt', ['orgId', 'revokedAt'])
 		.index('by_prefix', ['prefix']),
+	// Deprecated compatibility storage. No active webhook delivery pipeline uses these tables.
 	webhookEndpoints: defineTable({
 		orgId: v.id('organizations'),
 		url: v.string(),
