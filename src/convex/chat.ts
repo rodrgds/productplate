@@ -3,6 +3,7 @@ import { v } from 'convex/values';
 import { authComponent } from './auth';
 
 const CHAT_REQUESTS_PER_HOUR = 30;
+const DEMO_CHAT_REQUESTS_PER_HOUR = 3;
 const HOUR_MS = 60 * 60 * 1000;
 
 export const consumeRequest = mutation({
@@ -11,6 +12,11 @@ export const consumeRequest = mutation({
 	handler: async (ctx) => {
 		const user = await authComponent.getAuthUser(ctx);
 		const now = Date.now();
+		const profile = await ctx.db
+			.query('userProfiles')
+			.withIndex('by_userId', (q) => q.eq('userId', user._id))
+			.first();
+		const requestLimit = profile?.isDemo ? DEMO_CHAT_REQUESTS_PER_HOUR : CHAT_REQUESTS_PER_HOUR;
 		const windowStart = Math.floor(now / HOUR_MS) * HOUR_MS;
 		const record = await ctx.db
 			.query('chatRateLimits')
@@ -19,7 +25,7 @@ export const consumeRequest = mutation({
 			)
 			.unique();
 
-		if ((record?.count ?? 0) >= CHAT_REQUESTS_PER_HOUR) {
+		if ((record?.count ?? 0) >= requestLimit) {
 			throw new Error('Hourly AI request limit reached. Try again after the limit resets.');
 		}
 		const count = (record?.count ?? 0) + 1;
@@ -35,7 +41,7 @@ export const consumeRequest = mutation({
 		}
 
 		return {
-			remaining: CHAT_REQUESTS_PER_HOUR - count,
+			remaining: requestLimit - count,
 			resetsAt: windowStart + HOUR_MS
 		};
 	}

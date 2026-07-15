@@ -16,11 +16,15 @@ export default defineSchema({
 		role: v.string(),
 		workspaceName: v.string(),
 		activeOrganizationId: v.optional(v.id('organizations')),
+		isDemo: v.optional(v.boolean()),
+		demoExpiresAt: v.optional(v.number()),
 		image: v.optional(v.string()),
 		imageStorageId: v.optional(v.id('_storage')),
 		onboardingCompletedAt: v.number(),
 		updatedAt: v.number()
-	}).index('by_userId', ['userId']),
+	})
+		.index('by_userId', ['userId'])
+		.index('by_demo_and_expiry', ['isDemo', 'demoExpiresAt']),
 	organizations: defineTable({
 		name: v.string(),
 		slug: v.string(),
@@ -97,7 +101,8 @@ export default defineSchema({
 	})
 		.index('by_userId', ['userId'])
 		.index('by_userId_and_readAt', ['userId', 'readAt'])
-		.index('by_readAt', ['readAt']),
+		.index('by_readAt', ['readAt'])
+		.index('by_orgId', ['orgId']),
 	apiKeys: defineTable({
 		orgId: v.id('organizations'),
 		name: v.string(),
@@ -140,13 +145,27 @@ export default defineSchema({
 		windowStart: v.number(),
 		count: v.number(),
 		updatedAt: v.number()
-	}).index('by_userId_and_windowStart', ['userId', 'windowStart']),
+	})
+		.index('by_userId_and_windowStart', ['userId', 'windowStart'])
+		.index('by_userId', ['userId'])
+		.index('by_updatedAt', ['updatedAt']),
 	chatRateLimits: defineTable({
 		userId: v.string(),
 		windowStart: v.number(),
 		count: v.number(),
 		updatedAt: v.number()
-	}).index('by_userId_and_windowStart', ['userId', 'windowStart']),
+	})
+		.index('by_userId_and_windowStart', ['userId', 'windowStart'])
+		.index('by_userId', ['userId'])
+		.index('by_updatedAt', ['updatedAt']),
+	demoCreationLimits: defineTable({
+		fingerprint: v.string(),
+		windowStart: v.number(),
+		count: v.number(),
+		updatedAt: v.number()
+	})
+		.index('by_fingerprint_and_windowStart', ['fingerprint', 'windowStart'])
+		.index('by_updatedAt', ['updatedAt']),
 	webhookDeliveries: defineTable({
 		orgId: v.id('organizations'),
 		endpointId: v.id('webhookEndpoints'),
@@ -160,7 +179,8 @@ export default defineSchema({
 	})
 		.index('by_orgId', ['orgId'])
 		.index('by_endpointId', ['endpointId'])
-		.index('by_status_and_nextAttemptAt', ['status', 'nextAttemptAt']),
+		.index('by_status_and_nextAttemptAt', ['status', 'nextAttemptAt'])
+		.index('by_updatedAt', ['updatedAt']),
 	auditLogs: defineTable({
 		orgId: v.optional(v.id('organizations')),
 		actorUserId: v.optional(v.string()),
@@ -170,7 +190,8 @@ export default defineSchema({
 		createdAt: v.number()
 	})
 		.index('by_orgId_and_createdAt', ['orgId', 'createdAt'])
-		.index('by_actorUserId', ['actorUserId']),
+		.index('by_actorUserId', ['actorUserId'])
+		.index('by_createdAt', ['createdAt']),
 	usageCounters: defineTable({
 		orgId: v.id('organizations'),
 		key: v.string(),
@@ -178,5 +199,13 @@ export default defineSchema({
 		periodEnd: v.number(),
 		value: v.number(),
 		updatedAt: v.number()
-	}).index('by_orgId_and_key_and_periodStart', ['orgId', 'key', 'periodStart'])
+	})
+		.index('by_orgId_and_key_and_periodStart', ['orgId', 'key', 'periodStart'])
+		.index('by_orgId', ['orgId']),
+	accountDeletionJobs: defineTable({
+		userId: v.string(),
+		status: v.union(v.literal('pending'), v.literal('running')),
+		createdAt: v.number(),
+		updatedAt: v.number()
+	}).index('by_userId', ['userId'])
 });

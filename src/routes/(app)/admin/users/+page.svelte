@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { api } from '$convex/_generated/api.js';
-	import { useQuery } from 'convex-svelte';
+	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
@@ -34,6 +34,7 @@
 
 	// Get current user
 	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
+	const convex = useConvexClient();
 	let currentUser = $derived(currentUserResponse.data);
 
 	// State for users list
@@ -193,6 +194,7 @@
 		if (!userToDelete) return;
 
 		try {
+			await convex.mutation(api.accountAdmin.assertCanDeleteUser, { userId: userToDelete });
 			const { error } = await authClient.admin.removeUser({
 				userId: userToDelete
 			});

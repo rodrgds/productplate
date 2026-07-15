@@ -27,6 +27,7 @@
 	import { APP_NAME } from '$lib/constants.js';
 	import AppLogo from '$lib/components/app-logo.svelte';
 	import type { Doc } from '$convex/_generated/dataModel.js';
+	import { isDemoAccountEmail } from '$lib/demo-account.js';
 
 	interface WorkspaceOptionSource {
 		organization: Doc<'organizations'>;
@@ -51,6 +52,7 @@
 	});
 
 	const isAdmin = $derived(user?.role === 'admin');
+	const isDemo = $derived(isDemoAccountEmail(user?.email));
 
 	const navMainData = [
 		{
@@ -102,7 +104,9 @@
 
 	const data = $derived.by(() => ({
 		user: userData,
-		navMain: navMainData,
+		navMain: isDemo
+			? navMainData.filter((item) => !['Billing', 'Developer'].includes(item.title))
+			: navMainData,
 		navSecondary: [
 			{
 				title: 'Settings',

@@ -8,14 +8,17 @@
  * @module
  */
 
+import type * as accountAdmin from "../accountAdmin.js";
 import type * as auth from "../auth.js";
 import type * as autumn from "../autumn.js";
 import type * as billing from "../billing.js";
 import type * as chat from "../chat.js";
 import type * as crons from "../crons.js";
+import type * as demo from "../demo.js";
 import type * as developer from "../developer.js";
 import type * as emails from "../emails.js";
 import type * as http from "../http.js";
+import type * as lifecycle from "../lifecycle.js";
 import type * as maintenance from "../maintenance.js";
 import type * as notifications from "../notifications.js";
 import type * as organizations from "../organizations.js";
@@ -29,14 +32,17 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  accountAdmin: typeof accountAdmin;
   auth: typeof auth;
   autumn: typeof autumn;
   billing: typeof billing;
   chat: typeof chat;
   crons: typeof crons;
+  demo: typeof demo;
   developer: typeof developer;
   emails: typeof emails;
   http: typeof http;
+  lifecycle: typeof lifecycle;
   maintenance: typeof maintenance;
   notifications: typeof notifications;
   organizations: typeof organizations;

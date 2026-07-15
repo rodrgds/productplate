@@ -17,6 +17,11 @@ export const generateUploadUrl = mutation({
 	handler: async (ctx) => {
 		const user = await authComponent.getAuthUser(ctx);
 		const now = Date.now();
+		const profile = await ctx.db
+			.query('userProfiles')
+			.withIndex('by_userId', (q) => q.eq('userId', user._id))
+			.first();
+		const uploadLimit = profile?.isDemo ? 3 : MAX_UPLOAD_URLS_PER_DAY;
 		const windowStart = utcDayStart(now);
 		const limit = await ctx.db
 			.query('uploadRateLimits')
@@ -25,7 +30,7 @@ export const generateUploadUrl = mutation({
 			)
 			.unique();
 
-		if ((limit?.count ?? 0) >= MAX_UPLOAD_URLS_PER_DAY) {
+		if ((limit?.count ?? 0) >= uploadLimit) {
 			throw new Error('Daily profile image upload limit reached. Try again tomorrow.');
 		}
 		if (limit) {

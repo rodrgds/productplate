@@ -19,6 +19,14 @@ const queueWebhookRetriesRef = makeFunctionReference<'mutation', Record<string, 
 	'maintenance:queueWebhookRetries'
 ) as unknown as FunctionReference<'mutation', 'internal', Record<string, never>, number>;
 
+const expireDemoAccountsRef = makeFunctionReference<'action', Record<string, never>, number>(
+	'lifecycle:expireDemoAccounts'
+) as unknown as FunctionReference<'action', 'internal', Record<string, never>, number>;
+
+const pruneOperationalDataRef = makeFunctionReference<'mutation', Record<string, never>, number>(
+	'maintenance:pruneOperationalData'
+) as unknown as FunctionReference<'mutation', 'internal', Record<string, never>, number>;
+
 const crons = cronJobs();
 
 crons.interval('expire pending organization invites', { hours: 1 }, expireOldInvitesRef, {});
@@ -26,5 +34,7 @@ crons.cron('prune read notifications', '30 3 * * *', pruneReadNotificationsRef, 
 	olderThanDays: 45
 });
 crons.interval('queue failed webhook retries', { minutes: 5 }, queueWebhookRetriesRef, {});
+crons.interval('expire disposable demo accounts', { hours: 1 }, expireDemoAccountsRef, {});
+crons.cron('prune operational records', '45 3 * * *', pruneOperationalDataRef, {});
 
 export default crons;

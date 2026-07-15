@@ -48,6 +48,11 @@
 
 		demoProfileRequest ??= convexClient
 			.mutation(api.userProfiles.ensureDemoProfile, {})
+			.then(() =>
+				convexClient.mutation(api.organizations.ensureCurrent, {
+					workspaceName: 'Demo Workspace'
+				})
+			)
 			.catch((error) => {
 				console.error('Failed to prepare demo profile:', error);
 			});

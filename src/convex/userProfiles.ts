@@ -13,6 +13,8 @@ const profileValidator = v.object({
 	role: v.string(),
 	workspaceName: v.string(),
 	activeOrganizationId: v.optional(v.id('organizations')),
+	isDemo: v.optional(v.boolean()),
+	demoExpiresAt: v.optional(v.number()),
 	image: v.optional(v.string()),
 	imageStorageId: v.optional(v.id('_storage')),
 	onboardingCompletedAt: v.number(),
@@ -60,14 +62,24 @@ export const ensureDemoProfile = mutation({
 			throw new Error('The demo profile can only be created for the demo account.');
 		}
 
+		const now = Date.now();
+		const demoExpiresAt = now + 24 * 60 * 60 * 1000;
 		const existing = await getFirstProfileByUserId(ctx.db, user._id);
 
-		if (existing) return existing;
+		if (existing) {
+			if (!existing.isDemo || !existing.demoExpiresAt) {
+				await ctx.db.patch(existing._id, { isDemo: true, demoExpiresAt, updatedAt: now });
+			}
+			const updated = await ctx.db.get(existing._id);
+			if (!updated) throw new Error('Demo profile was not found after update.');
+			return updated;
+		}
 
-		const now = Date.now();
 		const profileId = await ctx.db.insert('userProfiles', {
 			userId: user._id,
 			...DEMO_PROFILE,
+			isDemo: true,
+			demoExpiresAt,
 			onboardingCompletedAt: now,
 			updatedAt: now
 		});

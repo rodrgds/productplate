@@ -60,6 +60,133 @@ async function createAuthenticatedUser(
 }
 
 describe('authorization boundaries', () => {
+	test('demo profiles are tagged with an expiration time', async () => {
+		const t = createTestBackend();
+		const demo = await createAuthenticatedUser(t, {
+			id: 'demo-user',
+			sessionId: 'demo-session',
+			email: 'demo-test-user@productplate.dev'
+		});
+
+		const profile = await demo.client.mutation(api.userProfiles.ensureDemoProfile, {});
+
+		expect(profile.isDemo).toBe(true);
+		expect(profile.demoExpiresAt).toBeGreaterThan(Date.now());
+	});
+
+	test('account deletion is blocked until owned workspaces have another owner', async () => {
+		const t = createTestBackend();
+		const owner = await createAuthenticatedUser(t, {
+			id: 'deletion-owner',
+			sessionId: 'deletion-owner-session',
+			email: 'deletion-owner@example.com'
+		});
+		const workspace = await owner.client.mutation(api.organizations.ensureCurrent, {
+			workspaceName: 'Shared workspace'
+		});
+		await t.run(async (ctx) => {
+			await ctx.db.insert('organizationMembers', {
+				orgId: workspace.organization._id,
+				userId: 'remaining-member',
+				email: 'remaining@example.com',
+				role: 'member',
+				status: 'active',
+				joinedAt: Date.now(),
+				updatedAt: Date.now()
+			});
+		});
+
+		await expect(
+			t.mutation(internal.lifecycle.startAccountDeletion, { userId: owner.userId })
+		).rejects.toThrow('Transfer ownership');
+	});
+
+	test('account deletion cleanup removes owned application data', async () => {
+		vi.useFakeTimers();
+		const t = createTestBackend();
+		const owner = await createAuthenticatedUser(t, {
+			id: 'cleanup-owner',
+			sessionId: 'cleanup-owner-session',
+			email: 'cleanup-owner@example.com'
+		});
+		const workspace = await owner.client.mutation(api.organizations.completeOnboarding, {
+			displayName: 'Cleanup owner',
+			bio: 'Testing complete deletion.',
+			role: 'Founder',
+			workspaceName: 'Disposable workspace'
+		});
+		await t.run(async (ctx) => {
+			await ctx.db.insert('apiKeys', {
+				orgId: workspace.organization._id,
+				name: 'Disposable key',
+				prefix: 'pp_delete',
+				keyHash: 'hash',
+				scopes: ['events:write'],
+				createdByUserId: owner.userId,
+				createdAt: Date.now()
+			});
+			await ctx.db.insert('chatRateLimits', {
+				userId: owner.userId,
+				windowStart: Date.now(),
+				count: 1,
+				updatedAt: Date.now()
+			});
+		});
+
+		await t.mutation(internal.lifecycle.startAccountDeletion, { userId: owner.userId });
+		await t.finishAllScheduledFunctions(() => vi.runAllTimers());
+
+		const remaining = await t.run(async (ctx) => ({
+			profile: await ctx.db
+				.query('userProfiles')
+				.withIndex('by_userId', (q) => q.eq('userId', owner.userId))
+				.first(),
+			organization: await ctx.db.get(workspace.organization._id),
+			apiKeys: await ctx.db
+				.query('apiKeys')
+				.withIndex('by_orgId', (q) => q.eq('orgId', workspace.organization._id))
+				.take(1),
+			chatLimits: await ctx.db
+				.query('chatRateLimits')
+				.withIndex('by_userId', (q) => q.eq('userId', owner.userId))
+				.take(1)
+		}));
+
+		expect(remaining.profile).toBeNull();
+		expect(remaining.organization).toBeNull();
+		expect(remaining.apiKeys).toHaveLength(0);
+		expect(remaining.chatLimits).toHaveLength(0);
+		vi.useRealTimers();
+	});
+
+	test('operational retention removes expired rate-limit records only', async () => {
+		const t = createTestBackend();
+		const now = Date.now();
+		const ids = await t.run(async (ctx) => ({
+			expired: await ctx.db.insert('chatRateLimits', {
+				userId: 'expired-user',
+				windowStart: now - 4 * 24 * 60 * 60 * 1000,
+				count: 1,
+				updatedAt: now - 4 * 24 * 60 * 60 * 1000
+			}),
+			current: await ctx.db.insert('chatRateLimits', {
+				userId: 'current-user',
+				windowStart: now,
+				count: 1,
+				updatedAt: now
+			})
+		}));
+
+		await t.mutation(internal.maintenance.pruneOperationalData, {});
+
+		const records = await t.run(async (ctx) => ({
+			expired: await ctx.db.get(ids.expired),
+			current: await ctx.db.get(ids.current)
+		}));
+		expect(records.expired).toBeNull();
+		expect(records.current).not.toBeNull();
+	});
+
 	test('onboarding creates the named workspace and selects it', async () => {
 		const t = createTestBackend();
 		const owner = await createAuthenticatedUser(t, {

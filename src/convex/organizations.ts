@@ -11,6 +11,7 @@ import { paginationOptsValidator, paginationResultValidator } from 'convex/serve
 import { authComponent } from './auth';
 import type { Doc, Id } from './_generated/dataModel';
 import { onboardingFormSchema } from '../lib/forms/schemas.js';
+import { isDemoAccountEmail } from '../lib/demo-account.js';
 
 const organizationRoleValidator = v.union(
 	v.literal('owner'),
@@ -595,6 +596,8 @@ export const getMemberAdministration = query({
 	handler: async (ctx) => {
 		const user = await authComponent.safeGetAuthUser(ctx);
 		if (!user) return null;
+		const profile = await getProfile(ctx, user._id);
+		if (profile?.isDemo) return null;
 		const membership = await getActiveMembership(ctx, user._id);
 		if (!membership || roleRank[membership.role] < roleRank.admin) return null;
 
@@ -619,6 +622,8 @@ export const getBillingOverview = query({
 	handler: async (ctx) => {
 		const user = await authComponent.safeGetAuthUser(ctx);
 		if (!user) return null;
+		const profile = await getProfile(ctx, user._id);
+		if (profile?.isDemo) return null;
 		const membership = await getActiveMembership(ctx, user._id);
 		if (!membership || roleRank[membership.role] < roleRank.admin) return null;
 		const organization = await ctx.db.get(membership.orgId);
@@ -640,6 +645,9 @@ export const inviteMember = mutation({
 	returns: inviteValidator,
 	handler: async (ctx, args) => {
 		const { user } = await requireRole(ctx, args.orgId, 'admin');
+		if (isDemoAccountEmail(user.email)) {
+			throw new Error('Workspace invitations are unavailable in demo accounts.');
+		}
 		if (args.role === 'owner') {
 			throw new Error(
 				'Owners cannot be invited directly. Invite an admin, then transfer ownership.'
@@ -998,6 +1006,8 @@ export const getCurrentBillingContext = internalQuery({
 	}),
 	handler: async (ctx) => {
 		const user = await requireCurrentUser(ctx);
+		const profile = await getProfile(ctx, user._id);
+		if (profile?.isDemo) throw new Error('Billing is unavailable in demo accounts.');
 		const membership = await getActiveMembership(ctx, user._id);
 		if (!membership || roleRank[membership.role] < roleRank.admin) {
 			throw new Error('Billing requires a workspace owner or administrator.');

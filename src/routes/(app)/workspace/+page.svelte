@@ -10,6 +10,7 @@
 	import { Bell, Building2, Check, Copy, MailPlus, ShieldCheck, Users } from '@lucide/svelte';
 	import type { Doc, Id } from '$convex/_generated/dataModel.js';
 	import { toast } from 'svelte-sonner';
+	import { isDemoAccountEmail } from '$lib/demo-account.js';
 
 	const convex = useConvexClient();
 	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
@@ -19,6 +20,7 @@
 	const notificationsResponse = useQuery(api.notifications.listCurrent, { limit: 10 });
 
 	let clientCurrentUser = $derived(currentUserResponse.data);
+	let isDemo = $derived(isDemoAccountEmail(clientCurrentUser?.email));
 	let workspace = $derived(workspaceResponse.data);
 	let administration = $derived(administrationResponse.data);
 	let entitlements = $derived(billingResponse.data?.entitlements ?? []);
@@ -240,7 +242,7 @@
 			</div>
 
 			<div class="grid min-w-0 auto-rows-max gap-4">
-				{#if administration}
+				{#if administration && !isDemo}
 					<Card.Root class="gap-0 py-0">
 						<Card.Header class="p-4 pb-3"
 							><Card.Title class="flex items-center gap-2 text-base"

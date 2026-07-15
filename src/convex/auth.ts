@@ -1,6 +1,6 @@
-import { createClient, type GenericCtx } from '@convex-dev/better-auth';
+import { createClient, type AuthFunctions, type GenericCtx } from '@convex-dev/better-auth';
 import { convex } from '@convex-dev/better-auth/plugins';
-import { components } from './_generated/api';
+import { components, internal } from './_generated/api';
 import { type DataModel } from './_generated/dataModel';
 import { query } from './_generated/server';
 import { v } from 'convex/values';
@@ -9,6 +9,7 @@ import type { BetterAuthOptions } from 'better-auth/minimal';
 import { admin } from 'better-auth/plugins';
 import authSchema from './betterAuth/schema';
 import authConfig from './auth.config';
+import { queueUserDeletionForAuth } from './lifecycle';
 
 function getRuntimeEnv(key: string) {
 	return typeof process === 'undefined' ? undefined : process.env[key];
@@ -63,11 +64,23 @@ const authUserValidator = v.object({
 
 // The component client has methods needed for integrating Convex with Better Auth,
 // as well as helper methods for general use.
+const authFunctions: AuthFunctions = internal.auth;
+
 export const authComponent = createClient<DataModel, typeof authSchema>(components.betterAuth, {
 	local: {
 		schema: authSchema
+	},
+	authFunctions,
+	triggers: {
+		user: {
+			onDelete: async (ctx, user) => {
+				await queueUserDeletionForAuth(ctx, user._id);
+			}
+		}
 	}
 });
+
+export const { onCreate, onUpdate, onDelete } = authComponent.triggersApi();
 
 function escapeHtml(value: string) {
 	return value
@@ -134,6 +147,7 @@ export const createAuthOptions = (
 		database: authComponent.adapter(ctx),
 		// User configuration
 		user: {
+			deleteUser: { enabled: true },
 			changeEmail: {
 				enabled: true,
 				sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {

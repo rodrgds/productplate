@@ -9,6 +9,7 @@ import {
 import { v } from 'convex/values';
 import { authComponent } from './auth';
 import type { Doc, Id } from './_generated/dataModel';
+import { isDemoAccountEmail } from '../lib/demo-account.js';
 
 const roleRank: Record<Doc<'organizationMembers'>['role'], number> = {
 	viewer: 0,
@@ -111,6 +112,9 @@ async function requireRole(
 	minimumRole: Doc<'organizationMembers'>['role']
 ) {
 	const user = await authComponent.getAuthUser(ctx);
+	if (isDemoAccountEmail(user.email)) {
+		throw new Error('Developer credentials are unavailable in demo accounts.');
+	}
 	const membership = await getMembership(ctx, orgId, user._id);
 	if (!membership || roleRank[membership.role] < roleRank[minimumRole]) {
 		throw new Error('You do not have permission to manage developer settings.');
@@ -195,6 +199,7 @@ export const getCurrentSettings = query({
 	handler: async (ctx) => {
 		const user = await authComponent.safeGetAuthUser(ctx);
 		if (!user) return null;
+		if (isDemoAccountEmail(user.email)) return null;
 		const profile = await ctx.db
 			.query('userProfiles')
 			.withIndex('by_userId', (q) => q.eq('userId', user._id))

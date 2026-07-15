@@ -1,5 +1,11 @@
 import { expect, test } from '@playwright/test';
 
+async function enterDemo(page: import('@playwright/test').Page) {
+	await page.goto('/auth/demo');
+	await page.getByRole('button', { name: /Create demo workspace/i }).click();
+	await page.waitForURL('**/dashboard');
+}
+
 test('home page presents Product Plate and its starter capabilities', async ({ page }) => {
 	await page.goto('/');
 	await expect(page).toHaveTitle(/Product Plate/);
@@ -25,8 +31,7 @@ test('home page presents Product Plate and its starter capabilities', async ({ p
 });
 
 test('home entry points signed-in visitors back to the app', async ({ page }) => {
-	await page.goto('/auth/demo');
-	await page.waitForURL('**/dashboard');
+	await enterDemo(page);
 
 	await page.goto('/');
 
@@ -76,8 +81,7 @@ test('landing component gallery presents reusable marketing sections', async ({ 
 });
 
 test('demo entry opens the dashboard with sidebar navigation', async ({ page }) => {
-	await page.goto('/auth/demo');
-	await page.waitForURL('**/dashboard');
+	await enterDemo(page);
 
 	await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
 	await expect(page.getByRole('link', { name: /Assistant/i })).toBeVisible();
@@ -87,8 +91,7 @@ test('demo entry opens the dashboard with sidebar navigation', async ({ page }) 
 });
 
 test('demo workspace includes the map and interactive 3D starter routes', async ({ page }) => {
-	await page.goto('/auth/demo');
-	await page.waitForURL('**/dashboard');
+	await enterDemo(page);
 
 	await page.goto('/map');
 	await expect(page.getByRole('heading', { name: 'Map', exact: true })).toBeVisible();
