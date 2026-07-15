@@ -9,6 +9,9 @@ env:
   PUBLIC_CONVEX_SITE_URL: 'https://fake-convex-site-url.convex.site'
   # SITE_URL - imported in hooks.server.ts and admin/+layout.server.ts
   SITE_URL: 'https://fake-site-url.com'
+  # Better Auth rejects its package default during production-mode builds.
+  # This CI-only value is never deployed or used by a real environment.
+  BETTER_AUTH_SECRET: 'ci-build-only-secret-not-used-at-runtime'
 
 jobs:
   lint_and_test:
