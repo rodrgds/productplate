@@ -3,6 +3,7 @@
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { BriefcaseIcon, FileTextIcon } from '@lucide/svelte';
+	import { APP_NAME } from '$lib/constants.js';
 
 	let { data } = $props();
 	const profile = $derived(data.profile);
@@ -16,6 +17,10 @@
 			.slice(0, 2)
 	);
 </script>
+
+<svelte:head>
+	<title>{profile.displayName} | Profile | {APP_NAME}</title>
+</svelte:head>
 
 <div class="flex min-h-screen flex-col items-center bg-muted/30">
 	<div class="w-full max-w-2xl px-4 py-16">

@@ -6,6 +6,7 @@
 	import LandingNav from '$lib/components/landing/landing-nav.svelte';
 	import LandingFooter from '$lib/components/landing/landing-footer.svelte';
 	import { Button } from '$lib/components/ui/button';
+	import { APP_URL } from '$lib/constants';
 	import { categories, getCategory } from '../registry';
 
 	let current = $derived(getCategory(page.params.category ?? ''));
@@ -17,6 +18,9 @@
 		name="description"
 		content={current ? current.blurb : 'Browse landing page component variants for Product Plate.'}
 	/>
+	{#if current}
+		<link rel="canonical" href={`${APP_URL}/components/${current.id}`} />
+	{/if}
 </svelte:head>
 
 <a

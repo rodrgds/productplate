@@ -6,6 +6,10 @@ import { isDemoAccountEmail } from '$lib/demo-account.js';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals, url }) => {
+	if (!locals.token) {
+		throw redirect(303, resolve('/auth/sign-in'));
+	}
+
 	const client = createConvexHttpClient({ token: locals.token });
 	const currentUser = await client.query(api.auth.getCurrentUser, {});
 

@@ -12,6 +12,22 @@ Product Plate follows semantic versioning while it is useful for template consum
 - Public docs, blog, changelog, legal starter pages, and theme builder.
 - Request IDs, default security headers, and optional request logging.
 - Expanded `START_HERE.md` coverage for workspaces, developer surfaces, admin/operator surfaces, docs cleanup, screenshots, and theme builder cleanup.
+- Non-mutating browser smoke coverage in the code-quality workflow.
+- Automated disposable-demo expiration, account cleanup, and operational-data retention.
+
+### Changed
+
+- Workspace selection is explicit and onboarding creates the workspace name entered by the user.
+- Billing and entitlements are scoped to the active organization and restricted to workspace administrators.
+- Webhooks remain inactive compatibility storage until a real signed delivery pipeline is selected.
+- PWA generation is opt-in and avoids precaching authenticated product routes.
+- Public changelog content now comes directly from this file.
+
+### Fixed
+
+- Account deletion now blocks unsafe owner removal and cleans related application data.
+- Protected, auth, placeholder legal, and empty blog routes now publish appropriate indexing directives.
+- The sitemap contains only truthful, indexable public routes.
 
 ## [0.1.0] - 2026-06-25
 

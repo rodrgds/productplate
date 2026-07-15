@@ -228,7 +228,7 @@
 						onclick={() => goto(resolve(`/profile/${user.id}`))}
 					>
 						<ExternalLink class="mr-2 size-3.5" />
-						View Public Profile
+						View Profile
 					</Button>
 				{/if}
 			</div>

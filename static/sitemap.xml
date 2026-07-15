@@ -11,18 +11,26 @@
 		<priority>0.8</priority>
 	</url>
 	<url>
-		<loc>https://productplate.pages.dev/auth/sign-up</loc>
-		<changefreq>monthly</changefreq>
-		<priority>0.6</priority>
-	</url>
-	<url>
-		<loc>https://productplate.pages.dev/auth/sign-in</loc>
-		<changefreq>monthly</changefreq>
-		<priority>0.4</priority>
-	</url>
-	<url>
-		<loc>https://productplate.pages.dev/auth/demo</loc>
+		<loc>https://productplate.pages.dev/components/hero</loc>
 		<changefreq>monthly</changefreq>
 		<priority>0.7</priority>
 	</url>
+	<url>
+		<loc>https://productplate.pages.dev/components/features</loc>
+		<changefreq>monthly</changefreq>
+		<priority>0.7</priority>
+	</url>
+	<url>
+		<loc>https://productplate.pages.dev/components/proof</loc>
+		<changefreq>monthly</changefreq>
+		<priority>0.7</priority>
+	</url>
+	<url><loc>https://productplate.pages.dev/components/pricing</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+	<url><loc>https://productplate.pages.dev/components/faq</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+	<url><loc>https://productplate.pages.dev/components/cta</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+	<url><loc>https://productplate.pages.dev/components/utility</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+	<url><loc>https://productplate.pages.dev/components/showcase</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+	<url><loc>https://productplate.pages.dev/theme-builder</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+	<url><loc>https://productplate.pages.dev/docs</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+	<url><loc>https://productplate.pages.dev/changelog</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
 </urlset>

@@ -13,8 +13,6 @@
 		GitBranch,
 		Cuboid,
 		MapPinned,
-		CircleQuestionMark,
-		ChartLine,
 		Building2,
 		Code2
 	} from '@lucide/svelte';
@@ -107,18 +105,7 @@
 		navMain: isDemo
 			? navMainData.filter((item) => !['Billing', 'Developer'].includes(item.title))
 			: navMainData,
-		navSecondary: [
-			{
-				title: 'Settings',
-				url: '/settings',
-				icon: Settings
-			},
-			{
-				title: 'Get Help',
-				url: '#',
-				icon: CircleQuestionMark
-			}
-		],
+		navSecondary: [{ title: 'Settings', url: '/settings', icon: Settings }],
 		admin: [
 			{
 				name: 'Users',
@@ -129,11 +116,6 @@
 				name: 'Organizations',
 				url: '/admin/organizations',
 				icon: Building2
-			},
-			{
-				name: 'Analytics',
-				url: '#',
-				icon: ChartLine
 			}
 		]
 	}));

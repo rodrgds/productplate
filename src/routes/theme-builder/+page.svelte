@@ -13,7 +13,7 @@
 	import { onMount } from 'svelte';
 	import LandingNav from '$lib/components/landing/landing-nav.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { APP_NAME } from '$lib/constants.js';
+	import { APP_NAME, APP_URL } from '$lib/constants.js';
 	import {
 		accentColorMeta,
 		accentColors,
@@ -220,6 +220,7 @@
 		name="description"
 		content="Build and copy a Product Plate theme with live CSS variables, dark mode, and a product preview."
 	/>
+	<link rel="canonical" href={`${APP_URL}/theme-builder`} />
 </svelte:head>
 
 <div class="min-h-screen bg-background text-foreground">

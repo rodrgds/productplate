@@ -16,7 +16,7 @@
 		"test:unit": "vitest run",
 		"test:e2e": "playwright test",
 		"test:e2e:auth": "playwright test e2e/auth-onboarding.test.ts",
-		"test:e2e:ci": "PLAYWRIGHT_TEST_MODE=public playwright test",
+		"test:e2e:ci": "PLAYWRIGHT_TEST_MODE=public PLAYWRIGHT_PREBUILT=true playwright test",
 		"audit": "bun audit --audit-level high",
 		"screenshots:readme": "bun docs/scripts/capture-readme-screenshots.ts",
 		"test": "bun run test:unit",

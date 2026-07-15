@@ -57,7 +57,7 @@
 			<a
 				href={resolve('/')}
 				aria-label="Product Plate home"
-				class="flex items-center gap-3 font-semibold tracking-tight"
+				class="flex min-h-11 items-center gap-3 font-semibold tracking-tight"
 			>
 				<AppLogo class="size-8 rounded-lg" />
 				<span>{APP_NAME}</span>
@@ -125,7 +125,7 @@
 							{...props}
 							variant="ghost"
 							size="icon"
-							class="lg:hidden"
+							class="size-11 lg:hidden"
 							aria-label="Open navigation"
 						>
 							<MenuIcon />
@@ -144,7 +144,7 @@
 							<a
 								href={resolve(item.href)}
 								aria-current={active === item.key ? 'page' : undefined}
-								class="rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground aria-[current=page]:bg-muted aria-[current=page]:text-foreground"
+								class="flex min-h-11 items-center rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground aria-[current=page]:bg-muted aria-[current=page]:text-foreground"
 								onclick={closeMenus}
 							>
 								{item.label}

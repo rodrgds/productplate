@@ -7,7 +7,7 @@
 	import LandingNav from '$lib/components/landing/landing-nav.svelte';
 	import LandingFooter from '$lib/components/landing/landing-footer.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { APP_DESCRIPTION, APP_NAME } from '$lib/constants';
+	import { APP_DESCRIPTION, APP_NAME, APP_URL } from '$lib/constants';
 	import { categories } from './registry';
 
 	const componentCount = categories.reduce(
@@ -25,6 +25,7 @@
 <svelte:head>
 	<title>Components | {APP_NAME}</title>
 	<meta name="description" content={APP_DESCRIPTION} />
+	<link rel="canonical" href={`${APP_URL}/components`} />
 </svelte:head>
 
 <a

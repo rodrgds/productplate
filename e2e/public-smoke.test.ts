@@ -41,3 +41,10 @@ test('mobile landing navigation remains interactive', async ({ page }) => {
 	await expect(page.locator('[data-slot="sheet-title"]')).toHaveText('Product Plate');
 	await expect(page.getByRole('link', { name: /Components/i }).last()).toBeVisible();
 });
+
+test('protected profile routes redirect signed-out visitors before backend access', async ({
+	page
+}) => {
+	await page.goto('/profile/not-a-real-user');
+	await expect(page).toHaveURL(/\/auth\/sign-in$/);
+});

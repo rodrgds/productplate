@@ -13,12 +13,17 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Account | {APP_NAME}</title>
+	<meta name="robots" content="noindex, nofollow" />
+</svelte:head>
+
 <div class="relative grid min-h-screen lg:grid-cols-2">
 	<div class="relative hidden flex-col justify-between bg-muted/50 p-10 lg:flex">
 		<a
 			href={resolve('/')}
 			aria-label={`${APP_NAME} home`}
-			class="inline-flex w-fit items-center gap-3 rounded-lg font-semibold tracking-tight transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+			class="inline-flex min-h-11 w-fit items-center gap-3 rounded-lg font-semibold tracking-tight transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
 		>
 			<AppLogo class="size-8 rounded-lg" />
 			{APP_NAME}
@@ -42,7 +47,7 @@
 			<a
 				href={resolve('/')}
 				aria-label={`${APP_NAME} home`}
-				class="mb-8 inline-flex w-full items-center justify-center gap-3 rounded-lg font-semibold tracking-tight transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none lg:hidden"
+				class="mb-8 inline-flex min-h-11 w-full items-center justify-center gap-3 rounded-lg font-semibold tracking-tight transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none lg:hidden"
 			>
 				<AppLogo class="size-8 rounded-lg" />
 				<span>{APP_NAME}</span>

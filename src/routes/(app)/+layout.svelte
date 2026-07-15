@@ -59,6 +59,10 @@
 	});
 </script>
 
+<svelte:head>
+	<meta name="robots" content="noindex, nofollow" />
+</svelte:head>
+
 {#if isLoading || (isAuthenticated && isProfileLoading)}
 	<div class="flex min-h-screen flex-col items-center justify-center gap-4 bg-muted/30">
 		<div class="flex size-10 items-center justify-center rounded-lg border bg-background shadow-sm">

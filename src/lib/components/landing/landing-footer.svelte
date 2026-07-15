@@ -9,11 +9,11 @@
 
 	const groups = [
 		{
-			title: 'Product',
+			title: 'Starter',
 			links: [
 				{ label: 'Home', href: '/' },
-				{ label: 'Dashboard', href: '/dashboard' },
-				{ label: 'Assistant', href: '/assistant' }
+				{ label: 'Docs', href: '/docs' },
+				{ label: 'Changelog', href: '/changelog' }
 			]
 		},
 		{
@@ -28,8 +28,10 @@
 			]
 		},
 		{
-			title: 'Source',
+			title: 'Explore',
 			links: [
+				{ label: 'Theme builder', href: '/theme-builder' },
+				{ label: 'Live demo', href: '/auth/demo' },
 				{ label: 'Sign up', href: '/auth/sign-up' },
 				{ label: 'Sign in', href: '/auth/sign-in' }
 			]
