@@ -50,26 +50,9 @@
 		products?: CustomerProduct[];
 	}
 
-	function extractCustomerData(value: unknown): CustomerData | null {
-		if (!value || typeof value !== 'object' || !('data' in value)) return null;
-		const outerData = value.data;
-		if (!outerData || typeof outerData !== 'object' || !('data' in outerData)) return null;
-		const customer = outerData.data;
-		return customer && typeof customer === 'object' ? (customer as CustomerData) : null;
-	}
-
-	function extractActionUrl(value: unknown): string | null {
-		if (!value || typeof value !== 'object' || !('data' in value)) return null;
-		const data = value.data;
-		if (!data || typeof data !== 'object' || !('url' in data)) return null;
-		return typeof data.url === 'string' ? data.url : null;
-	}
-
 	// Get Convex client for actions (checkout/portal)
 	const client = useConvexClient();
-	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
-	const workspaceResponse = useQuery(api.organizations.getCurrent, {});
-	let clientCurrentUser = $derived(currentUserResponse.data);
+	const workspaceResponse = useQuery(api.organizations.getBillingOverview, {});
 	let workspace = $derived(workspaceResponse.data);
 	let syncMessage = $state('');
 	let syncError = $state('');
@@ -78,14 +61,15 @@
 	// Get data from server load function
 	let products = $derived<Product[]>(data.products || []);
 	// customerData from autumn.customers.get() - nested under data.data
-	let customerData = $derived<CustomerData | null>(extractCustomerData(data.customerData));
+	let customerData = $derived<CustomerData | null>(
+		(data.customerData as CustomerData | null) ?? null
+	);
 
 	async function handleCheckout(productId: string) {
 		try {
-			const result: unknown = await client.action(api.billing.checkout, { productId });
-			const url = extractActionUrl(result);
-			if (url) {
-				window.location.href = url;
+			const result = await client.action(api.billing.checkout, { productId });
+			if (result.url) {
+				window.location.href = result.url;
 			}
 		} catch (error) {
 			console.error('Checkout error:', error);
@@ -94,10 +78,9 @@
 
 	async function handleManageSubscription() {
 		try {
-			const result: unknown = await client.action(api.billing.billingPortal, {});
-			const url = extractActionUrl(result);
-			if (url) {
-				window.location.href = url;
+			const result = await client.action(api.billing.billingPortal, {});
+			if (result.url) {
+				window.location.href = result.url;
 			}
 		} catch (error) {
 			console.error('Billing portal error:', error);
@@ -106,21 +89,23 @@
 
 	// Get active product IDs from customer data
 	// customerData.products is an array of product objects with { id, status }
-	let activeProductIds = $derived<string[]>(
+	let activeProductIds = $derived<Set<string>>(
 		Array.isArray(customerData?.products)
-			? customerData.products
-					.filter((product) => product.status === 'active')
-					.map((product) => product.id)
-			: []
+			? new Set(
+					customerData.products
+						.filter((product) => product.status === 'active')
+						.map((product) => product.id)
+				)
+			: new Set()
 	);
 
 	// Get current plan info from customerData.products (active subscription)
 	let currentPlan = $derived.by<Plan | null>(() => {
-		if (!customerData?.products || activeProductIds.length === 0) return null;
+		if (!customerData?.products || activeProductIds.size === 0) return null;
 
 		// Get the active product from customer data
 		const activeCustomerProduct = customerData.products.find(
-			(p) => p.status === 'active' && activeProductIds.includes(p.id)
+			(p) => p.status === 'active' && activeProductIds.has(p.id)
 		);
 		if (!activeCustomerProduct) return null;
 
@@ -143,11 +128,6 @@
 		};
 	});
 
-	let currentProduct = $derived.by<CustomerProduct | null>(() => {
-		if (!customerData?.products) return null;
-		return customerData.products.find((product) => product.status === 'active') ?? null;
-	});
-
 	// Map products to display format
 	let plans = $derived<Plan[]>(
 		Array.isArray(products)
@@ -165,7 +145,7 @@
 							product.id === 'pro' ? 'Priority support' : 'Basic support',
 							product.id === 'pro' ? 'Advanced features' : 'Community access'
 						],
-						isCurrent: activeProductIds.includes(product.id)
+						isCurrent: activeProductIds.has(product.id)
 					};
 				})
 			: []
@@ -174,19 +154,9 @@
 	async function syncEntitlements() {
 		syncMessage = '';
 		syncError = '';
-		if (!clientCurrentUser) {
-			syncError = currentUserResponse.isLoading
-				? 'Your session is still connecting. Try again in a moment.'
-				: 'Sign in again before syncing entitlements.';
-			return;
-		}
-
 		isSyncingEntitlements = true;
 		try {
-			const args: { productId?: string; status?: string } = {};
-			if (currentProduct?.id) args.productId = currentProduct.id;
-			if (currentProduct?.status) args.status = currentProduct.status;
-			await client.mutation(api.organizations.syncBillingPlan, args);
+			await client.action(api.billing.syncCurrentPlan, {});
 			syncMessage = 'Workspace entitlements synced from billing.';
 		} catch (cause) {
 			syncError = cause instanceof Error ? cause.message : String(cause);
@@ -292,13 +262,9 @@
 					<Button
 						class="w-full"
 						onclick={syncEntitlements}
-						disabled={isSyncingEntitlements || !clientCurrentUser}
+						disabled={isSyncingEntitlements || !workspace}
 					>
-						{currentUserResponse.isLoading
-							? 'Preparing session...'
-							: isSyncingEntitlements
-								? 'Syncing...'
-								: 'Sync entitlements'}
+						{isSyncingEntitlements ? 'Syncing...' : 'Sync entitlements'}
 					</Button>
 					{#if syncMessage}
 						<p class="text-sm text-primary">{syncMessage}</p>

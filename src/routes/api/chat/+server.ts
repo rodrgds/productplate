@@ -1,10 +1,14 @@
 import { env } from '$env/dynamic/private';
+import { api } from '$convex/_generated/api.js';
+import { createConvexHttpClient } from '@mmailaender/convex-better-auth-svelte/sveltekit';
 import { createOpenAI } from '@ai-sdk/openai';
-import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from 'ai';
+import { convertToModelMessages, safeValidateUIMessages, stepCountIs, streamText, tool } from 'ai';
 import { z } from 'zod';
 import { APP_NAME } from '$lib/constants.js';
 
 const MODEL_NAME = env.CHAT_MODEL ?? 'openrouter/free';
+const MAX_CHAT_BODY_BYTES = 100_000;
+const MAX_CHAT_MESSAGES = 50;
 
 const openrouter = createOpenAI({
 	name: 'openrouter',
@@ -82,12 +86,47 @@ function evaluateExpression(expr: string): number {
 	return parseExpression();
 }
 
-export async function POST({ request }) {
+export async function POST({ request, locals }) {
 	if (!env.OPENROUTER_API_KEY) {
 		return new Response('OPENROUTER_API_KEY is not configured.', { status: 503 });
 	}
+	if (!locals.token) return new Response('Unauthorized.', { status: 401 });
+	const declaredLength = Number(request.headers.get('content-length') ?? 0);
+	if (declaredLength > MAX_CHAT_BODY_BYTES) {
+		return new Response('Request body is too large.', { status: 413 });
+	}
 
-	const { messages }: { messages: UIMessage[] } = await request.json();
+	const bodyText = await request.text();
+	if (new TextEncoder().encode(bodyText).byteLength > MAX_CHAT_BODY_BYTES) {
+		return new Response('Request body is too large.', { status: 413 });
+	}
+	let body: unknown;
+	try {
+		body = JSON.parse(bodyText);
+	} catch {
+		return new Response('Invalid JSON body.', { status: 400 });
+	}
+	if (
+		!body ||
+		typeof body !== 'object' ||
+		!('messages' in body) ||
+		!Array.isArray(body.messages) ||
+		body.messages.length === 0 ||
+		body.messages.length > MAX_CHAT_MESSAGES
+	) {
+		return new Response('Invalid message list.', { status: 400 });
+	}
+	const validation = await safeValidateUIMessages({ messages: body.messages });
+	if (!validation.success) return new Response('Invalid chat messages.', { status: 400 });
+	const messages = validation.data;
+
+	try {
+		const client = createConvexHttpClient({ token: locals.token });
+		await client.mutation(api.chat.consumeRequest, {});
+	} catch (error) {
+		const message = error instanceof Error ? error.message : 'AI request limit reached.';
+		return new Response(message, { status: message.includes('limit') ? 429 : 401 });
+	}
 
 	const result = streamText({
 		model: openrouter.chat(MODEL_NAME),
@@ -98,6 +137,7 @@ export async function POST({ request }) {
 			'display/block math in double dollar signs ($$\\dfrac{128 \\times 7}{3} = 298.67$$). ' +
 			'Use the calculator tool for arithmetic and show the result clearly, including the LaTeX form when useful.',
 		messages: await convertToModelMessages(messages),
+		maxOutputTokens: 800,
 		stopWhen: stepCountIs(4),
 		tools: {
 			calculator: tool({

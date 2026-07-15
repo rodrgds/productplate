@@ -6,14 +6,18 @@
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { useConvexClient, useQuery } from 'convex-svelte';
+	import { useConvexClient, usePaginatedQuery } from 'convex-svelte';
 	import { Building2, ShieldCheck } from '@lucide/svelte';
 	import type { Id } from '$convex/_generated/dataModel.js';
 
 	const convex = useConvexClient();
-	const organizationsResponse = useQuery(api.organizations.adminListOrganizations, {});
+	const organizationsResponse = usePaginatedQuery(
+		api.organizations.adminListOrganizations,
+		() => ({}),
+		{ initialNumItems: 10 }
+	);
 
-	let rows = $derived(organizationsResponse.data ?? []);
+	let rows = $derived(organizationsResponse.results);
 	let entitlementKey = $state('advanced_admin');
 	let entitlementEnabled = $state(true);
 	let entitlementLimit = $state('');
@@ -114,6 +118,13 @@
 				</div>
 			{/if}
 		</Card.Content>
+		{#if organizationsResponse.status === 'CanLoadMore'}
+			<Card.Footer class="border-t">
+				<Button variant="outline" onclick={() => organizationsResponse.loadMore(10)}>
+					Load more workspaces
+				</Button>
+			</Card.Footer>
+		{/if}
 	</Card.Root>
 
 	<Card.Root class="self-start">

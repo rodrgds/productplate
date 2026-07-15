@@ -2,6 +2,7 @@ import {
 	internalMutation,
 	internalQuery,
 	mutation,
+	query,
 	type MutationCtx,
 	type QueryCtx
 } from './_generated/server';
@@ -62,6 +63,12 @@ const webhookDeliveryValidator = v.object({
 	nextAttemptAt: v.optional(v.number()),
 	createdAt: v.number(),
 	updatedAt: v.number()
+});
+
+const developerSettingsValidator = v.object({
+	orgId: v.id('organizations'),
+	apiKeys: v.array(apiKeySummaryValidator),
+	webhooks: v.array(webhookEndpointSummaryValidator)
 });
 
 function randomSecret(prefix: string, byteLength = 24) {
@@ -141,39 +148,36 @@ async function insertAuditLog(
 	await ctx.db.insert('auditLogs', record);
 }
 
-async function getActiveCount(
+async function assertCanCreate(
 	ctx: QueryCtx | MutationCtx,
 	orgId: Id<'organizations'>,
-	table: 'apiKeys' | 'webhookEndpoints'
-) {
-	const records = await ctx.db
-		.query(table)
-		.withIndex('by_orgId', (q) => q.eq('orgId', orgId))
-		.take(100);
-
-	if (table === 'apiKeys') {
-		return (records as Doc<'apiKeys'>[]).filter((record) => !record.revokedAt).length;
-	}
-
-	return (records as Doc<'webhookEndpoints'>[]).filter((record) => record.enabled).length;
-}
-
-async function assertEntitlement(
-	ctx: QueryCtx | MutationCtx,
-	orgId: Id<'organizations'>,
-	key: string,
-	nextUsage: number
+	table: 'apiKeys' | 'webhookEndpoints',
+	entitlementKey: string
 ) {
 	const entitlement = await ctx.db
 		.query('entitlements')
-		.withIndex('by_orgId_and_key', (q) => q.eq('orgId', orgId).eq('key', key))
+		.withIndex('by_orgId_and_key', (q) => q.eq('orgId', orgId).eq('key', entitlementKey))
 		.unique();
 
 	if (!entitlement?.enabled) {
-		throw new Error(`The ${key} entitlement is not enabled for this workspace.`);
+		throw new Error(`The ${entitlementKey} entitlement is not enabled for this workspace.`);
 	}
-	if (entitlement.limit !== undefined && nextUsage > entitlement.limit) {
-		throw new Error(`The ${key} entitlement limit has been reached.`);
+	if (entitlement.limit === undefined) return;
+
+	const activeRecords =
+		table === 'apiKeys'
+			? await ctx.db
+					.query('apiKeys')
+					.withIndex('by_orgId_and_revokedAt', (q) =>
+						q.eq('orgId', orgId).eq('revokedAt', undefined)
+					)
+					.take(entitlement.limit)
+			: await ctx.db
+					.query('webhookEndpoints')
+					.withIndex('by_orgId_and_enabled', (q) => q.eq('orgId', orgId).eq('enabled', true))
+					.take(entitlement.limit);
+	if (activeRecords.length >= entitlement.limit) {
+		throw new Error(`The ${entitlementKey} entitlement limit has been reached.`);
 	}
 }
 
@@ -184,6 +188,34 @@ function normalizeScopes(scopes: string[]) {
 function normalizeEvents(events: string[]) {
 	return Array.from(new Set(events.map((event) => event.trim()).filter(Boolean))).sort();
 }
+
+export const getCurrentSettings = query({
+	args: {},
+	returns: v.union(developerSettingsValidator, v.null()),
+	handler: async (ctx) => {
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) return null;
+		const membership = await ctx.db
+			.query('organizationMembers')
+			.withIndex('by_userId_and_status', (q) => q.eq('userId', user._id).eq('status', 'active'))
+			.first();
+		if (!membership || roleRank[membership.role] < roleRank.admin) return null;
+
+		const apiKeys = await ctx.db
+			.query('apiKeys')
+			.withIndex('by_orgId', (q) => q.eq('orgId', membership.orgId))
+			.take(50);
+		const webhooks = await ctx.db
+			.query('webhookEndpoints')
+			.withIndex('by_orgId', (q) => q.eq('orgId', membership.orgId))
+			.take(50);
+		return {
+			orgId: membership.orgId,
+			apiKeys: apiKeys.map(toSummary),
+			webhooks: webhooks.map(toWebhookSummary)
+		};
+	}
+});
 
 export const createApiKey = mutation({
 	args: {
@@ -197,8 +229,7 @@ export const createApiKey = mutation({
 	}),
 	handler: async (ctx, args) => {
 		const { user } = await requireRole(ctx, args.orgId, 'admin');
-		const activeCount = await getActiveCount(ctx, args.orgId, 'apiKeys');
-		await assertEntitlement(ctx, args.orgId, 'api_keys', activeCount + 1);
+		await assertCanCreate(ctx, args.orgId, 'apiKeys', 'api_keys');
 
 		const key = randomSecret('pp_live');
 		const keyHash = await sha256Hex(key);
@@ -269,8 +300,7 @@ export const createWebhookEndpoint = mutation({
 			throw new Error('Webhook URLs must use http or https.');
 		}
 
-		const activeCount = await getActiveCount(ctx, args.orgId, 'webhookEndpoints');
-		await assertEntitlement(ctx, args.orgId, 'webhooks', activeCount + 1);
+		await assertCanCreate(ctx, args.orgId, 'webhookEndpoints', 'webhooks');
 
 		const secret = randomSecret('whsec');
 		const now = Date.now();

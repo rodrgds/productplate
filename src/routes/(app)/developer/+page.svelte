@@ -13,10 +13,12 @@
 
 	const convex = useConvexClient();
 	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
-	const workspaceResponse = useQuery(api.organizations.getCurrent, {});
+	const workspaceSummaryResponse = useQuery(api.organizations.getCurrent, {});
+	const developerSettingsResponse = useQuery(api.developer.getCurrentSettings, {});
 
 	let clientCurrentUser = $derived(currentUserResponse.data);
-	let workspace = $derived(workspaceResponse.data);
+	let workspaceSummary = $derived(workspaceSummaryResponse.data);
+	let workspace = $derived(developerSettingsResponse.data);
 	let apiKeyName = $state('Production key');
 	let apiKeyScopes = $state('events:write');
 	let webhookUrl = $state('https://example.com/api/webhooks/product');
@@ -83,7 +85,7 @@
 		if (!workspace) return;
 		await runAction(async () => {
 			const result = await convex.mutation(api.developer.createApiKey, {
-				orgId: workspace.organization._id,
+				orgId: workspace.orgId,
 				name: apiKeyName,
 				scopes: splitList(apiKeyScopes)
 			});
@@ -105,7 +107,7 @@
 		if (!workspace) return;
 		await runAction(async () => {
 			const result = await convex.mutation(api.developer.createWebhookEndpoint, {
-				orgId: workspace.organization._id,
+				orgId: workspace.orgId,
 				url: webhookUrl,
 				description: webhookDescription,
 				events: splitList(webhookEvents)
@@ -141,7 +143,13 @@
 </header>
 
 <main class="flex min-w-0 flex-1 flex-col gap-4 bg-muted/20 p-4 lg:p-6">
-	{#if !workspace}
+	{#if workspaceSummaryResponse.isLoading}
+		<Card.Root class="max-w-xl gap-0 py-0">
+			<Card.Content class="p-4 text-sm text-muted-foreground"
+				>Loading developer settings...</Card.Content
+			>
+		</Card.Root>
+	{:else if !workspaceSummary}
 		<Card.Root class="max-w-xl gap-0 py-0">
 			<Card.Header class="p-4 pb-3">
 				<Card.Title>Initialize developer settings</Card.Title>
@@ -154,6 +162,15 @@
 					{currentUserResponse.isLoading ? 'Preparing session...' : 'Create workspace'}
 				</Button>
 			</Card.Content>
+		</Card.Root>
+	{:else if !workspace}
+		<Card.Root class="max-w-xl gap-0 py-0">
+			<Card.Header class="p-4">
+				<Card.Title>Developer settings unavailable</Card.Title>
+				<Card.Description
+					>Your {workspaceSummary.membership.role} role does not include API key or webhook administration.</Card.Description
+				>
+			</Card.Header>
 		</Card.Root>
 	{:else}
 		<div class="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)]">

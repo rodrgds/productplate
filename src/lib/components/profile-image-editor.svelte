@@ -25,6 +25,7 @@
 	let uppy = new Uppy({
 		restrictions: {
 			maxNumberOfFiles: 1,
+			maxFileSize: 5 * 1024 * 1024,
 			allowedFileTypes: ['image/*']
 		},
 		autoProceed: false
@@ -99,19 +100,19 @@
 			const uploadUrl = await convexClient.mutation(api.storage.generateUploadUrl, {});
 			const result = await fetch(uploadUrl, {
 				method: 'POST',
-				headers: { 'Content-Type': 'image/jpeg' },
+				headers: { 'Content-Type': data.type || 'image/jpeg' },
 				body: data
 			});
 
 			if (!result.ok) throw new Error('Upload failed');
 			const { storageId } = await result.json();
-			const imageUrl = await convexClient.query(api.storage.getImageUrl, { storageId });
+			const { url: imageUrl } = await convexClient.mutation(api.storage.finalizeProfileImage, {
+				storageId
+			});
 
-			if (imageUrl) {
-				onUploadComplete?.(imageUrl);
-				open = false;
-				reset();
-			}
+			onUploadComplete?.(imageUrl);
+			open = false;
+			reset();
 		} catch (error) {
 			console.error('Upload error:', error);
 			toast.error(error instanceof Error ? error.message : 'Failed to save profile picture');

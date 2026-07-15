@@ -1,5 +1,12 @@
-import { mutation, query, type MutationCtx, type QueryCtx } from './_generated/server';
+import {
+	internalMutation,
+	mutation,
+	query,
+	type MutationCtx,
+	type QueryCtx
+} from './_generated/server';
 import { v } from 'convex/values';
+import { paginationOptsValidator, paginationResultValidator } from 'convex/server';
 import { authComponent } from './auth';
 import type { Doc, Id } from './_generated/dataModel';
 
@@ -67,54 +74,20 @@ const entitlementValidator = v.object({
 	updatedAt: v.number()
 });
 
-const notificationValidator = v.object({
-	_id: v.id('notifications'),
-	_creationTime: v.number(),
-	orgId: v.optional(v.id('organizations')),
-	userId: v.string(),
-	type: v.union(
-		v.literal('invite'),
-		v.literal('billing'),
-		v.literal('system'),
-		v.literal('security'),
-		v.literal('usage')
-	),
-	title: v.string(),
-	body: v.string(),
-	actionUrl: v.optional(v.string()),
-	readAt: v.optional(v.number()),
-	createdAt: v.number()
+const workspaceSummaryValidator = v.object({
+	organization: organizationValidator,
+	membership: memberValidator
 });
 
-const apiKeySummaryValidator = v.object({
-	_id: v.id('apiKeys'),
-	name: v.string(),
-	prefix: v.string(),
-	scopes: v.array(v.string()),
-	lastUsedAt: v.optional(v.number()),
-	revokedAt: v.optional(v.number()),
-	createdAt: v.number()
+const memberAdministrationValidator = v.object({
+	members: v.array(memberValidator),
+	invites: v.array(inviteValidator)
 });
 
-const webhookEndpointSummaryValidator = v.object({
-	_id: v.id('webhookEndpoints'),
-	url: v.string(),
-	description: v.string(),
-	events: v.array(v.string()),
-	enabled: v.boolean(),
-	createdAt: v.number(),
-	updatedAt: v.number()
-});
-
-const workspaceOverviewValidator = v.object({
+const billingOverviewValidator = v.object({
 	organization: organizationValidator,
 	membership: memberValidator,
-	members: v.array(memberValidator),
-	invites: v.array(inviteValidator),
-	entitlements: v.array(entitlementValidator),
-	notifications: v.array(notificationValidator),
-	apiKeys: v.array(apiKeySummaryValidator),
-	webhooks: v.array(webhookEndpointSummaryValidator)
+	entitlements: v.array(entitlementValidator)
 });
 
 type Role = Doc<'organizationMembers'>['role'];
@@ -211,12 +184,12 @@ function randomToken(byteLength = 24) {
 }
 
 async function getFirstActiveMembership(ctx: QueryCtx | MutationCtx, userId: string) {
-	const memberships = await ctx.db
+	const membership = await ctx.db
 		.query('organizationMembers')
-		.withIndex('by_userId', (q) => q.eq('userId', userId))
-		.take(20);
+		.withIndex('by_userId_and_status', (q) => q.eq('userId', userId).eq('status', 'active'))
+		.first();
 
-	return memberships.find((membership) => membership.status === 'active') ?? null;
+	return membership ?? null;
 }
 
 async function getMembership(
@@ -360,6 +333,30 @@ async function upsertEntitlements(
 	}
 }
 
+async function assertMemberCapacity(ctx: MutationCtx, orgId: Id<'organizations'>) {
+	const entitlement = await ctx.db
+		.query('entitlements')
+		.withIndex('by_orgId_and_key', (q) => q.eq('orgId', orgId).eq('key', 'members'))
+		.unique();
+	if (!entitlement?.enabled) throw new Error('The members entitlement is not enabled.');
+	if (entitlement.limit === undefined) return;
+
+	const members = await ctx.db
+		.query('organizationMembers')
+		.withIndex('by_orgId', (q) => q.eq('orgId', orgId))
+		.take(entitlement.limit);
+	const pendingInvites = await ctx.db
+		.query('organizationInvites')
+		.withIndex('by_orgId_and_status', (q) => q.eq('orgId', orgId).eq('status', 'pending'))
+		.take(entitlement.limit);
+	if (
+		members.filter((member) => member.status === 'active').length + pendingInvites.length >=
+		entitlement.limit
+	) {
+		throw new Error('The workspace member limit has been reached.');
+	}
+}
+
 async function createOrganizationForUser(
 	ctx: MutationCtx,
 	args: {
@@ -442,20 +439,20 @@ export const ensureCurrent = mutation({
 	args: {
 		workspaceName: v.optional(v.string())
 	},
-	returns: workspaceOverviewValidator,
+	returns: workspaceSummaryValidator,
 	handler: async (ctx, args) => {
 		const user = await requireCurrentUser(ctx);
 		const orgId = await ensureWorkspaceForUser(ctx, user, args.workspaceName);
 
-		const overview = await getWorkspaceOverview(ctx, orgId, user._id);
-		if (!overview) throw new Error('Workspace was not found after setup.');
-		return overview;
+		const summary = await getWorkspaceSummary(ctx, orgId, user._id);
+		if (!summary) throw new Error('Workspace was not found after setup.');
+		return summary;
 	}
 });
 
 export const getCurrent = query({
 	args: {},
-	returns: v.union(workspaceOverviewValidator, v.null()),
+	returns: v.union(workspaceSummaryValidator, v.null()),
 	handler: async (ctx) => {
 		const user = await authComponent.safeGetAuthUser(ctx);
 		if (!user) return null;
@@ -463,11 +460,11 @@ export const getCurrent = query({
 		const membership = await getFirstActiveMembership(ctx, user._id);
 		if (!membership) return null;
 
-		return await getWorkspaceOverview(ctx, membership.orgId, user._id);
+		return await getWorkspaceSummary(ctx, membership.orgId, user._id);
 	}
 });
 
-async function getWorkspaceOverview(
+async function getWorkspaceSummary(
 	ctx: QueryCtx | MutationCtx,
 	orgId: Id<'organizations'>,
 	userId: string
@@ -476,59 +473,50 @@ async function getWorkspaceOverview(
 	const membership = await getMembership(ctx, orgId, userId);
 	if (!organization || !membership) return null;
 
-	const members = await ctx.db
-		.query('organizationMembers')
-		.withIndex('by_orgId', (q) => q.eq('orgId', orgId))
-		.take(50);
-	const invites = await ctx.db
-		.query('organizationInvites')
-		.withIndex('by_orgId', (q) => q.eq('orgId', orgId))
-		.take(50);
-	const entitlements = await ctx.db
-		.query('entitlements')
-		.withIndex('by_orgId', (q) => q.eq('orgId', orgId))
-		.take(50);
-	const notifications = await ctx.db
-		.query('notifications')
-		.withIndex('by_userId', (q) => q.eq('userId', userId))
-		.order('desc')
-		.take(10);
-	const apiKeys = await ctx.db
-		.query('apiKeys')
-		.withIndex('by_orgId', (q) => q.eq('orgId', orgId))
-		.take(20);
-	const webhooks = await ctx.db
-		.query('webhookEndpoints')
-		.withIndex('by_orgId', (q) => q.eq('orgId', orgId))
-		.take(20);
-
-	return {
-		organization,
-		membership,
-		members,
-		invites: invites.filter((invite) => invite.status === 'pending'),
-		entitlements,
-		notifications,
-		apiKeys: apiKeys.map(({ _id, name, prefix, scopes, lastUsedAt, revokedAt, createdAt }) => ({
-			_id,
-			name,
-			prefix,
-			scopes,
-			lastUsedAt,
-			revokedAt,
-			createdAt
-		})),
-		webhooks: webhooks.map(({ _id, url, description, events, enabled, createdAt, updatedAt }) => ({
-			_id,
-			url,
-			description,
-			events,
-			enabled,
-			createdAt,
-			updatedAt
-		}))
-	};
+	return { organization, membership };
 }
+
+export const getMemberAdministration = query({
+	args: {},
+	returns: v.union(memberAdministrationValidator, v.null()),
+	handler: async (ctx) => {
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) return null;
+		const membership = await getFirstActiveMembership(ctx, user._id);
+		if (!membership || roleRank[membership.role] < roleRank.admin) return null;
+
+		const members = await ctx.db
+			.query('organizationMembers')
+			.withIndex('by_orgId', (q) => q.eq('orgId', membership.orgId))
+			.take(100);
+		const invites = await ctx.db
+			.query('organizationInvites')
+			.withIndex('by_orgId_and_status', (q) =>
+				q.eq('orgId', membership.orgId).eq('status', 'pending')
+			)
+			.take(100);
+
+		return { members, invites };
+	}
+});
+
+export const getBillingOverview = query({
+	args: {},
+	returns: v.union(billingOverviewValidator, v.null()),
+	handler: async (ctx) => {
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) return null;
+		const membership = await getFirstActiveMembership(ctx, user._id);
+		if (!membership || roleRank[membership.role] < roleRank.admin) return null;
+		const organization = await ctx.db.get(membership.orgId);
+		if (!organization) return null;
+		const entitlements = await ctx.db
+			.query('entitlements')
+			.withIndex('by_orgId', (q) => q.eq('orgId', membership.orgId))
+			.take(50);
+		return { organization, membership, entitlements };
+	}
+});
 
 export const inviteMember = mutation({
 	args: {
@@ -552,12 +540,13 @@ export const inviteMember = mutation({
 		const normalizedEmail = normalizeEmail(args.email);
 		const existing = await ctx.db
 			.query('organizationInvites')
-			.withIndex('by_orgId_and_email', (q) =>
-				q.eq('orgId', args.orgId).eq('email', normalizedEmail)
+			.withIndex('by_orgId_and_email_and_status', (q) =>
+				q.eq('orgId', args.orgId).eq('email', normalizedEmail).eq('status', 'pending')
 			)
-			.take(10);
-		const activeInvite = existing.find((invite) => invite.status === 'pending');
+			.first();
+		const activeInvite = existing;
 		if (activeInvite) return activeInvite;
+		await assertMemberCapacity(ctx, args.orgId);
 
 		const inviteId = await ctx.db.insert('organizationInvites', {
 			orgId: args.orgId,
@@ -762,8 +751,8 @@ export const revokeInvite = mutation({
 });
 
 export const adminListOrganizations = query({
-	args: {},
-	returns: v.array(
+	args: { paginationOpts: paginationOptsValidator },
+	returns: paginationResultValidator(
 		v.object({
 			organization: organizationValidator,
 			members: v.array(memberValidator),
@@ -779,11 +768,14 @@ export const adminListOrganizations = query({
 			)
 		})
 	),
-	handler: async (ctx) => {
+	handler: async (ctx, args) => {
 		const user = await requireCurrentUser(ctx);
 		if (user.role !== 'admin') throw new Error('Admin access required.');
 
-		const organizations = await ctx.db.query('organizations').order('desc').take(50);
+		const organizationsPage = await ctx.db
+			.query('organizations')
+			.order('desc')
+			.paginate(args.paginationOpts);
 		const results: {
 			organization: Doc<'organizations'>;
 			members: Doc<'organizationMembers'>[];
@@ -795,7 +787,7 @@ export const adminListOrganizations = query({
 				updatedAt: number;
 			} | null;
 		}[] = [];
-		for (const organization of organizations) {
+		for (const organization of organizationsPage.page) {
 			const members = await ctx.db
 				.query('organizationMembers')
 				.withIndex('by_orgId', (q) => q.eq('orgId', organization._id))
@@ -819,21 +811,22 @@ export const adminListOrganizations = query({
 			});
 		}
 
-		return results;
+		return { ...organizationsPage, page: results };
 	}
 });
 
-export const syncBillingPlan = mutation({
+export const applyVerifiedBillingPlan = internalMutation({
 	args: {
-		productId: v.optional(v.string()),
-		status: v.optional(v.string())
+		userId: v.string(),
+		productId: v.union(v.string(), v.null()),
+		status: v.string()
 	},
-	returns: workspaceOverviewValidator,
+	returns: v.null(),
 	handler: async (ctx, args) => {
-		const user = await requireCurrentUser(ctx);
-		const orgId = await ensureWorkspaceForUser(ctx, user);
-
-		const productId = args.status === 'active' ? (args.productId ?? 'starter') : 'starter';
+		const membership = await getFirstActiveMembership(ctx, args.userId);
+		if (!membership) throw new Error('Create a workspace before syncing billing.');
+		const orgId = membership.orgId;
+		const productId = args.status === 'active' && args.productId ? args.productId : 'starter';
 		const plan = billingPlanEntitlements[productId] ?? billingPlanEntitlements.starter;
 		const now = Date.now();
 
@@ -851,7 +844,7 @@ export const syncBillingPlan = mutation({
 		);
 		await ctx.db.insert('notifications', {
 			orgId,
-			userId: user._id,
+			userId: args.userId,
 			type: 'billing',
 			title: 'Billing entitlements synced',
 			body: `Workspace plan is now ${plan.planKey}.`,
@@ -860,15 +853,11 @@ export const syncBillingPlan = mutation({
 		});
 		await insertAuditLog(ctx, {
 			orgId,
-			actorUserId: user._id,
 			action: 'billing.entitlements_synced',
 			target: plan.planKey,
-			metadata: { status: args.status ?? 'none', productId: args.productId ?? 'starter' }
+			metadata: { status: args.status, productId: args.productId ?? 'starter' }
 		});
-
-		const overview = await getWorkspaceOverview(ctx, orgId, user._id);
-		if (!overview) throw new Error('Workspace was not found after billing sync.');
-		return overview;
+		return null;
 	}
 });
 

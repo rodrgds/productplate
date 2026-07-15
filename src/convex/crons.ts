@@ -22,7 +22,7 @@ const queueWebhookRetriesRef = makeFunctionReference<'mutation', Record<string, 
 const crons = cronJobs();
 
 crons.interval('expire pending organization invites', { hours: 1 }, expireOldInvitesRef, {});
-crons.daily('prune read notifications', { hourUTC: 3, minuteUTC: 30 }, pruneReadNotificationsRef, {
+crons.cron('prune read notifications', '30 3 * * *', pruneReadNotificationsRef, {
 	olderThanDays: 45
 });
 crons.interval('queue failed webhook retries', { minutes: 5 }, queueWebhookRetriesRef, {});

@@ -13,6 +13,7 @@ const profileValidator = v.object({
 	role: v.string(),
 	workspaceName: v.string(),
 	image: v.optional(v.string()),
+	imageStorageId: v.optional(v.id('_storage')),
 	onboardingCompletedAt: v.number(),
 	updatedAt: v.number()
 });
@@ -139,10 +140,23 @@ export const updateCurrent = mutation({
 			throw new Error('Complete onboarding before updating your profile.');
 		}
 
+		const nextImage = profileUpdate.image || undefined;
+		if (existing.imageStorageId && nextImage !== existing.image) {
+			const ownedFile = await ctx.db
+				.query('uploadedFiles')
+				.withIndex('by_storageId', (q) => q.eq('storageId', existing.imageStorageId!))
+				.unique();
+			if (ownedFile?.userId === user._id) {
+				await ctx.storage.delete(existing.imageStorageId);
+				await ctx.db.delete(ownedFile._id);
+			}
+		}
+
 		await ctx.db.patch(existing._id, {
 			displayName: profileUpdate.displayName,
 			bio: profileUpdate.bio,
-			image: profileUpdate.image || undefined,
+			image: nextImage,
+			...(nextImage === existing.image ? {} : { imageStorageId: undefined }),
 			updatedAt: Date.now()
 		});
 		const profile = await ctx.db.get(existing._id);

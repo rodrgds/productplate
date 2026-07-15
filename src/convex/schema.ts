@@ -16,6 +16,7 @@ export default defineSchema({
 		role: v.string(),
 		workspaceName: v.string(),
 		image: v.optional(v.string()),
+		imageStorageId: v.optional(v.id('_storage')),
 		onboardingCompletedAt: v.number(),
 		updatedAt: v.number()
 	}).index('by_userId', ['userId']),
@@ -41,6 +42,7 @@ export default defineSchema({
 	})
 		.index('by_orgId', ['orgId'])
 		.index('by_userId', ['userId'])
+		.index('by_userId_and_status', ['userId', 'status'])
 		.index('by_orgId_and_userId', ['orgId', 'userId'])
 		.index('by_orgId_and_role', ['orgId', 'role']),
 	organizationInvites: defineTable({
@@ -61,7 +63,10 @@ export default defineSchema({
 	})
 		.index('by_token', ['token'])
 		.index('by_orgId', ['orgId'])
-		.index('by_orgId_and_email', ['orgId', 'email']),
+		.index('by_orgId_and_email', ['orgId', 'email'])
+		.index('by_orgId_and_email_and_status', ['orgId', 'email', 'status'])
+		.index('by_orgId_and_status', ['orgId', 'status'])
+		.index('by_status_and_expiresAt', ['status', 'expiresAt']),
 	entitlements: defineTable({
 		orgId: v.id('organizations'),
 		key: v.string(),
@@ -90,7 +95,8 @@ export default defineSchema({
 		createdAt: v.number()
 	})
 		.index('by_userId', ['userId'])
-		.index('by_userId_and_readAt', ['userId', 'readAt']),
+		.index('by_userId_and_readAt', ['userId', 'readAt'])
+		.index('by_readAt', ['readAt']),
 	apiKeys: defineTable({
 		orgId: v.id('organizations'),
 		name: v.string(),
@@ -103,6 +109,7 @@ export default defineSchema({
 		createdAt: v.number()
 	})
 		.index('by_orgId', ['orgId'])
+		.index('by_orgId_and_revokedAt', ['orgId', 'revokedAt'])
 		.index('by_prefix', ['prefix']),
 	webhookEndpoints: defineTable({
 		orgId: v.id('organizations'),
@@ -114,7 +121,31 @@ export default defineSchema({
 		createdByUserId: v.string(),
 		createdAt: v.number(),
 		updatedAt: v.number()
-	}).index('by_orgId', ['orgId']),
+	})
+		.index('by_orgId', ['orgId'])
+		.index('by_orgId_and_enabled', ['orgId', 'enabled']),
+	uploadedFiles: defineTable({
+		storageId: v.id('_storage'),
+		userId: v.string(),
+		purpose: v.literal('profile_image'),
+		contentType: v.string(),
+		size: v.number(),
+		createdAt: v.number()
+	})
+		.index('by_storageId', ['storageId'])
+		.index('by_userId', ['userId']),
+	uploadRateLimits: defineTable({
+		userId: v.string(),
+		windowStart: v.number(),
+		count: v.number(),
+		updatedAt: v.number()
+	}).index('by_userId_and_windowStart', ['userId', 'windowStart']),
+	chatRateLimits: defineTable({
+		userId: v.string(),
+		windowStart: v.number(),
+		count: v.number(),
+		updatedAt: v.number()
+	}).index('by_userId_and_windowStart', ['userId', 'windowStart']),
 	webhookDeliveries: defineTable({
 		orgId: v.id('organizations'),
 		endpointId: v.id('webhookEndpoints'),

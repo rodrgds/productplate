@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 		return {
 			products: productsResult?.data?.list || [],
-			customerData: customerResult || null
+			customerData: customerResult.data
 		};
 	} catch (error) {
 		console.error('Error loading billing data:', error);

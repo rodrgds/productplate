@@ -104,6 +104,7 @@
 	async function handleRemoveImage() {
 		isLoading = true;
 		try {
+			await convexClient.mutation(api.storage.removeCurrentProfileImage, {});
 			await authClient.updateUser({
 				image: null
 			});

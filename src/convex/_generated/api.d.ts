@@ -11,6 +11,7 @@
 import type * as auth from "../auth.js";
 import type * as autumn from "../autumn.js";
 import type * as billing from "../billing.js";
+import type * as chat from "../chat.js";
 import type * as crons from "../crons.js";
 import type * as developer from "../developer.js";
 import type * as emails from "../emails.js";
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   autumn: typeof autumn;
   billing: typeof billing;
+  chat: typeof chat;
   crons: typeof crons;
   developer: typeof developer;
   emails: typeof emails;
