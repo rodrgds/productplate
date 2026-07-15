@@ -9,7 +9,9 @@ const newSectionKeys = [
 	'feature-spotlight',
 	'case-study',
 	'trust-center',
-	'release-timeline'
+	'release-timeline',
+	'roi-calculator',
+	'migration-plan'
 ] as const;
 
 describe('landing component registry', () => {
@@ -20,6 +22,6 @@ describe('landing component registry', () => {
 
 		expect(keys).toEqual(expect.arrayContaining([...newSectionKeys]));
 		expect(new Set(keys).size).toBe(keys.length);
-		expect(keys).toHaveLength(30);
+		expect(keys).toHaveLength(32);
 	});
 });

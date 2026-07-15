@@ -15,6 +15,7 @@ import {
 	LandingIntegrationCloud,
 	LandingLensShowcase,
 	LandingLogoMarquee,
+	LandingMigrationPlan,
 	LandingOrbitingCircles,
 	LandingPricingCards,
 	LandingPricingComparison,
@@ -22,6 +23,7 @@ import {
 	LandingProcessTimeline,
 	LandingProblemSolution,
 	LandingReleaseTimeline,
+	LandingRoiCalculator,
 	LandingStatsGrid,
 	LandingStatsStrip,
 	LandingTestimonialMarquee,
@@ -119,6 +121,15 @@ export const categories: readonly Category[] = [
 			{ key: 'stats-strip', label: 'Stats strip', Component: LandingStatsStrip },
 			{ key: 'stats-grid', label: 'Stats grid', Component: LandingStatsGrid },
 			{ key: 'integration', label: 'Integration cloud', Component: LandingIntegrationCloud }
+		]
+	},
+	{
+		id: 'conversion',
+		title: 'Conversion',
+		blurb: 'Interactive business cases and low-risk migration closes.',
+		components: [
+			{ key: 'roi-calculator', label: 'ROI calculator', Component: LandingRoiCalculator },
+			{ key: 'migration-plan', label: 'Migration plan', Component: LandingMigrationPlan }
 		]
 	},
 	{

@@ -15,6 +15,7 @@ export { default as LandingHeroVideoDialog } from './landing-hero-video-dialog.s
 export { default as LandingIntegrationCloud } from './landing-integration-cloud.svelte';
 export { default as LandingLensShowcase } from './landing-lens-showcase.svelte';
 export { default as LandingLogoMarquee } from './landing-logo-marquee.svelte';
+export { default as LandingMigrationPlan } from './landing-migration-plan.svelte';
 export { default as LandingNav } from './landing-nav.svelte';
 export { default as LandingOrbitingCircles } from './landing-orbiting-circles.svelte';
 export { default as LandingPricingCards } from './landing-pricing-cards.svelte';
@@ -23,6 +24,7 @@ export { default as LandingPricingMatrix } from './landing-pricing-matrix.svelte
 export { default as LandingProcessTimeline } from './landing-process-timeline.svelte';
 export { default as LandingProblemSolution } from './landing-problem-solution.svelte';
 export { default as LandingReleaseTimeline } from './landing-release-timeline.svelte';
+export { default as LandingRoiCalculator } from './landing-roi-calculator.svelte';
 export { default as LandingStatsGrid } from './landing-stats-grid.svelte';
 export { default as LandingStatsStrip } from './landing-stats-strip.svelte';
 export { default as LandingStickyScrollReveal } from './landing-sticky-scroll-reveal.svelte';

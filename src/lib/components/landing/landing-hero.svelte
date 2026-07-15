@@ -39,7 +39,7 @@
 			}
 		],
 		stats = [
-			{ value: '22', label: 'source components' },
+			{ value: '32', label: 'source components' },
 			{ value: '3', label: 'reference systems' },
 			{ value: 'AA', label: 'accessibility target' }
 		]

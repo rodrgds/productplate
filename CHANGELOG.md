@@ -14,6 +14,7 @@ Product Plate follows semantic versioning while it is useful for template consum
 - Expanded `START_HERE.md` coverage for workspaces, developer surfaces, admin/operator surfaces, docs cleanup, screenshots, and theme builder cleanup.
 - Non-mutating browser smoke coverage in the code-quality workflow.
 - Automated disposable-demo expiration, account cleanup, and operational-data retention.
+- Ten reusable SaaS landing sections spanning product storytelling, proof, trust, ROI, and migration.
 
 ### Changed
 
@@ -50,4 +51,4 @@ Product Plate follows semantic versioning while it is useful for template consum
 
 - This is a `v0.1` starter release, not a locked API or framework contract.
 - The default stack is Convex, Better Auth, Autumn, SvelteKit, Tailwind CSS v4, shadcn-svelte, Bun, and Cloudflare Pages.
-- Planned follow-up work includes project creation CLI, Drizzle/Postgres/SQLite options, Polar support, stronger SEO defaults, and more landing components.
+- Planned follow-up work includes project creation CLI, Drizzle/Postgres/SQLite options, Polar support, and stronger SEO defaults.

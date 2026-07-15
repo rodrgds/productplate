@@ -24,13 +24,33 @@ test('public starter routes render with truthful navigation', async ({ page }) =
 test('public routes have no horizontal overflow on a phone viewport', async ({ page }) => {
 	await page.setViewportSize({ width: 390, height: 844 });
 
-	for (const path of ['/', '/components', '/docs', '/auth/demo']) {
+	for (const path of [
+		'/',
+		'/components',
+		'/components/hero',
+		'/components/features',
+		'/components/proof',
+		'/components/conversion',
+		'/docs',
+		'/auth/demo'
+	]) {
 		await page.goto(path);
 		const hasHorizontalOverflow = await page.evaluate(
 			() => document.documentElement.scrollWidth > document.documentElement.clientWidth
 		);
 		expect(hasHorizontalOverflow, `${path} should fit the viewport`).toBe(false);
 	}
+});
+
+test('ROI calculator updates the visible business case', async ({ page }) => {
+	await page.goto('/components/conversion');
+
+	const teamSize = page.locator('[aria-label="People doing the work"] [role="slider"]');
+	await expect(teamSize).toHaveAttribute('aria-valuenow', '12');
+	await teamSize.press('ArrowRight');
+
+	await expect(teamSize).toHaveAttribute('aria-valuenow', '13');
+	await expect(page.getByText('$114,270', { exact: true })).toBeVisible();
 });
 
 test('mobile landing navigation remains interactive', async ({ page }) => {
