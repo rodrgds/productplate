@@ -25,9 +25,9 @@
 	}
 
 	let {
-		kicker = 'How it works',
-		title = 'From signal to shipped work in three visible steps.',
-		description = 'Use a guided workflow section when the product has a sequence customers need to understand before they can value the outcome.',
+		kicker = 'An inspectable workflow',
+		title = 'Let buyers watch the handoff happen.',
+		description = 'A compact run log makes the sequence concrete without turning the section into three more feature cards.',
 		steps = [
 			{
 				value: 'capture',
@@ -63,88 +63,66 @@
 	}: Props = $props();
 
 	let activeStep = $state('');
-
 	$effect(() => {
-		if (!steps.some((step) => step.value === activeStep)) {
-			activeStep = steps[0]?.value ?? '';
-		}
+		if (!steps.some((step) => step.value === activeStep)) activeStep = steps[0]?.value ?? '';
 	});
 </script>
 
-<section id="workflow" class="border-b bg-muted/25 py-20 sm:py-24">
+<section id="workflow" class="border-b bg-muted/25 py-20 sm:py-24" data-testid="workflow-steps">
 	<div class="mx-auto max-w-7xl px-6">
-		<div class="mx-auto max-w-3xl text-center">
-			<Badge variant="outline">{kicker}</Badge>
-			<h2 class="mt-5 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{title}</h2>
-			<p class="mx-auto mt-5 max-w-2xl text-base leading-7 text-muted-foreground">{description}</p>
-		</div>
+		<header class="workflow-header">
+			<div>
+				<Badge variant="outline">{kicker}</Badge>
+				<h2>{title}</h2>
+			</div>
+			<p>{description}</p>
+		</header>
 
-		<Tabs.Root bind:value={activeStep} class="mt-12">
+		<Tabs.Root bind:value={activeStep} class="workflow-machine">
 			<Tabs.List class="workflow-tabs">
 				{#each steps as item (item.value)}
 					<Tabs.Trigger value={item.value} class="workflow-trigger">
-						<span>{item.step}</span>
-						<strong>{item.title}</strong>
+						<span>{item.step}</span><strong>{item.title}</strong>
 					</Tabs.Trigger>
 				{/each}
 			</Tabs.List>
 
 			{#each steps as item (item.value)}
-				<Tabs.Content value={item.value} class="mt-6">
-					<div class="workflow-panel">
+				<Tabs.Content value={item.value} class="mt-0">
+					<div class="workflow-stage">
 						<div class="workflow-copy">
-							<p class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-								Step {item.step}
-							</p>
+							<span>Step {item.step}</span>
 							<h3>{item.title}</h3>
 							<p>{item.description}</p>
-							<Button href="#" variant="outline" class="mt-7">
-								Explore this step
-								<ArrowUpRightIcon data-icon="inline-end" />
+							<Button href="#" variant="outline">
+								Explore this step<ArrowUpRightIcon data-icon="inline-end" />
 							</Button>
 						</div>
 
-						<div class="workflow-preview">
-							<div class="preview-toolbar">
+						<div class="run-log">
+							<div class="log-heading">
+								<div><span class="live-dot"></span><strong>Run 0284</strong></div>
+								<span>Completed in 1.8s</span>
+							</div>
+							<div class="log-row">
+								<small>09:41:02</small><span><PlayIcon class="size-3.5" /></span>
 								<div>
-									<p>Automation run</p>
+									<p>Trigger received</p>
 									<strong>{item.event}</strong>
 								</div>
-								<Badge variant="secondary">
-									<PlayIcon />
-									Live
-								</Badge>
 							</div>
-
-							<div class="preview-flow">
-								<div class="flow-node">
-									<span class="flow-icon bg-primary text-primary-foreground">
-										<PlayIcon class="size-3.5" />
-									</span>
-									<div>
-										<small>Trigger</small>
-										<strong>{item.event}</strong>
-									</div>
+							<div class="log-row">
+								<small>09:41:03</small><span><ClockIcon class="size-3.5" /></span>
+								<div>
+									<p>Ownership resolved</p>
+									<strong>{item.owner}</strong>
 								</div>
-								<div class="flow-connector" aria-hidden="true"></div>
-								<div class="flow-node">
-									<span class="flow-icon bg-muted text-foreground">
-										<ClockIcon class="size-3.5" />
-									</span>
-									<div>
-										<small>Route to</small>
-										<strong>{item.owner}</strong>
-									</div>
-								</div>
-								<div class="flow-connector" aria-hidden="true"></div>
-								<div class="flow-node">
-									<span class="flow-icon bg-primary text-primary-foreground">
-										<CheckIcon class="size-3.5" />
-									</span>
-									<div>
-										<small>Outcome</small>
-										<strong>{item.result}</strong>
-									</div>
+							</div>
+							<div class="log-row complete">
+								<small>09:41:04</small><span><CheckIcon class="size-3.5" /></span>
+								<div>
+									<p>Run completed</p>
+									<strong>{item.result}</strong>
 								</div>
 							</div>
 						</div>
@@ -156,151 +134,198 @@
 </section>
 
 <style>
+	.workflow-header {
+		display: grid;
+		gap: 2rem;
+		align-items: end;
+	}
+	.workflow-header h2 {
+		max-width: 42rem;
+		margin-top: 1.25rem;
+		font-size: clamp(2.25rem, 5vw, 3.75rem);
+		font-weight: 650;
+		line-height: 0.98;
+		letter-spacing: -0.05em;
+		text-wrap: balance;
+	}
+	.workflow-header > p {
+		max-width: 34rem;
+		color: var(--muted-foreground);
+		line-height: 1.7;
+	}
+	:global(.workflow-machine) {
+		overflow: hidden;
+		margin-top: 3rem;
+		border: 1px solid var(--border);
+		border-radius: 1rem;
+		background: var(--background);
+	}
 	:global(.workflow-tabs) {
 		display: grid;
 		height: auto;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 0;
-		border: 1px solid var(--border);
-		border-radius: 0.85rem;
-		background: var(--background);
+		border-radius: 0;
+		border-bottom: 1px solid var(--border);
+		background: var(--muted);
 		padding: 0;
 	}
-
 	:global(.workflow-trigger) {
 		display: flex;
 		height: auto;
-		min-height: 4.5rem;
+		min-height: 4.75rem;
 		align-items: center;
 		justify-content: flex-start;
-		gap: 0.85rem;
+		gap: 0.75rem;
 		border-radius: 0;
-		padding: 0.9rem 1rem;
+		padding: 1rem 1.25rem;
 		white-space: normal;
 	}
-
 	:global(.workflow-trigger:not(:last-child)) {
 		border-right: 1px solid var(--border);
 	}
-
-	:global(.workflow-trigger span) {
-		font-size: 0.72rem;
-		color: var(--muted-foreground);
+	:global(.workflow-trigger[data-state='active']) {
+		background: var(--foreground);
+		color: var(--background);
+		box-shadow: none;
 	}
-
+	:global(.workflow-trigger span) {
+		font-size: 0.68rem;
+		color: var(--primary);
+	}
 	:global(.workflow-trigger strong) {
-		font-size: 0.85rem;
-		font-weight: 600;
+		font-size: 0.82rem;
+		font-weight: 650;
 		text-align: left;
 	}
-
-	.workflow-panel {
+	.workflow-stage {
 		display: grid;
-		overflow: hidden;
-		border: 1px solid var(--border);
-		border-radius: 1rem;
-		background: var(--card);
+		min-height: 30rem;
 	}
-
 	.workflow-copy {
-		padding: clamp(1.5rem, 4vw, 3rem);
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		padding: clamp(1.5rem, 5vw, 3.5rem);
 	}
-
-	.workflow-copy h3 {
-		margin-top: 0.75rem;
-		font-size: clamp(1.75rem, 4vw, 2.5rem);
+	.workflow-copy > span {
+		font-size: 0.7rem;
 		font-weight: 650;
-		line-height: 1.08;
-		letter-spacing: -0.03em;
+		color: var(--primary);
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
 	}
-
-	.workflow-copy > p:last-of-type {
-		max-width: 34rem;
+	.workflow-copy h3 {
+		margin-top: 1rem;
+		font-size: clamp(2rem, 4vw, 3.25rem);
+		font-weight: 650;
+		line-height: 0.98;
+		letter-spacing: -0.05em;
+	}
+	.workflow-copy p {
+		max-width: 32rem;
 		margin-top: 1rem;
 		color: var(--muted-foreground);
 		line-height: 1.7;
 	}
-
-	.workflow-preview {
-		margin: 0 1rem 1rem;
-		border: 1px solid var(--border);
-		border-radius: 0.9rem;
-		background: var(--background);
-		box-shadow: 0 14px 34px color-mix(in oklch, var(--foreground) 7%, transparent);
+	.workflow-copy :global(a) {
+		width: fit-content;
+		margin-top: 2rem;
 	}
-
-	.preview-toolbar {
+	.run-log {
+		align-self: center;
+		margin: 1rem;
+		border: 1px solid var(--border);
+		border-radius: 0.85rem;
+		background: var(--card);
+	}
+	.log-heading {
 		display: flex;
+		min-height: 3.5rem;
 		align-items: center;
 		justify-content: space-between;
 		gap: 1rem;
 		border-bottom: 1px solid var(--border);
-		padding: 1rem;
+		padding: 0 1rem;
 	}
-
-	.preview-toolbar p,
-	.flow-node small {
-		color: var(--muted-foreground);
-		font-size: 0.72rem;
-	}
-
-	.preview-toolbar strong,
-	.flow-node strong {
-		display: block;
-		margin-top: 0.2rem;
-		font-size: 0.85rem;
-		font-weight: 650;
-	}
-
-	.preview-flow {
-		padding: clamp(1rem, 4vw, 2rem);
-	}
-
-	.flow-node {
+	.log-heading > div {
 		display: flex;
 		align-items: center;
-		gap: 0.85rem;
-		border: 1px solid var(--border);
-		border-radius: 0.75rem;
-		background: var(--card);
-		padding: 0.9rem;
+		gap: 0.5rem;
 	}
-
-	.flow-icon {
+	.log-heading strong,
+	.log-heading > span {
+		font-size: 0.7rem;
+	}
+	.log-heading > span {
+		color: var(--muted-foreground);
+	}
+	.live-dot {
+		display: block;
+		size: 0.45rem;
+		border-radius: 999px;
+		background: var(--primary);
+	}
+	.log-row {
 		display: grid;
-		size: 2.25rem;
-		flex: none;
+		min-height: 5.25rem;
+		grid-template-columns: 4.5rem 2rem minmax(0, 1fr);
+		align-items: center;
+		gap: 0.75rem;
+		border-bottom: 1px solid var(--border);
+		padding: 0.8rem 1rem;
+	}
+	.log-row:last-child {
+		border-bottom: 0;
+	}
+	.log-row small {
+		font-size: 0.65rem;
+		color: var(--muted-foreground);
+		font-variant-numeric: tabular-nums;
+	}
+	.log-row > span {
+		display: grid;
+		size: 2rem;
 		place-items: center;
-		border-radius: 0.6rem;
+		border-radius: 999px;
+		background: var(--muted);
+		color: var(--muted-foreground);
 	}
-
-	.flow-connector {
-		width: 1px;
-		height: 1.5rem;
-		margin-left: 1.125rem;
-		background: var(--border);
+	.log-row.complete > span {
+		background: var(--primary);
+		color: var(--primary-foreground);
 	}
-
-	@media (min-width: 900px) {
-		.workflow-panel {
-			grid-template-columns: 0.72fr 1.28fr;
-			align-items: stretch;
+	.log-row p {
+		font-size: 0.68rem;
+		color: var(--muted-foreground);
+	}
+	.log-row strong {
+		display: block;
+		margin-top: 0.25rem;
+		font-size: 0.82rem;
+		font-weight: 650;
+	}
+	@media (min-width: 800px) {
+		.workflow-header {
+			grid-template-columns: 1fr 0.72fr;
 		}
-
-		.workflow-preview {
-			align-self: center;
-			margin: 1rem 1rem 1rem 0;
+		.workflow-stage {
+			grid-template-columns: 0.78fr 1.22fr;
 		}
 	}
-
 	@media (max-width: 639px) {
 		:global(.workflow-tabs) {
 			grid-template-columns: 1fr;
 		}
-
 		:global(.workflow-trigger:not(:last-child)) {
 			border-right: 0;
 			border-bottom: 1px solid var(--border);
+		}
+		.log-row {
+			grid-template-columns: 2rem minmax(0, 1fr);
+		}
+		.log-row small {
+			display: none;
 		}
 	}
 </style>
