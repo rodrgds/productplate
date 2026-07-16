@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
 	import CheckIcon from '@lucide/svelte/icons/check';
-	import MoveRightIcon from '@lucide/svelte/icons/move-right';
+	import RotateCcwIcon from '@lucide/svelte/icons/rotate-ccw';
 	import ShieldCheckIcon from '@lucide/svelte/icons/shield-check';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -26,38 +26,35 @@
 	}
 
 	let {
-		kicker = 'A migration plan, not a leap of faith',
-		title = 'Move the workflow without putting the work at risk.',
-		description = 'Close with a concrete transition plan when switching cost is the last objection. Show ownership, sequence, and the safety net.',
+		kicker = 'A controlled move, not a leap',
+		title = 'Start with one workflow. Keep the old path until the new one proves itself.',
+		description = 'A migration close should make the sequence and the escape hatch obvious. This plan keeps ownership visible without burying the buyer in a project plan.',
 		steps = [
 			{
 				day: 'Day 0',
-				title: 'Map the current workflow',
-				description: 'We document sources, owners, states, and the reports your team depends on.',
+				title: 'Map',
+				description: 'Capture the sources, owners, permissions, and reports that cannot break.',
 				owner: '60-minute working session'
 			},
 			{
 				day: 'Day 3',
-				title: 'Import and verify',
-				description:
-					'Run a test import, compare record counts, and resolve exceptions before anything changes.',
-				owner: 'Handled with your project lead'
+				title: 'Prove',
+				description: 'Run a sample import and compare the result before anyone changes tools.',
+				owner: 'Your lead plus our migration owner'
 			},
 			{
 				day: 'Day 7',
-				title: 'Switch with a rollback window',
+				title: 'Switch',
 				description:
-					'Launch the new path, monitor the first week, and keep the prior export available.',
+					'Move the live workflow, monitor the first week, and retain a rollback export.',
 				owner: 'Priority launch support'
 			}
 		],
 		included = [
 			'Dedicated migration owner',
 			'Historical data import',
-			'Workflow and permission setup',
 			'Team onboarding session',
-			'30-day rollback export',
-			'Post-launch health review'
+			'30-day rollback export'
 		],
 		ctaLabel = 'Plan my migration',
 		ctaHref = '/auth/sign-up',
@@ -66,265 +63,264 @@
 	}: Props = $props();
 </script>
 
-<section class="border-b bg-muted/25 py-20 sm:py-24">
+<section class="border-b bg-muted/25 py-20 sm:py-24" data-testid="migration-plan">
 	<div class="mx-auto max-w-7xl px-6">
-		<div class="migration-shell">
-			<div class="migration-main">
-				<Badge variant="outline">
-					<MoveRightIcon />
-					{kicker}
-				</Badge>
+		<header class="migration-header">
+			<div>
+				<Badge variant="outline"><ShieldCheckIcon />{kicker}</Badge>
 				<h2>{title}</h2>
-				<p class="migration-description">{description}</p>
+			</div>
+			<p>{description}</p>
+		</header>
 
-				<div class="migration-timeline">
-					{#each steps as step, index (step.day)}
-						<article>
-							<div class="timeline-rail">
-								<span class:current={index === 0}>{String(index + 1).padStart(2, '0')}</span>
-							</div>
-							<div class="timeline-copy">
-								<p>{step.day}</p>
-								<h3>{step.title}</h3>
-								<span>{step.description}</span>
-								<small>{step.owner}</small>
-							</div>
-						</article>
-					{/each}
+		<div class="migration-board">
+			<div class="board-topline">
+				<div>
+					<span>Pilot scope</span>
+					<strong>One live workflow</strong>
+				</div>
+				<div class="rollback-note">
+					<RotateCcwIcon class="size-4" />
+					<span>30-day rollback export included</span>
 				</div>
 			</div>
 
-			<aside class="migration-summary">
-				<div class="summary-heading">
-					<span
-						class="grid size-10 place-items-center rounded-full bg-primary text-primary-foreground"
-					>
-						<ShieldCheckIcon class="size-4" />
-					</span>
-					<div>
-						<p>Launch support</p>
-						<h3>Everything needed to switch safely.</h3>
-					</div>
-				</div>
+			<div class="migration-phases">
+				{#each steps as step, index (step.day)}
+					<article>
+						<div class="phase-heading">
+							<span>{step.day}</span>
+							<strong>{String(index + 1).padStart(2, '0')}</strong>
+						</div>
+						<h3>{step.title}</h3>
+						<p>{step.description}</p>
+						<small>{step.owner}</small>
+					</article>
+				{/each}
+			</div>
 
-				<ul>
+			<div class="migration-footer">
+				<ul aria-label="Migration support included">
 					{#each included as item (item)}
-						<li><CheckIcon class="size-4 text-primary" />{item}</li>
+						<li><CheckIcon class="size-3.5" />{item}</li>
 					{/each}
 				</ul>
-
-				<div class="summary-note">
-					<p>Start with one workflow</p>
-					<span>You can prove the path before moving the rest of the team.</span>
-				</div>
-
-				<div class="mt-6 grid gap-2">
-					<Button href={ctaHref} size="lg">
-						{ctaLabel}
-						<ArrowRightIcon data-icon="inline-end" />
-					</Button>
+				<div class="migration-actions">
 					<Button href={secondaryHref} variant="ghost">{secondaryLabel}</Button>
+					<Button href={ctaHref}>{ctaLabel}<ArrowRightIcon data-icon="inline-end" /></Button>
 				</div>
-			</aside>
+			</div>
 		</div>
 	</div>
 </section>
 
 <style>
-	.migration-shell {
+	.migration-header {
 		display: grid;
-		overflow: hidden;
-		border: 1px solid var(--border);
-		border-radius: 1rem;
-		background: var(--background);
+		gap: 2rem;
+		align-items: end;
 	}
 
-	.migration-main {
-		padding: clamp(1.5rem, 5vw, 3.5rem);
-	}
-
-	.migration-main > h2 {
-		max-width: 44rem;
-		margin-top: 1.5rem;
-		font-size: clamp(2.25rem, 5vw, 4rem);
+	.migration-header h2 {
+		max-width: 50rem;
+		margin-top: 1.25rem;
+		font-size: clamp(2.25rem, 5vw, 3.75rem);
 		font-weight: 650;
 		line-height: 0.98;
 		letter-spacing: -0.05em;
 		text-wrap: balance;
 	}
 
-	.migration-description {
-		max-width: 40rem;
-		margin-top: 1.25rem;
+	.migration-header > p {
+		max-width: 34rem;
 		color: var(--muted-foreground);
 		line-height: 1.7;
 	}
 
-	.migration-timeline {
-		display: grid;
+	.migration-board {
+		overflow: hidden;
 		margin-top: 3rem;
+		border: 1px solid var(--border);
+		border-radius: 1rem;
+		background: var(--background);
 	}
 
-	.migration-timeline article {
+	.board-topline,
+	.migration-footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1.5rem;
+		padding: 1.25rem clamp(1.25rem, 4vw, 2.5rem);
+	}
+
+	.board-topline {
+		border-bottom: 1px solid var(--border);
+	}
+
+	.board-topline span,
+	.board-topline strong {
+		display: block;
+	}
+
+	.board-topline > div:first-child span {
+		color: var(--muted-foreground);
+		font-size: 0.68rem;
+		font-weight: 650;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+
+	.board-topline > div:first-child strong {
+		margin-top: 0.2rem;
+		font-size: 0.9rem;
+	}
+
+	.rollback-note {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: var(--primary);
+		font-size: 0.75rem;
+		font-weight: 650;
+	}
+
+	.migration-phases {
 		display: grid;
-		grid-template-columns: 2.5rem minmax(0, 1fr);
-		gap: 1rem;
 	}
 
-	.timeline-rail {
+	.migration-phases article {
 		position: relative;
 		display: flex;
-		justify-content: center;
+		min-height: 22rem;
+		flex-direction: column;
+		padding: clamp(1.5rem, 4vw, 2.5rem);
 	}
 
-	.timeline-rail::after {
+	.migration-phases article::before {
 		position: absolute;
-		top: 2.5rem;
-		bottom: 0;
-		left: 50%;
-		width: 1px;
+		top: 0;
+		right: clamp(1.5rem, 4vw, 2.5rem);
+		left: clamp(1.5rem, 4vw, 2.5rem);
+		height: 3px;
+		border-radius: 999px;
 		background: var(--border);
 		content: '';
 	}
 
-	.migration-timeline article:last-child .timeline-rail::after {
-		display: none;
-	}
-
-	.timeline-rail span {
-		display: grid;
-		size: 2rem;
-		place-items: center;
-		border: 1px solid var(--border);
-		border-radius: 999px;
-		background: var(--background);
-		font-size: 0.68rem;
-		font-weight: 700;
-		color: var(--muted-foreground);
-	}
-
-	.timeline-rail span.current {
-		border-color: var(--primary);
+	.migration-phases article:first-child::before {
 		background: var(--primary);
-		color: var(--primary-foreground);
 	}
 
-	.timeline-copy {
-		padding-bottom: 2.25rem;
-	}
-
-	.timeline-copy > p {
-		font-size: 0.7rem;
-		font-weight: 650;
-		color: var(--primary);
-		text-transform: uppercase;
-	}
-
-	.timeline-copy h3 {
-		margin-top: 0.35rem;
-		font-size: 1.05rem;
-		font-weight: 650;
-	}
-
-	.timeline-copy > span {
-		display: block;
-		max-width: 38rem;
-		margin-top: 0.5rem;
-		color: var(--muted-foreground);
-		font-size: 0.875rem;
-		line-height: 1.6;
-	}
-
-	.timeline-copy small {
-		display: inline-block;
-		margin-top: 0.8rem;
-		border-radius: 999px;
-		background: var(--muted);
-		padding: 0.35rem 0.6rem;
-		font-size: 0.68rem;
-		font-weight: 600;
-		color: var(--muted-foreground);
-	}
-
-	.migration-summary {
+	.phase-heading {
 		display: flex;
-		justify-content: center;
-		flex-direction: column;
-		border-top: 1px solid var(--border);
-		background: var(--card);
-		padding: clamp(1.5rem, 5vw, 3rem);
-	}
-
-	.summary-heading {
-		display: flex;
-		align-items: center;
+		align-items: start;
+		justify-content: space-between;
 		gap: 1rem;
 	}
 
-	.summary-heading p {
-		font-size: 0.7rem;
+	.phase-heading span {
+		padding-top: 0.4rem;
+		color: var(--primary);
+		font-size: 0.72rem;
 		font-weight: 650;
-		color: var(--muted-foreground);
+		letter-spacing: 0.04em;
 		text-transform: uppercase;
 	}
 
-	.summary-heading h3 {
-		max-width: 22rem;
-		margin-top: 0.3rem;
-		font-size: 1.25rem;
+	.phase-heading strong {
+		color: var(--muted);
+		font-size: 3.5rem;
+		font-weight: 700;
+		line-height: 0.8;
+		letter-spacing: -0.08em;
+	}
+
+	.migration-phases h3 {
+		margin-top: 3rem;
+		font-size: clamp(1.8rem, 3vw, 2.5rem);
 		font-weight: 650;
-		line-height: 1.2;
+		line-height: 1;
+		letter-spacing: -0.04em;
 	}
 
-	.migration-summary ul {
-		display: grid;
-		gap: 0;
-		margin-top: 2rem;
-		border-block: 1px solid var(--border);
-	}
-
-	.migration-summary li {
-		display: flex;
-		align-items: center;
-		gap: 0.65rem;
-		border-bottom: 1px solid var(--border);
-		padding: 0.8rem 0;
-		font-size: 0.8rem;
-		font-weight: 550;
-	}
-
-	.migration-summary li:last-child {
-		border-bottom: 0;
-	}
-
-	.summary-note {
-		margin-top: 1.5rem;
-		border-radius: 0.75rem;
-		background: var(--muted);
-		padding: 1rem;
-	}
-
-	.summary-note p {
-		font-size: 0.82rem;
-		font-weight: 650;
-	}
-
-	.summary-note span {
-		display: block;
-		margin-top: 0.35rem;
+	.migration-phases p {
+		max-width: 28rem;
+		margin-top: 1rem;
 		color: var(--muted-foreground);
-		font-size: 0.75rem;
-		line-height: 1.55;
+		font-size: 0.875rem;
+		line-height: 1.7;
+	}
+
+	.migration-phases small {
+		margin-top: auto;
+		padding-top: 2rem;
+		font-size: 0.72rem;
+		font-weight: 650;
+	}
+
+	.migration-footer {
+		border-top: 1px solid var(--border);
+		background: var(--muted);
+	}
+
+	.migration-footer ul {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.65rem 1.25rem;
+	}
+
+	.migration-footer li {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-size: 0.72rem;
+		font-weight: 600;
+	}
+
+	.migration-footer li :global(svg) {
+		color: var(--primary);
+	}
+
+	.migration-actions {
+		display: flex;
+		flex: none;
+		gap: 0.5rem;
 	}
 
 	@media (min-width: 900px) {
-		.migration-shell {
-			grid-template-columns: minmax(0, 1.2fr) minmax(21rem, 0.8fr);
+		.migration-header {
+			grid-template-columns: 1fr 0.72fr;
 		}
 
-		.migration-summary {
-			border-top: 0;
-			border-left: 1px solid var(--border);
+		.migration-phases {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+
+		.migration-phases article:not(:last-child) {
+			border-right: 1px solid var(--border);
+		}
+	}
+
+	@media (max-width: 760px) {
+		.board-topline,
+		.migration-footer,
+		.migration-actions {
+			align-items: stretch;
+			flex-direction: column;
+		}
+
+		.migration-phases article {
+			min-height: 18rem;
+			border-bottom: 1px solid var(--border);
+		}
+
+		.migration-phases article:last-child {
+			border-bottom: 0;
+		}
+
+		.migration-actions :global(a) {
+			width: 100%;
 		}
 	}
 </style>
