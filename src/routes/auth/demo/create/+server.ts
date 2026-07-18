@@ -72,7 +72,7 @@ async function sha256(value: string) {
 
 export const POST: RequestHandler = async ({ fetch, getClientAddress, request, url }) => {
 	if (privateEnv.DEMO_ENABLED === 'false') error(404, 'The public demo is disabled.');
-	if (!privateEnv.BETTER_AUTH_SECRET || !PUBLIC_CONVEX_URL) {
+	if (!privateEnv.DEMO_CREATION_SECRET || !PUBLIC_CONVEX_URL) {
 		error(503, 'Demo account creation is not configured.');
 	}
 
@@ -84,11 +84,11 @@ export const POST: RequestHandler = async ({ fetch, getClientAddress, request, u
 			clientAddress = 'unknown';
 		}
 	}
-	const fingerprint = await sha256(`${privateEnv.BETTER_AUTH_SECRET}:${clientAddress}`);
+	const fingerprint = await sha256(`${privateEnv.DEMO_CREATION_SECRET}:${clientAddress}`);
 	const convex = new ConvexHttpClient(PUBLIC_CONVEX_URL);
 	try {
 		await convex.mutation(api.demo.reserveCreation, {
-			secret: privateEnv.BETTER_AUTH_SECRET,
+			secret: privateEnv.DEMO_CREATION_SECRET,
 			fingerprint
 		});
 	} catch (cause) {

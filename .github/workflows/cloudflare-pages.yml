@@ -61,6 +61,20 @@ jobs:
       - name: Set Cloudflare Node Version
         run: echo "22" > ./.svelte-kit/cloudflare/.node-version
 
+      - name: Configure demo creation secret
+        if: github.ref == 'refs/heads/main'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_PROJECT_NAME: ${{ vars.CLOUDFLARE_PROJECT_NAME || 'productplate' }}
+          DEMO_CREATION_SECRET: ${{ secrets.DEMO_CREATION_SECRET }}
+        run: |
+          if [ -z "$DEMO_CREATION_SECRET" ]; then
+            echo "DEMO_CREATION_SECRET is not configured." >&2
+            exit 1
+          fi
+          printf '%s' "$DEMO_CREATION_SECRET" | bunx wrangler pages secret put DEMO_CREATION_SECRET --project-name="$CLOUDFLARE_PROJECT_NAME"
+
       - name: Deploy to Cloudflare Pages
         id: cloudflare-deploy
         uses: cloudflare/wrangler-action@v3

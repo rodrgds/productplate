@@ -14,4 +14,13 @@ describe('disposable demo route', () => {
 		expect(source).toContain("import { PUBLIC_CONVEX_URL } from '$env/static/public';");
 		expect(source).toContain('new ConvexHttpClient(PUBLIC_CONVEX_URL)');
 	});
+
+	it('authenticates demo reservations with a dedicated shared secret', async () => {
+		const route = await readFile('src/routes/auth/demo/create/+server.ts', 'utf8');
+		const mutation = await readFile('src/convex/demo.ts', 'utf8');
+
+		expect(route).toContain('privateEnv.DEMO_CREATION_SECRET');
+		expect(mutation).toContain('process.env.DEMO_CREATION_SECRET');
+		expect(route).not.toContain('secret: privateEnv.BETTER_AUTH_SECRET');
+	});
 });

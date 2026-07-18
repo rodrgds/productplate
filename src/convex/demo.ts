@@ -41,7 +41,7 @@ export const reserveCreation = mutation({
 	args: { secret: v.string(), fingerprint: v.string() },
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		const expectedSecret = process.env.BETTER_AUTH_SECRET;
+		const expectedSecret = process.env.DEMO_CREATION_SECRET;
 		if (!expectedSecret || args.secret !== expectedSecret)
 			throw new Error('Demo creation unavailable.');
 		if (!/^[a-f0-9]{64}$/.test(args.fingerprint)) throw new Error('Invalid demo fingerprint.');
