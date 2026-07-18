@@ -11,6 +11,7 @@
 	import type { Doc, Id } from '$convex/_generated/dataModel.js';
 	import { toast } from 'svelte-sonner';
 	import { isDemoAccountEmail } from '$lib/demo-account.js';
+	import { soundPreferences } from '$lib/sound-preferences.svelte.js';
 
 	const convex = useConvexClient();
 	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
@@ -93,22 +94,30 @@
 				deliveryStatus = 'Email delivery failed; copy the invite link.';
 			}
 			toast.success(`Invite created. ${deliveryStatus}`);
+			soundPreferences.play('success');
 			inviteEmail = '';
 		} catch (cause) {
 			error = cause instanceof Error ? cause.message : String(cause);
 			toast.error(error);
+			soundPreferences.play('error');
 		} finally {
 			isBusy = false;
 		}
 	}
 
 	async function copyInvite(inviteId: Id<'organizationInvites'>, token: string) {
-		await navigator.clipboard.writeText(inviteUrl(token));
-		copiedInviteId = inviteId;
-		toast.success('Invite link copied.');
-		setTimeout(() => {
-			if (copiedInviteId === inviteId) copiedInviteId = '';
-		}, 1800);
+		try {
+			await navigator.clipboard.writeText(inviteUrl(token));
+			copiedInviteId = inviteId;
+			toast.success('Invite link copied.');
+			soundPreferences.play('success');
+			setTimeout(() => {
+				if (copiedInviteId === inviteId) copiedInviteId = '';
+			}, 1800);
+		} catch {
+			toast.error('Unable to copy the invite link.');
+			soundPreferences.play('error');
+		}
 	}
 </script>
 

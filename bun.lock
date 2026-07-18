@@ -26,6 +26,7 @@
         "better-auth": "^1.6.23",
         "convex": "^1.42.2",
         "convex-svelte": "^0.14.0",
+        "cuelume": "^0.1.2",
         "embla-carousel-svelte": "^8.6.0",
         "mode-watcher": "^1.1.0",
         "prosekit": "^0.21.4",
@@ -1302,6 +1303,8 @@
     "cssesc": ["cssesc@3.0.0", "", { "bin": { "cssesc": "bin/cssesc" } }, "sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg=="],
 
     "csstype": ["csstype@3.2.3", "", {}, "sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ=="],
+
+    "cuelume": ["cuelume@0.1.2", "", {}, "sha512-VxL0k9l1fyKGot3VKM+wm5Xd2K75fVeBHdNTrR1EHiqKRtD6S5Dxy/vY7hwl9gXp3QT/TIywFXUos77n39YZVQ=="],
 
     "cytoscape": ["cytoscape@3.33.3", "", {}, "sha512-Gej7U+OKR+LZ8kvX7rb2HhCYJ0IhvEFsnkud4SB1PR+BUY/TsSO0dmOW59WEVLu51b1Rm+gQRKoz4bLYxGSZ2g=="],
 

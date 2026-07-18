@@ -11,6 +11,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { passwordFormSchema, type PasswordForm } from '$lib/forms/schemas.js';
+	import { soundPreferences } from '$lib/sound-preferences.svelte.js';
 
 	let isLoading = $state(false);
 	let error = $state('');
@@ -39,8 +40,10 @@
 					if (authError) {
 						error = authError.message || 'Failed to change password';
 						toast.error(error);
+						soundPreferences.play('error');
 					} else {
 						toast.success('Password changed successfully');
+						soundPreferences.play('success');
 						$formData.currentPassword = '';
 						$formData.newPassword = '';
 						$formData.confirmPassword = '';
@@ -48,6 +51,7 @@
 				} catch (err) {
 					error = err instanceof Error ? err.message : 'An unexpected error occurred';
 					toast.error(error);
+					soundPreferences.play('error');
 				} finally {
 					isLoading = false;
 				}

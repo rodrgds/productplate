@@ -7,7 +7,8 @@
 		CircleUser,
 		Sun,
 		Moon,
-		Monitor
+		Monitor,
+		Volume2
 	} from '@lucide/svelte';
 
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
@@ -17,6 +18,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { setMode, resetMode } from 'mode-watcher';
+	import { soundPreferences } from '$lib/sound-preferences.svelte.js';
 
 	let { user }: { user: { name: string; email: string; avatar: string } } = $props();
 
@@ -121,6 +123,13 @@
 						</DropdownMenu.Item>
 					</DropdownMenu.SubContent>
 				</DropdownMenu.Sub>
+				<DropdownMenu.CheckboxItem
+					checked={soundPreferences.enabled}
+					onCheckedChange={(enabled) => soundPreferences.setPreference(enabled === true)}
+				>
+					<Volume2 />
+					Sound effects
+				</DropdownMenu.CheckboxItem>
 				<DropdownMenu.Separator />
 				<DropdownMenu.Item onclick={handleSignOut}>
 					<LogOut />

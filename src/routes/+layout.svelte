@@ -16,6 +16,7 @@
 	import PwaReloadPrompt from '$lib/components/pwa-reload-prompt.svelte';
 	import ThemeRuntime from '$lib/components/theme-runtime.svelte';
 	import { Toaster } from '$lib/components/ui/sonner/index.js';
+	import { soundPreferences } from '$lib/sound-preferences.svelte.js';
 	createSvelteAuthClient({ authClient });
 
 	let { children } = $props();
@@ -23,6 +24,8 @@
 	let webManifest = $derived(pwaInfo ? pwaInfo.webManifest.linkTag : '');
 
 	onMount(() => {
+		soundPreferences.initialize();
+
 		if (pwaInfo || !('serviceWorker' in navigator)) return;
 		void navigator.serviceWorker
 			.getRegistrations()

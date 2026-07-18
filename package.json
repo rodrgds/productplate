@@ -129,6 +129,7 @@
 		"better-auth": "^1.6.23",
 		"convex": "^1.42.2",
 		"convex-svelte": "^0.14.0",
+		"cuelume": "^0.1.2",
 		"embla-carousel-svelte": "^8.6.0",
 		"mode-watcher": "^1.1.0",
 		"prosekit": "^0.21.4",

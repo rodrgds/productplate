@@ -12,6 +12,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { emailFormSchema, type EmailForm } from '$lib/forms/schemas.js';
+	import { soundPreferences } from '$lib/sound-preferences.svelte.js';
 
 	interface Props {
 		user: {
@@ -52,11 +53,13 @@
 							? 'Verification email sent to your current address. Please check your inbox to approve the change.'
 							: 'Email updated successfully'
 					);
+					soundPreferences.play('success');
 
 					$formData.newEmail = '';
 				} catch (err) {
 					error = err instanceof Error ? err.message : 'Failed to change email';
 					toast.error(error);
+					soundPreferences.play('error');
 				} finally {
 					isLoading = false;
 				}

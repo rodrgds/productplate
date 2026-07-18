@@ -16,6 +16,7 @@
 	import { ExternalLink } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { soundPreferences } from '$lib/sound-preferences.svelte.js';
 
 	interface Props {
 		user: {
@@ -62,9 +63,11 @@
 					$formData.bio = updatedProfile.bio;
 					$formData.image = updatedProfile.image || '';
 					toast.success('Profile updated successfully');
+					soundPreferences.play('success');
 				} catch (error) {
 					const message = error instanceof Error ? error.message : 'Failed to update profile';
 					toast.error(message);
+					soundPreferences.play('error');
 				} finally {
 					isLoading = false;
 				}
@@ -96,8 +99,11 @@
 				image: imageUrl
 			});
 			toast.success('Profile picture updated');
+			soundPreferences.play('success');
 		} catch (error) {
 			console.error('Failed to update user image:', error);
+			toast.error('The image uploaded, but the account update failed. Please try again.');
+			soundPreferences.play('error');
 		}
 	}
 
@@ -110,9 +116,11 @@
 			});
 			$formData.image = '';
 			toast.success('Profile picture removed');
+			soundPreferences.play('success');
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Failed to remove image';
 			toast.error(message);
+			soundPreferences.play('error');
 		} finally {
 			isLoading = false;
 		}

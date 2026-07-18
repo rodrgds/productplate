@@ -10,6 +10,7 @@
 	import { Check, Code2, Copy, KeyRound } from '@lucide/svelte';
 	import type { Id } from '$convex/_generated/dataModel.js';
 	import { toast } from 'svelte-sonner';
+	import { soundPreferences } from '$lib/sound-preferences.svelte.js';
 
 	const convex = useConvexClient();
 	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
@@ -41,11 +42,18 @@
 	}
 
 	async function copy(value: string, label: string) {
-		await navigator.clipboard.writeText(value);
-		copied = label;
-		setTimeout(() => {
-			if (copied === label) copied = '';
-		}, 1600);
+		try {
+			await navigator.clipboard.writeText(value);
+			copied = label;
+			soundPreferences.play('success');
+			setTimeout(() => {
+				if (copied === label) copied = '';
+			}, 1600);
+		} catch (cause) {
+			error = cause instanceof Error ? cause.message : 'Unable to copy to the clipboard.';
+			toast.error(error);
+			soundPreferences.play('error');
+		}
 	}
 
 	async function runAction(action: () => Promise<unknown>, success: string) {
@@ -54,9 +62,11 @@
 		try {
 			await action();
 			toast.success(success);
+			soundPreferences.play('success');
 		} catch (cause) {
 			error = cause instanceof Error ? cause.message : String(cause);
 			toast.error(error);
+			soundPreferences.play('error');
 		} finally {
 			isBusy = false;
 		}
