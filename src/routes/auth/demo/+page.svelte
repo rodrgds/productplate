@@ -5,6 +5,7 @@
 	import Clock3Icon from '@lucide/svelte/icons/clock-3';
 	import ShieldCheckIcon from '@lucide/svelte/icons/shield-check';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
+	import { resolve } from '$app/paths';
 </script>
 
 <svelte:head>
@@ -43,7 +44,7 @@
 		</div>
 	</Card.Content>
 	<Card.Footer class="flex-col items-stretch gap-3">
-		<form method="POST">
+		<form method="POST" action={resolve('/auth/demo/create')}>
 			<Button type="submit" size="lg" class="min-h-11 w-full">Create demo workspace</Button>
 		</form>
 		<p class="text-center text-xs text-muted-foreground">

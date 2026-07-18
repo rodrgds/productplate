@@ -2,6 +2,9 @@ import { expect, test } from '@playwright/test';
 
 async function enterDemo(page: import('@playwright/test').Page) {
 	await page.goto('/auth/demo');
+	const creationForm = page.locator('form');
+	await expect(creationForm).toHaveCount(1);
+	await expect(creationForm).toHaveAttribute('action', /auth\/demo\/create$/);
 	await page.getByRole('button', { name: /Create demo workspace/i }).click();
 	await page.waitForURL('**/dashboard');
 }
