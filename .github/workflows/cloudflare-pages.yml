@@ -16,6 +16,9 @@ jobs:
     name: Deploy to Cloudflare Pages
     env:
       NODE_OPTIONS: --max_old_space_size=4096
+      PUBLIC_CONVEX_URL: ${{ vars.PUBLIC_CONVEX_URL }}
+      PUBLIC_CONVEX_SITE_URL: ${{ vars.PUBLIC_CONVEX_SITE_URL }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://productplate.pages.dev' }}
     permissions:
       contents: read
       deployments: write
@@ -50,9 +53,6 @@ jobs:
 
       - name: Build
         env:
-          PUBLIC_CONVEX_URL: ${{ vars.PUBLIC_CONVEX_URL }}
-          PUBLIC_CONVEX_SITE_URL: ${{ vars.PUBLIC_CONVEX_SITE_URL }}
-          SITE_URL: ${{ vars.SITE_URL || 'https://productplate.pages.dev' }}
           # Runtime bindings are configured in Cloudflare; this only lets Vite
           # initialize Better Auth while compiling the Worker bundle.
           BETTER_AUTH_SECRET: 'ci-build-only-secret-not-used-at-runtime'
