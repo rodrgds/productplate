@@ -35,11 +35,17 @@
 
 	async function handleSignOut() {
 		try {
+			sidebar.setOpenMobile(false);
 			await authClient.signOut();
 			goto(resolve('/auth/sign-in'));
 		} catch (e) {
 			console.error('Failed to sign out', e);
 		}
+	}
+
+	function navigateTo(path: '/settings' | '/billing') {
+		sidebar.setOpenMobile(false);
+		return goto(resolve(path));
 	}
 </script>
 
@@ -69,7 +75,8 @@
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content
 				class="w-(--bits-dropdown-menu-anchor-width) min-w-56 rounded-lg"
-				side={sidebar.isMobile ? 'bottom' : 'right'}
+				portalProps={sidebar.isMobile ? { to: '[data-mobile="true"]' } : undefined}
+				side={sidebar.isMobile ? 'top' : 'right'}
 				align="end"
 				sideOffset={4}
 			>
@@ -89,11 +96,11 @@
 				</DropdownMenu.Label>
 				<DropdownMenu.Separator />
 				<DropdownMenu.Group>
-					<DropdownMenu.Item onSelect={() => goto(resolve('/settings'))}>
+					<DropdownMenu.Item onSelect={() => navigateTo('/settings')}>
 						<CircleUser />
 						Account
 					</DropdownMenu.Item>
-					<DropdownMenu.Item onSelect={() => goto(resolve('/billing'))}>
+					<DropdownMenu.Item onSelect={() => navigateTo('/billing')}>
 						<CreditCard />
 						Billing
 					</DropdownMenu.Item>

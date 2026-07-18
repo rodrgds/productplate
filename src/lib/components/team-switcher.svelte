@@ -33,6 +33,7 @@
 		isSwitching = true;
 		try {
 			await convex.mutation(api.organizations.setCurrent, { orgId: team.id });
+			sidebar.setOpenMobile(false);
 			toast.success(`Switched to ${team.name}.`);
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Unable to switch workspace.');
@@ -70,6 +71,7 @@
 				{#if teams.length > 1}
 					<DropdownMenu.Content
 						class="w-(--bits-dropdown-menu-anchor-width) min-w-56 rounded-lg"
+						portalProps={sidebar.isMobile ? { to: '[data-mobile="true"]' } : undefined}
 						align="start"
 						side={sidebar.isMobile ? 'bottom' : 'right'}
 						sideOffset={4}

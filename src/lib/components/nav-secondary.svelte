@@ -11,6 +11,11 @@
 	}: { items: { title: string; url: string; icon: Component<IconProps> }[] } & WithoutChildren<
 		ComponentProps<typeof Sidebar.Group>
 	> = $props();
+	const sidebar = Sidebar.useSidebar();
+
+	function closeMobileSidebar() {
+		if (sidebar.isMobile) sidebar.setOpenMobile(false);
+	}
 </script>
 
 <Sidebar.Group {...restProps}>
@@ -22,16 +27,23 @@
 						{#snippet child({ props })}
 							{#if item.url && item.url.startsWith('/')}
 								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-								<a href={resolve(item.url as '/')} {...props}>
+								<a href={resolve(item.url as '/')} {...props} onclick={closeMobileSidebar}>
 									<item.icon />
 									<span>{item.title}</span>
 								</a>
 							{:else if item.url && (item.url.startsWith('https://') || item.url.startsWith('mailto:') || item.url.startsWith('tel:'))}
-								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-								<a href={item.url} target="_blank" rel="noopener noreferrer" {...props}>
+								<!-- eslint-disable svelte/no-navigation-without-resolve -->
+								<a
+									href={item.url}
+									target="_blank"
+									rel="noopener noreferrer"
+									{...props}
+									onclick={closeMobileSidebar}
+								>
 									<item.icon />
 									<span>{item.title}</span>
 								</a>
+								<!-- eslint-enable svelte/no-navigation-without-resolve -->
 							{:else}
 								<span {...props}>
 									<item.icon />

@@ -93,6 +93,43 @@ test('demo entry opens the dashboard with sidebar navigation', async ({ page }) 
 	await expect(page.getByRole('link', { name: /Threlte/i })).toBeVisible();
 });
 
+test('mobile sidebar user menu stays visible and dismisses after navigation', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await enterDemo(page);
+
+	await page.getByRole('button', { name: 'Toggle Sidebar' }).click();
+	const mobileSidebar = page.locator('[data-mobile="true"]');
+	const userTrigger = mobileSidebar.locator('[data-slot="sidebar-footer"] button');
+	await expect(userTrigger).toHaveCount(1);
+	await userTrigger.click();
+
+	const userMenu = page.locator('[data-slot="dropdown-menu-content"]');
+	await expect(userMenu).toBeVisible();
+	await expect
+		.poll(async () =>
+			userMenu.evaluate((menu) => {
+				const rect = menu.getBoundingClientRect();
+				const elementAtMenuCenter = document.elementFromPoint(
+					rect.left + rect.width / 2,
+					rect.top + rect.height / 2
+				);
+
+				return elementAtMenuCenter === menu || menu.contains(elementAtMenuCenter);
+			})
+		)
+		.toBe(true);
+
+	await page.getByRole('menuitem', { name: 'Account' }).click();
+	await expect(page).toHaveURL(/\/settings$/);
+	await expect(mobileSidebar).toBeHidden();
+
+	await page.getByRole('button', { name: 'Toggle Sidebar' }).click();
+	await expect(mobileSidebar).toBeVisible();
+	await mobileSidebar.getByRole('link', { name: 'Dashboard' }).click();
+	await expect(page).toHaveURL(/\/dashboard$/);
+	await expect(mobileSidebar).toBeHidden();
+});
+
 test('demo workspace includes the map and interactive 3D starter routes', async ({ page }) => {
 	await enterDemo(page);
 
