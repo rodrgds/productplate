@@ -3,7 +3,7 @@ import { resolve } from '$app/paths';
 import { createDemoAccountCredentials } from '$lib/demo-account.js';
 import type { RequestHandler } from './$types';
 import { env as privateEnv } from '$env/dynamic/private';
-import { env as publicEnv } from '$env/dynamic/public';
+import { PUBLIC_CONVEX_URL } from '$env/static/public';
 import { api } from '$convex/_generated/api.js';
 import { ConvexHttpClient } from 'convex/browser';
 
@@ -72,7 +72,7 @@ async function sha256(value: string) {
 
 export const POST: RequestHandler = async ({ fetch, getClientAddress, request, url }) => {
 	if (privateEnv.DEMO_ENABLED === 'false') error(404, 'The public demo is disabled.');
-	if (!privateEnv.BETTER_AUTH_SECRET || !publicEnv.PUBLIC_CONVEX_URL) {
+	if (!privateEnv.BETTER_AUTH_SECRET || !PUBLIC_CONVEX_URL) {
 		error(503, 'Demo account creation is not configured.');
 	}
 
@@ -85,7 +85,7 @@ export const POST: RequestHandler = async ({ fetch, getClientAddress, request, u
 		}
 	}
 	const fingerprint = await sha256(`${privateEnv.BETTER_AUTH_SECRET}:${clientAddress}`);
-	const convex = new ConvexHttpClient(publicEnv.PUBLIC_CONVEX_URL);
+	const convex = new ConvexHttpClient(PUBLIC_CONVEX_URL);
 	try {
 		await convex.mutation(api.demo.reserveCreation, {
 			secret: privateEnv.BETTER_AUTH_SECRET,

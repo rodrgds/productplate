@@ -7,4 +7,11 @@ describe('disposable demo route', () => {
 
 		expect(source).toContain("action={resolve('/auth/demo/create')}");
 	});
+
+	it('uses the build-time public Convex URL in the server handler', async () => {
+		const source = await readFile('src/routes/auth/demo/create/+server.ts', 'utf8');
+
+		expect(source).toContain("import { PUBLIC_CONVEX_URL } from '$env/static/public';");
+		expect(source).toContain('new ConvexHttpClient(PUBLIC_CONVEX_URL)');
+	});
 });
