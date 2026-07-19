@@ -33,7 +33,7 @@
 	}
 
 	let {
-		kicker = 'Customer field report',
+		kicker = 'Sample case study',
 		company = 'Northstar',
 		quote = 'We stopped asking where work stood. The team and our customers could finally see the same story without another status meeting.',
 		person = { name: 'Amelia Hart', role: 'VP of Customer Experience' },
@@ -83,7 +83,7 @@
 						<span>Customer operations / Field report 04</span>
 					</div>
 				</div>
-				<Badge variant="secondary">Verified outcome</Badge>
+				<Badge variant="secondary">Example outcome</Badge>
 			</header>
 
 			<div class="report-quote">

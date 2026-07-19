@@ -35,7 +35,7 @@
 				cancel();
 
 				if ($formData.newEmail === currentEmail) {
-					error = 'New email must be different from current email';
+					error = 'Enter an email address different from the current one.';
 					return;
 				}
 
@@ -50,14 +50,14 @@
 
 					toast.success(
 						isEmailVerified
-							? 'Verification email sent to your current address. Please check your inbox to approve the change.'
-							: 'Email updated successfully'
+							? 'Verification email sent to your current address. Open it to approve the change.'
+							: 'Email updated.'
 					);
 					soundPreferences.play('success');
 
 					$formData.newEmail = '';
 				} catch (err) {
-					error = err instanceof Error ? err.message : 'Failed to change email';
+					error = err instanceof Error ? err.message : 'Could not change the email.';
 					toast.error(error);
 					soundPreferences.play('error');
 				} finally {

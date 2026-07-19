@@ -38,11 +38,11 @@
 					});
 
 					if (authError) {
-						error = authError.message || 'Failed to change password';
+						error = authError.message || 'Could not change the password.';
 						toast.error(error);
 						soundPreferences.play('error');
 					} else {
-						toast.success('Password changed successfully');
+						toast.success('Password changed.');
 						soundPreferences.play('success');
 						$formData.currentPassword = '';
 						$formData.newPassword = '';

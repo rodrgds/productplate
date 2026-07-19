@@ -82,7 +82,7 @@
 			}
 		} catch (error) {
 			console.error('Error loading users:', error);
-			toast.error('Failed to load users');
+			toast.error('Could not load users.');
 		} finally {
 			isLoadingUsers = false;
 		}
@@ -102,7 +102,7 @@
 
 	async function handleCreateUser() {
 		if (!newUserName || !newUserEmail || !newUserPassword) {
-			toast.error('Please fill in all fields');
+			toast.error('Enter a name, email, and password.');
 			return;
 		}
 
@@ -119,7 +119,7 @@
 				throw new Error(error.message);
 			}
 
-			toast.success('User created successfully');
+			toast.success('User created.');
 			showCreateDialog = false;
 			newUserName = '';
 			newUserEmail = '';
@@ -130,7 +130,7 @@
 			currentPage = 1;
 			await loadUsers();
 		} catch (error) {
-			toast.error('Failed to create user: ' + (error as Error).message);
+			toast.error('Could not create user: ' + (error as Error).message);
 		} finally {
 			isCreating = false;
 		}
@@ -150,7 +150,7 @@
 			toast.success('User role updated');
 			await loadUsers();
 		} catch (error) {
-			toast.error('Failed to update role: ' + (error as Error).message);
+			toast.error('Could not update role: ' + (error as Error).message);
 		}
 	}
 
@@ -181,7 +181,7 @@
 			userToBan = null;
 			await loadUsers();
 		} catch (error) {
-			toast.error('Failed to update ban status: ' + (error as Error).message);
+			toast.error('Could not update ban status: ' + (error as Error).message);
 		}
 	}
 
@@ -208,7 +208,7 @@
 			userToDelete = null;
 			await loadUsers();
 		} catch (error) {
-			toast.error('Failed to delete user: ' + (error as Error).message);
+			toast.error('Could not delete user: ' + (error as Error).message);
 		}
 	}
 
@@ -233,11 +233,11 @@
 	<div class="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
 		<Sidebar.Trigger class="-ml-1" />
 		<Separator orientation="vertical" class="mx-2 data-[orientation=vertical]:h-4" />
-		<h1 class="text-base font-medium">User Management</h1>
+		<h1 class="text-base font-medium">Users</h1>
 		<div class="ml-auto">
 			<Button onclick={() => (showCreateDialog = true)}>
 				<UserPlus class="mr-2 h-4 w-4" />
-				Add User
+				Add user
 			</Button>
 		</div>
 	</div>

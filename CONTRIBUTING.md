@@ -6,7 +6,7 @@ Product Plate is a starter, not a framework. Contributions should make the defau
 
 ## Good contributions
 
-Good changes usually fit one of these buckets:
+Good changes usually fit one of these groups:
 
 - Fixes for broken setup, auth, billing, deployment, tests, or demo flows.
 - Better docs for real customization work.
@@ -21,7 +21,7 @@ Please avoid changes that make the starter harder to fork into a real product:
 
 - Runtime provider switchers for billing/database/auth unless there is a strong product reason.
 - Heavy abstractions over ordinary SvelteKit or Convex code.
-- Decorative component volume that does not improve actual product-starting speed.
+- Decorative components that do not help people start a product.
 - Imports from `_template_options` in active application code.
 - Vendor-specific setup that becomes mandatory for every user.
 
@@ -69,7 +69,7 @@ bun run test:e2e
 - Keep active app code in `src/routes`, `src/lib`, and `src/convex`.
 - Treat `_template_options` as inactive source material only.
 - Preserve the `START_HERE.md` kickstart flow when changing the starter structure.
-- The hosted `/auth/demo` route is a launch-preview convenience and should usually be removed when a user forks Product Plate into a real product.
+- The hosted `/auth/demo` route supports the hosted preview and should usually be removed when someone forks Product Plate into a real product.
 
 ## Pull request description
 

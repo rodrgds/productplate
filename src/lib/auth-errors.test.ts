@@ -9,9 +9,7 @@ describe('getOAuthErrorMessage', () => {
 	});
 
 	it('uses a safe fallback for unknown provider errors', () => {
-		expect(getOAuthErrorMessage('provider_failure')).toBe(
-			'Google sign-in failed. Please try again.'
-		);
+		expect(getOAuthErrorMessage('provider_failure')).toBe('Google sign-in failed. Try again.');
 	});
 
 	it('returns null when there is no OAuth error', () => {

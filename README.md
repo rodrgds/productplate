@@ -24,7 +24,7 @@
 
 ## Why this exists
 
-Most starters save setup time, then leave you with a permanent showcase app.
+Most starters save setup time, then leave you with a showcase app to dismantle.
 
 Product Plate gives you two things:
 

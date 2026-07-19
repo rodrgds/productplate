@@ -27,7 +27,7 @@
 		error = null;
 		message = null;
 		if (password.length < 8) {
-			error = 'Password must be at least 8 characters';
+			error = 'Enter a password with at least 8 characters.';
 			return;
 		}
 		if (password !== confirmPassword) {
@@ -36,7 +36,7 @@
 		}
 		const token = getTokenFromUrl();
 		if (!token) {
-			error = 'Missing or invalid token';
+			error = 'This reset link is missing or invalid.';
 			return;
 		}
 		isLoading = true;
@@ -51,7 +51,7 @@
 				message = 'Your password has been reset. You can now sign in.';
 			}
 		} catch {
-			error = 'Failed to reset password';
+			error = 'Could not reset the password.';
 		} finally {
 			isLoading = false;
 		}

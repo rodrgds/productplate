@@ -11,7 +11,7 @@ export const APP_URL = 'https://productplate.pages.dev';
 export const APP_DESCRIPTION =
 	'An open-source SvelteKit product starter with auth, billing, realtime data, AI, tests, deployment, and a guided kickstart prompt.';
 
-export const APP_TAGLINE = 'Ship the product, not the setup.';
+export const APP_TAGLINE = 'A working foundation for your next product.';
 
 export const APP_SOCIAL_TITLE = 'Product Plate | SvelteKit product starter';
 

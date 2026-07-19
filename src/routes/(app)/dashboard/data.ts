@@ -145,7 +145,7 @@ export default [
 	},
 	{
 		id: 17,
-		header: 'Scalability and Future Proofing',
+		header: 'Capacity planning and maintenance',
 		type: 'Narrative',
 		status: 'Done',
 		target: '4',

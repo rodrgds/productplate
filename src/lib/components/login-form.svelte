@@ -133,7 +133,7 @@
 				errorCallbackURL: resolve('/auth/sign-in')
 			});
 		} catch (err) {
-			error = 'Failed to sign in with Google';
+			error = 'Google sign-in failed. Try again.';
 			console.error('Google auth error:', err);
 		}
 	}

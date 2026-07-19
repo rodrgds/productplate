@@ -71,9 +71,7 @@
 				<Building2 class="size-4 text-primary" />
 				Workspaces
 			</Card.Title>
-			<Card.Description
-				>Operator-level overview of organizations and billing-controlled gates.</Card.Description
-			>
+			<Card.Description>Organizations and their billing entitlements.</Card.Description>
 		</Card.Header>
 		<Card.Content class="p-0">
 			{#if organizationsResponse.isLoading}
@@ -133,7 +131,7 @@
 				<ShieldCheck class="size-4 text-primary" />
 				Set entitlement
 			</Card.Title>
-			<Card.Description>Manual override hook for support and billing incidents.</Card.Description>
+			<Card.Description>Override an entitlement during support or billing work.</Card.Description>
 		</Card.Header>
 		<Card.Content class="space-y-3">
 			<label class="space-y-2 text-sm font-medium">

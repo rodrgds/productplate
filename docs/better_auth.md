@@ -15,7 +15,7 @@ When working on authentication-related tasks, always refer to these official doc
 - **Official Documentation**: The primary source for all `better-auth` concepts, API, and guides.
   - [Better Auth Docs - Introduction](https://www.better-auth.com/docs/introduction)
 
-- **Email Authentication Concepts**: For a deep dive into how email/password authentication is handled.
+- **Email Authentication Concepts**: How Better Auth handles email and password authentication.
   - [Better Auth - Email Concepts](https://github.com/better-auth/better-auth/blob/main/docs/content/docs/concepts/email.mdx)
 
 - **Admin Plugin**: Documentation for the admin plugin functionality.

@@ -34,7 +34,7 @@
 				message = 'Check your email for a reset link.';
 			}
 		} catch {
-			error = 'Failed to request password reset';
+			error = 'Could not send the reset email.';
 		} finally {
 			isLoading = false;
 		}

@@ -52,6 +52,10 @@
 						Browse the source-owned Svelte sections that ship with {APP_NAME}. They are meant to be
 						copied, removed, and reshaped during kickstart instead of treated as a locked theme.
 					</p>
+					<p class="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+						Names, brands, quotes, and metrics in the previews are placeholder content, not Product
+						Plate customer claims.
+					</p>
 					<div class="mt-6 flex flex-wrap gap-3">
 						<Button href={to.hero} size="lg">
 							Browse variants

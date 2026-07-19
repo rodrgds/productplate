@@ -63,9 +63,9 @@ components:
 
 ## Overview
 
-**Creative North Star: "The Founder Workbench"**
+**Design direction: "A focused product starter"**
 
-Product Plate should feel like a carefully organized workbench in a bright home office: capable, calm, and ready to be adapted. The system uses warm-tinted neutrals, compact controls, precise borders, and generous section rhythm. Product screenshots and working interface compositions carry the story.
+Product Plate should feel capable, calm, and ready to adapt. The system uses warm-tinted neutrals, compact controls, precise borders, and varied section spacing. Product screenshots and working interface compositions show what the starter includes.
 
 It explicitly rejects generic AI-tool marketing with purple gradients, glowing orbs, and glassmorphism; over-animated component galleries; empty template claims; and editorial or luxury styling. Minimal does not mean empty. Every section must demonstrate a useful product capability.
 
@@ -83,16 +83,16 @@ The palette is restrained and warm. Ink is used decisively; tonal neutrals provi
 
 ### Primary
 
-- **Workbench Ink:** The primary action, headline, and strongest navigation color.
+- **Ink:** The primary action, headline, and strongest navigation color.
 - **Signal Orange:** Product Plate guidance, section markers, and the kickstart story. Keep it focused so downstream products can replace it easily.
 
 ### Neutral
 
 - **Warm Canvas:** The page background and open breathing space.
 - **Clean Surface:** Cards, popovers, and product preview surfaces.
-- **Soft Bench:** Muted sections, active navigation, and secondary controls.
+- **Soft Neutral:** Muted sections, active navigation, and secondary controls.
 - **Pencil Gray:** Secondary copy and interface metadata.
-- **Joinery Line:** Borders, dividers, and input outlines.
+- **Border:** Borders, dividers, and input outlines.
 
 **The Ten Percent Rule.** Strong ink-filled surfaces should occupy less than ten percent of a typical screen. Their rarity preserves hierarchy.
 
@@ -129,7 +129,7 @@ The system is flat by default. Borders and tonal layers establish structure; sof
 ### Buttons
 
 - **Shape:** Compact and gently rounded (9px radius).
-- **Primary:** Workbench Ink with Warm Canvas text; use for one dominant action per group.
+- **Primary:** Ink with Warm Canvas text; use for one dominant action per group.
 - **Hover / Focus:** Subtle tonal change and a visible three-pixel focus ring. No glow.
 - **Secondary / Ghost:** Neutral surfaces and existing shadcn-svelte variants.
 

@@ -147,7 +147,7 @@ Use Svelte's lifecycle functions, `onMount` and `onDestroy`, to integrate librar
 
 ### Attachments
 
-Attachments are functions that run when an element is added to the DOM. They provide a powerful way to create reusable integrations.
+Attachments are functions that run when an element is added to the DOM. Use them to build reusable integrations.
 
 ```svelte
 <script lang="ts">

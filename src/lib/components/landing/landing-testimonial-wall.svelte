@@ -25,7 +25,7 @@
 
 	let {
 		heading = 'Testimonials',
-		description = 'Hear from builders who shipped on top of this starter.',
+		description = 'Sample layout. Replace every name, portrait, quote, role, and source before publishing.',
 		testimonials = [
 			{
 				id: '1',

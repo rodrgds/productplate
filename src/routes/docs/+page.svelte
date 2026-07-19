@@ -17,7 +17,7 @@
 		},
 		{
 			title: 'Ship',
-			description: 'Run the real verification gates and configure deployment secrets.',
+			description: 'Run the verification checks and configure deployment secrets.',
 			href: `${sourceRoot}/README.md#commands`
 		}
 	] as const;
@@ -27,7 +27,7 @@
 	<title>Docs | {APP_NAME}</title>
 	<meta
 		name="description"
-		content="Product Plate setup, architecture, and production handoff documentation."
+		content="Setup, architecture, and deployment documentation for Product Plate."
 	/>
 	<link rel="canonical" href={`${APP_URL}/docs`} />
 </svelte:head>
@@ -36,7 +36,7 @@
 	<main id="main-content" class="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-16">
 		<section class="max-w-3xl space-y-4">
 			<p class="text-sm font-medium text-primary">Documentation</p>
-			<h1 class="text-4xl font-semibold tracking-tight">Build from a real product surface.</h1>
+			<h1 class="text-4xl font-semibold tracking-tight">Build from a working product.</h1>
 			<p class="text-lg text-muted-foreground">{APP_DESCRIPTION}</p>
 		</section>
 

@@ -11,5 +11,5 @@ export function getOAuthErrorMessage(errorCode: string | null): string | null {
 		return 'That Google account could not be linked. Sign in with email first, then try Google again.';
 	}
 
-	return 'Google sign-in failed. Please try again.';
+	return 'Google sign-in failed. Try again.';
 }

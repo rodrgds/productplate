@@ -11,7 +11,7 @@ Product Plate uses a selection model, not a runtime toggle model.
 
 - Most apps need one billing provider and one data layer.
 - Runtime toggles keep unused secrets, unused packages, and unused failure modes in the app.
-- Agents can customize faster when inactive choices are explicit scaffolds instead of half-active abstractions.
+- Agents can customize explicit inactive scaffolds faster than partly active abstractions.
 
 Build runtime provider abstraction only when the product truly sells through multiple providers at the same time.
 
@@ -46,7 +46,7 @@ The kickstart agent should keep only the surfaces that support the selected prod
 
 ## Provider Notes
 
-- Autumn is already active through Convex and should stay if you want the fastest Stripe-backed path.
+- Autumn is already active through Convex and is the shortest Stripe-backed setup in this starter.
 - Stripe direct gives maximum control, but requires careful webhook and subscription handling.
 - Polar is a good fit when checkout sessions, benefits, and customer portal flows map to the product.
 - Creem is a good fit when checkout sessions, signed webhooks, test mode, and software sales workflows are important.

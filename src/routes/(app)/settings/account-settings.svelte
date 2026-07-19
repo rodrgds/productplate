@@ -62,10 +62,10 @@
 					$formData.name = updatedProfile.displayName;
 					$formData.bio = updatedProfile.bio;
 					$formData.image = updatedProfile.image || '';
-					toast.success('Profile updated successfully');
+					toast.success('Profile updated.');
 					soundPreferences.play('success');
 				} catch (error) {
-					const message = error instanceof Error ? error.message : 'Failed to update profile';
+					const message = error instanceof Error ? error.message : 'Could not update the profile.';
 					toast.error(message);
 					soundPreferences.play('error');
 				} finally {
@@ -102,7 +102,7 @@
 			soundPreferences.play('success');
 		} catch (error) {
 			console.error('Failed to update user image:', error);
-			toast.error('The image uploaded, but the account update failed. Please try again.');
+			toast.error('The image uploaded, but your profile picture did not update. Try again.');
 			soundPreferences.play('error');
 		}
 	}
@@ -118,7 +118,7 @@
 			toast.success('Profile picture removed');
 			soundPreferences.play('success');
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Failed to remove image';
+			const message = error instanceof Error ? error.message : 'Could not remove the image.';
 			toast.error(message);
 			soundPreferences.play('error');
 		} finally {

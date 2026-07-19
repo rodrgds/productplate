@@ -24,12 +24,22 @@
 - `_template_options/` contains inactive scaffolds for alternate billing and data choices. Do not import from it in active app code. Copy the selected scaffold into the app, then delete unused options.
 - Public docs, blog, changelog, legal pages, component gallery, theme builder, workspace, developer, and admin screens are starter surfaces. Keep, rewrite, or remove them based on the selected product loop instead of leaving Product Plate copy in place.
 
+## Writing and product copy
+
+- Avoid stock metaphors, similes, idioms, and figures of speech.
+- Prefer short, familiar words when they keep the exact meaning. Cut words and sections that add no meaning.
+- Prefer active voice when it makes the actor and action clearer.
+- Replace jargon, foreign phrases, and needless scientific or academic terms with everyday English.
+- Break any rule when accuracy, natural phrasing, tone, legal meaning, accessibility, or readability requires it.
+- Apply these rules in context, not as blind replacements. Preserve code, commands, API fields, product names, citations, quotes, legal wording, and exact technical terms unless they are the copy being improved.
+- Finish every copy change with a line-by-line prose review.
+
 ## Svelte Best Practices
 
 ### High-Level Principles
 
 - Write concise, technical, and accurate Svelte 5/SvelteKit code.
-- Leverage SSR and SSG.
+- Use SSR and SSG where they fit.
 - Prioritize performance and minimal JavaScript.
 - Use descriptive variable names and follow official conventions.
 

@@ -1,6 +1,6 @@
 ## State in Functions and Classes
 
-While runes are often used at the top-level of components, you can also use them inside regular JavaScript/TypeScript functions and classes to create powerful, reusable state stores. To do this, place your code in files with a `.svelte.ts` or `.svelte.js` extension. This tells the Svelte compiler to process the runes within them.
+Runes work at the top level of components and inside JavaScript or TypeScript functions and classes. Put reusable state that uses runes in a `.svelte.ts` or `.svelte.js` file so the Svelte compiler processes it.
 
 ### State in Functions
 

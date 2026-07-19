@@ -55,7 +55,7 @@
 
 	uppy.on('file-added', (file) => {
 		if (!file.type?.startsWith('image/')) {
-			toast.error('Please select an image file.');
+			toast.error('Select an image file.');
 			uppy.removeFile(file.id);
 			return;
 		}
@@ -117,7 +117,7 @@
 			reset();
 		} catch (error) {
 			console.error('Upload error:', error);
-			toast.error(error instanceof Error ? error.message : 'Failed to save profile picture');
+			toast.error(error instanceof Error ? error.message : 'Could not save the profile picture.');
 		} finally {
 			isUploading = false;
 		}

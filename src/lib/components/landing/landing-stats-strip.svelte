@@ -15,13 +15,13 @@
 	}
 
 	let {
-		eyebrow = 'Launch proof',
-		title = 'A compact numbers band for founders, tools, and public launches.',
+		eyebrow = 'Sample metrics',
+		title = 'Example layout for sourced figures that help buyers evaluate the product.',
 		stats = [
-			{ value: '8.4k', label: 'waitlist signups', detail: '+34% after proof section' },
-			{ value: '21', label: 'days saved', detail: 'setup work skipped' },
-			{ value: '4.9/5', label: 'pilot rating', detail: 'from 62 beta users' },
-			{ value: '99.9%', label: 'route uptime', detail: 'tracked from day one' }
+			{ value: '8.4k', label: 'waitlist signups', detail: 'Sample source · Jun 2026' },
+			{ value: '21', label: 'days saved', detail: 'Sample source · Jun 2026' },
+			{ value: '4.9/5', label: 'pilot rating', detail: 'Sample source · Jun 2026' },
+			{ value: '99.9%', label: 'route uptime', detail: 'Sample source · Jun 2026' }
 		]
 	}: Props = $props();
 </script>

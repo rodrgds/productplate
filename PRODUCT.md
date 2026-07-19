@@ -10,7 +10,7 @@ Indie hackers and early-stage founders who want to start a production-minded Saa
 
 ## Product Purpose
 
-Product Plate is a public, batteries-included SvelteKit starter. It shortens the path from product idea to a credible working SaaS by providing a coherent frontend, Convex backend, authentication, billing, AI patterns, and reusable product UI.
+Product Plate is a public SvelteKit starter with a connected frontend, Convex backend, authentication, billing, AI patterns, and reusable product UI. It helps teams turn a product idea into a credible working SaaS without repeating the initial setup.
 
 ## Template Kickstart
 
@@ -23,7 +23,7 @@ Product Plate is a public, batteries-included SvelteKit starter. It shortens the
 
 ## Brand Personality
 
-Practical, composed, and quietly confident. The product should feel like a well-organized workbench: capable enough for serious work, approachable enough to start using immediately, and restrained enough to adapt to a new brand. A focused orange signal color marks Product Plate guidance without taking over the neutral product UI.
+Practical, composed, and direct. The product should support serious work, be easy to start, and remain neutral enough to adapt to a new brand. A focused orange signal color marks Product Plate guidance without taking over the product UI.
 
 ## Anti-references
 

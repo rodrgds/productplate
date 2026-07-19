@@ -130,7 +130,7 @@ let { error = null, customPrompt = '' }: Props = $props();
 ## UI and Styling
 
 - Use Tailwind CSS v4 for utility-first styling approach.
-- Leverage Shadcn components for pre-built, customizable UI elements.
+- Use shadcn-svelte components for prebuilt, customizable UI elements.
 - Import Shadcn components from `$lib/components/ui`.
 - Install new ones with `bunx --bun shadcn-svelte@latest add <component_name>`. The documentation is available at https://shadcn-svelte.com/docs/installation/sveltekit.
 - Use Svelte's built-in transition and animation features.
@@ -181,7 +181,7 @@ let { error = null, customPrompt = '' }: Props = $props();
 - Use .svelte.ts files for component logic and state machines.
 - Implement proper component composition and reusability.
 - Use Svelte's props for data passing.
-- Leverage Svelte's reactive declarations for local state management.
+- Use Svelte's reactive declarations for local state management.
 
 ## State Management
 
@@ -230,18 +230,18 @@ let { error = null, customPrompt = '' }: Props = $props();
 
 ## Server-Side Rendering (SSR) and Static Site Generation (SSG)
 
-- Leverage SvelteKit's SSR capabilities for dynamic content.
+- Use SvelteKit SSR for dynamic content where it fits.
 - Implement SSG for static pages using prerender option.
 - Use the adapter-auto for automatic deployment configuration.
 
 ## Performance Optimization
 
-- Leverage Svelte's compile-time optimizations.
+- Use Svelte's compile-time optimizations.
 - Use `{#key}` blocks to force re-rendering of components when needed.
 - Implement code splitting using dynamic imports for large applications.
 - Profile and monitor performance using browser developer tools.
 - Use `$effect.tracking()` to optimize effect dependencies.
-- Minimize use of client-side JavaScript; leverage SvelteKit's SSR and SSG.
+- Minimize client-side JavaScript; use SvelteKit SSR and SSG where they fit.
 - Implement proper lazy loading for images and other assets.
 
 ## Enhanced Images
@@ -329,7 +329,7 @@ This project uses `@sveltejs/enhanced-img` for optimized image handling. Always 
 
 ## Remote Functions
 
-SvelteKit's remote functions provide a type-safe and streamlined way to handle client-server communication. They allow you to call server-side code from the client as if it were a local function.
+SvelteKit remote functions provide type-safe client-server calls. They let client code call server functions with generated types.
 
 For a comprehensive guide on using `query`, `form`, `command`, and `prerender`, as well as best practices for validation, optimistic updates, and security, please read the svelte remote-functions documentation before trying to implement something related.
 

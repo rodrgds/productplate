@@ -12,11 +12,11 @@
 
 	let {
 		heading = 'In numbers',
-		description = 'A compact proof strip for the metrics that matter to founders evaluating a starter.',
+		description = 'Example layout. Replace these sample values with current figures from a named source.',
 		stats = [
-			{ value: '+1200', label: 'Stars on GitHub' },
-			{ value: '22 Million', label: 'Active users' },
-			{ value: '+500', label: 'Powered apps' }
+			{ value: '+1,200', label: 'GitHub stars' },
+			{ value: '22M', label: 'Active users' },
+			{ value: '+500', label: 'Apps powered' }
 		]
 	}: Props = $props();
 </script>

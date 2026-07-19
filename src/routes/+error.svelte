@@ -16,10 +16,12 @@
 		<AppLogo class="mx-auto size-12 rounded-xl" />
 		<p class="mt-8 text-sm font-medium text-primary">Error {page.status}</p>
 		<h1 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-			{page.status === 404 ? 'This page is not part of the starter.' : 'Something went wrong.'}
+			{page.status === 404
+				? 'This route is not included in the starter.'
+				: 'We could not load this page'}
 		</h1>
 		<p class="mx-auto mt-4 max-w-md text-sm leading-6 text-muted-foreground">
-			{page.error?.message ?? 'The request could not be completed. Try again from a known route.'}
+			{page.error?.message ?? 'The request could not be completed. Try again, or return home.'}
 		</p>
 		<div class="mt-8 flex flex-wrap justify-center gap-3">
 			<Button href={resolve('/')}>Return home</Button>
