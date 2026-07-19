@@ -16,9 +16,7 @@ test('public starter routes render with truthful navigation', async ({ page }) =
 	await expect(page.getByRole('heading', { name: /Reusable landing sections/i })).toBeVisible();
 
 	await page.goto('/docs');
-	await expect(
-		page.getByRole('heading', { name: /Build from a working product/i })
-	).toBeVisible();
+	await expect(page.getByRole('heading', { name: /Build from a working product/i })).toBeVisible();
 });
 
 test('public routes have no horizontal overflow on a phone viewport', async ({ page }) => {
