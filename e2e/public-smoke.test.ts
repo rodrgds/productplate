@@ -17,7 +17,7 @@ test('public starter routes render with truthful navigation', async ({ page }) =
 
 	await page.goto('/docs');
 	await expect(
-		page.getByRole('heading', { name: /Build from a real product surface/i })
+		page.getByRole('heading', { name: /Build from a working product/i })
 	).toBeVisible();
 });
 
