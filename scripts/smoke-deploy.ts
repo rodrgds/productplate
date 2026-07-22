@@ -13,8 +13,8 @@ const defaultWait = (delayMs: number) =>
 export async function smokeDeployment(url: string, options: SmokeOptions = {}) {
 	const fetcher = options.fetcher ?? fetch;
 	const wait = options.wait ?? defaultWait;
-	const attempts = options.attempts ?? 6;
-	const delayMs = options.delayMs ?? 2_000;
+	const attempts = options.attempts ?? 12;
+	const delayMs = options.delayMs ?? 5_000;
 	let lastError: Error | undefined;
 
 	for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -31,7 +31,10 @@ export async function smokeDeployment(url: string, options: SmokeOptions = {}) {
 			return;
 		} catch (error) {
 			lastError = error instanceof Error ? error : new Error('Deployment smoke failed.');
-			if (attempt < attempts) await wait(delayMs);
+			if (attempt < attempts) {
+				console.warn(`Smoke attempt ${attempt}/${attempts} failed: ${lastError.message}`);
+				await wait(delayMs);
+			}
 		}
 	}
 

@@ -3,6 +3,7 @@ import { smokeDeployment } from '../../scripts/smoke-deploy';
 
 describe('deployment smoke', () => {
 	it('retries a temporary Cloudflare 404 before accepting rendered HTML', async () => {
+		const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
 		const fetcher = vi
 			.fn()
 			.mockResolvedValueOnce(new Response('Not found', { status: 404 }))
@@ -18,9 +19,12 @@ describe('deployment smoke', () => {
 
 		expect(fetcher).toHaveBeenCalledTimes(2);
 		expect(wait).toHaveBeenCalledOnce();
+		expect(warning).toHaveBeenCalledOnce();
+		warning.mockRestore();
 	});
 
 	it('fails after the bounded retry budget', async () => {
+		const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
 		const fetcher = vi.fn().mockResolvedValue(new Response('Not found', { status: 404 }));
 
 		await expect(
@@ -32,5 +36,7 @@ describe('deployment smoke', () => {
 			})
 		).rejects.toThrow('Deployment smoke failed with 404.');
 		expect(fetcher).toHaveBeenCalledTimes(2);
+		expect(warning).toHaveBeenCalledOnce();
+		warning.mockRestore();
 	});
 });
