@@ -1,0 +1,43 @@
+{
+	"name": "create-product-plate",
+	"version": "1.0.0",
+	"description": "Create and maintain a lean Product Plate application.",
+	"type": "module",
+	"bin": {
+		"create-product-plate": "./src/create-product-plate.ts",
+		"product-plate": "./src/product-plate.ts"
+	},
+	"files": [
+		"src",
+		"README.md",
+		"LICENSE"
+	],
+	"scripts": {
+		"test": "bun test",
+		"typecheck": "tsc --noEmit",
+		"verify": "bun run typecheck && bun run test"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"typescript": "^5.9.3"
+	},
+	"engines": {
+		"bun": ">=1.3.0"
+	},
+	"keywords": [
+		"sveltekit",
+		"convex",
+		"saas",
+		"starter"
+	],
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rodrgds/productplate.git",
+		"directory": "packages/create-product-plate"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true
+	}
+}

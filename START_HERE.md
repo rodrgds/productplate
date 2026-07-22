@@ -1,6 +1,8 @@
-# Product Plate Kickstart Prompt
+# Product Plate full-demo kickstart prompt
 
-Copy the prompt below into your AI coding agent after cloning Product Plate. Run it from the repository root before your first real product commit.
+The recommended founder path is `bun create product-plate my-app`. The generator selects one of four profiles, removes unrelated code, and writes a profile-specific `START_HERE.md`.
+
+Use the longer prompt below only after cloning the complete demo repository because you want to inspect or reshape integrations outside the fixed profiles. Run it from the repository root before your first real product commit.
 
 The goal is not to polish the template. The goal is to turn the template into your product.
 

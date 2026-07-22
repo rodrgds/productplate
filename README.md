@@ -15,23 +15,34 @@
 <p align="center">
   <a href="https://productplate.pages.dev/auth/demo">Live demo</a>
   ·
-  <a href="./START_HERE.md">Kickstart prompt</a>
+  <a href="./docs/tutorial.md">Create tutorial</a>
   ·
-  <a href="https://productplate.pages.dev/components">Component gallery</a>
+  <a href="https://github.com/rodrgds/productplate/discussions">Discussions</a>
   ·
   <a href="./LICENSE">MIT license</a>
 </p>
+
+```sh
+bun create product-plate my-app
+```
 
 ## Why this exists
 
 Most starters save setup time, then leave you with a showcase app to dismantle.
 
-Product Plate gives you two things:
+Product Plate gives you two paths:
 
-- A working SvelteKit product foundation with connected routes and integrations.
-- [`START_HERE.md`](./START_HERE.md), a guided prompt that tells your coding agent how to keep what fits, remove what does not, rename the product, update the docs, and verify the result.
+- `bun create product-plate` generates a lean app from one fixed product profile.
+- This repository remains the maintained full demo and integration source for contributors and founders who want to inspect every pattern.
 
-The goal is a smaller first version of your product, not a renamed template.
+Generated apps contain only the selected routes, backend modules, dependencies, environment contract, tests, and navigation. The generated `product-plate.json` records the profile and capabilities for launch checks and safe infrastructure upgrades.
+
+| Profile     | Product shape                                                                                                          |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `prelaunch` | Landing page, real waitlist, SEO, legal placeholders, email, and Convex.                                               |
+| `solo-saas` | Personal SaaS with auth, onboarding, billing, settings, support, and operator users.                                   |
+| `team-saas` | Solo SaaS plus visible organizations, roles, members, invites, notifications, audit history, and organization billing. |
+| `ai-saas`   | Solo SaaS plus AI chat, model configuration, rate limits, usage, entitlements, and usage-aware billing.                |
 
 ## See the product
 
@@ -72,17 +83,42 @@ The hosted demo creates a fresh disposable account and opens the authenticated a
 ## Start here
 
 ```sh
-git clone https://github.com/rodrgds/productplate.git my-product
-cd my-product
+bun create product-plate my-app
+cd my-app
+bun convex dev
+bun run dev
 ```
 
-Before installing dependencies, open [`START_HERE.md`](./START_HERE.md) in your coding agent. It will:
+The interactive command asks for a profile, product identity, and theme. CI and scripted creation can be explicit:
 
-1. Ask what you are building.
-2. Recommend what to keep, reshape, remove, or decide later.
-3. Select one active backend, auth, billing, AI, team, developer, and public-site path.
-4. Build the smallest coherent product loop.
-5. Update identity, routes, docs, tests, and deployment settings.
+```sh
+bun create product-plate my-app \
+  --profile solo-saas \
+  --name "My Product" \
+  --description "Short product description" \
+  --theme neutral \
+  --yes
+```
+
+Run `bun run doctor` while configuring providers and `bun run verify:launch` before production. The normal path needs Bun only; Devenv remains optional.
+
+See [the create-to-production tutorial](./docs/tutorial.md) for product kickstart, preview deployment, and production setup.
+
+### Inspect or contribute to the full demo
+
+Clone this repository only when you want every maintained integration and showcase or intend to contribute:
+
+```sh
+git clone https://github.com/rodrgds/productplate.git
+cd productplate
+bun install --frozen-lockfile
+bun convex dev
+bun run dev
+```
+
+[`START_HERE.md`](./START_HERE.md) remains the guided product-kickstart prompt for direct full-demo forks. Generated apps receive a shorter profile-specific version.
+
+### Optional reproducible environment
 
 Product Plate pins Bun 1.3.3 in its devenv. With direnv installed, allow the environment once, then run the named commands directly:
 
@@ -183,22 +219,9 @@ docs/                       Integration, theme, template-option, observability/s
 
 ## Deployment
 
-The default production path is Convex plus Cloudflare Pages.
+The default production path is one verified Convex and Cloudflare Pages workflow. Pull requests use `CONVEX_PREVIEW_DEPLOY_KEY` to create an isolated branch deployment. `main` uses `CONVEX_PRODUCTION_DEPLOY_KEY`, builds through `bun convex deploy --cmd`, activates the backward-compatible backend, uploads the exact Cloudflare artifact, and then runs a smoke test against the public URL.
 
-```sh
-bun convex deploy
-bun run build
-```
-
-Cloudflare Pages:
-
-```text
-Build command: bun run build
-Build output: .svelte-kit/cloudflare
-Node.js: 22
-```
-
-The included GitHub Actions workflow runs checks and deploys `main` after the required Cloudflare secrets and repository variables are configured.
+Configure Cloudflare credentials, `CLOUDFLARE_PROJECT_NAME`, the final `SITE_URL`, and provider secrets in the GitHub environment. The workflow summary records the frontend URL, Convex target, Git SHA, smoke status, and rollback instruction. Preview and production deploy keys must never be the same.
 
 ## License
 

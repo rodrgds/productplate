@@ -14,7 +14,9 @@ Product Plate is a public SvelteKit starter with a connected frontend, Convex ba
 
 ## Template Kickstart
 
-- `START_HERE.md` is the default handoff prompt for turning the starter into a specific product.
+- `bun create product-plate` is the default founder entrypoint and generates `prelaunch`, `solo-saas`, `team-saas`, or `ai-saas`.
+- `product-plate.json` records the generated identity, profile, capabilities, providers, and template version.
+- `START_HERE.md` is the fallback handoff prompt for direct forks of the complete demo and a shorter profile-specific guide in generated apps.
 - The hosted `/auth/demo` entrypoint creates a fresh disposable demo account per visitor and should be deleted or replaced during kickstart.
 - `_template_options` stores inactive scaffolds for alternate billing and data choices. The final app should keep one active stack and remove unused options.
 - Public docs, blog, changelog, legal pages, component gallery, theme builder, workspace, developer, and admin screens are starter surfaces. Kickstart should keep only the ones that support the selected product.

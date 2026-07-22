@@ -2,9 +2,10 @@
 
 Product Plate uses a selection model, not a runtime toggle model.
 
+- The founder default is `bun create product-plate` with one fixed profile: `prelaunch`, `solo-saas`, `team-saas`, or `ai-saas`.
 - The active default is Convex, Better Auth, and Autumn.
-- Alternate payment and database examples live in `_template_options`.
-- The kickstart agent chooses one stack, activates the relevant files, and deletes the rest.
+- Alternate payment and database examples remain full-demo reference material in `_template_options`; generated apps never contain them.
+- Direct full-demo forks may use the long kickstart prompt to choose a different stack.
 - Do not ship imports from `_template_options`.
 
 ## Why Not Runtime Toggles?
@@ -37,12 +38,13 @@ The kickstart agent should keep only the surfaces that support the selected prod
 
 ## Kickstart Flow
 
-1. Run the prompt in `START_HERE.md`.
-2. Answer product basics first.
-3. Let the agent recommend what to keep and remove.
-4. Pick the active stack.
-5. Let the agent rename the product, remove the demo account, activate the selected scaffold, rewrite or delete unused route surfaces, delete unused folders, and update docs/env examples.
-6. Verify with `bun run lint`, `bun run check`, focused tests, and `bun run build`.
+1. Run `bun create product-plate my-app` and choose the smallest fixed profile.
+2. Open the generated `START_HERE.md` and build the real first product loop.
+3. Configure only providers listed in `product-plate.json`.
+4. Check setup with `bun run doctor`.
+5. Verify production readiness with `bun run verify:launch`.
+
+Use the longer prompt in the full repository's `START_HERE.md` only when the fixed profiles do not fit and you intentionally need the complete integration source.
 
 ## Provider Notes
 

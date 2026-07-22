@@ -1,0 +1,80 @@
+name: Generated profile matrix
+
+on:
+  workflow_call:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+env:
+  PUBLIC_CONVEX_URL: https://agreeable-otter-123.convex.cloud
+  PUBLIC_CONVEX_SITE_URL: https://agreeable-otter-123.convex.site
+  SITE_URL: https://profile-matrix.example.com
+  BETTER_AUTH_URL: https://profile-matrix.example.com
+  BETTER_AUTH_SECRET: profile-matrix-secret-that-is-never-deployed
+
+jobs:
+  profile:
+    name: ${{ matrix.profile }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [prelaunch, solo-saas, team-saas, ai-saas]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.3
+
+      - name: Generate profile
+        run: |
+          bun packages/create-product-plate/src/create-product-plate.ts "$RUNNER_TEMP/generated-${{ matrix.profile }}" \
+            --profile "${{ matrix.profile }}" \
+            --name "Matrix ${{ matrix.profile }}" \
+            --description "Generated release profile." \
+            --theme neutral \
+            --template-path . \
+            --yes \
+            --install \
+            --no-git
+
+      - name: Prove frozen installation
+        working-directory: ${{ runner.temp }}/generated-${{ matrix.profile }}
+        run: bun install --frozen-lockfile
+
+      - name: Install browser
+        working-directory: ${{ runner.temp }}/generated-${{ matrix.profile }}
+        run: bunx playwright install --with-deps chromium
+
+      - name: Lint
+        working-directory: ${{ runner.temp }}/generated-${{ matrix.profile }}
+        run: bun run lint
+
+      - name: Typecheck
+        working-directory: ${{ runner.temp }}/generated-${{ matrix.profile }}
+        run: bun run check
+
+      - name: Unit tests
+        working-directory: ${{ runner.temp }}/generated-${{ matrix.profile }}
+        run: bun run test:unit
+
+      - name: Dependency audit
+        working-directory: ${{ runner.temp }}/generated-${{ matrix.profile }}
+        run: bun run audit
+
+      - name: Production build
+        working-directory: ${{ runner.temp }}/generated-${{ matrix.profile }}
+        run: bun run build
+
+      - name: Profile browser smoke
+        working-directory: ${{ runner.temp }}/generated-${{ matrix.profile }}
+        env:
+          PLAYWRIGHT_PREBUILT: 'true'
+        run: bun run test:e2e
+
+      - name: Local launch doctor
+        working-directory: ${{ runner.temp }}/generated-${{ matrix.profile }}
+        run: bun run doctor -- --json

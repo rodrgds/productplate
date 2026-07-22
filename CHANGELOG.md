@@ -6,6 +6,50 @@ Product Plate follows semantic versioning while it is useful for template consum
 
 ## Unreleased
 
+No changes yet.
+
+## [1.0.0]
+
+### Added
+
+- Safe `product-plate upgrade --check` and `--apply` support for unchanged generator-managed infrastructure.
+- Release assets with archive checksums, provenance, migration notes, tag and package version checks, and GitHub release automation.
+- A create-to-production tutorial, GitHub Discussions support path, and repository-backed reviewed showcase.
+
+### Changed
+
+- The README now leads with `bun create product-plate`; direct cloning is reserved for contributors and full-demo inspection.
+- Stable releases require all four generated profiles to pass frozen install, lint, typecheck, unit, audit, build, and browser smoke gates.
+
+## [0.4.0]
+
+### Added
+
+- Consent-gated PostHog telemetry with a typed event contract and no-op behavior when unconfigured.
+- Optional Sentry integration with credential and user-content scrubbing, Git SHA tags, request IDs, and support actions.
+- mdsvex content, typed metadata, generated sitemap, robots, RSS, article schema, and noindex behavior for empty content.
+- One typed email renderer and delivery service covering verification, reset, email change, welcome, invite, waitlist, and subscription messages.
+- Production email verification controls, password-reset session revocation, explicit Better Auth rate limits, and an optional disabled magic-link recipe.
+- Authenticated feedback storage and operator status management with `SUPPORT_EMAIL` as the universal fallback.
+
+## [0.3.0]
+
+### Added
+
+- Profile-aware `doctor`, JSON output, strict production checks, live checks, and `verify:launch`.
+- One build-first deployment workflow for isolated Convex previews, production Convex, Cloudflare Pages, public smoke tests, summaries, and rollback guidance.
+
+## [0.2.0]
+
+### Added
+
+- The `create-product-plate` Bun package and fixed `prelaunch`, `solo-saas`, `team-saas`, and `ai-saas` profiles.
+- Typed capability resolution, safe destination handling, tagged archive checksums, identity and metadata rewrites, secure local secrets, dependency pruning, and `product-plate.json`.
+- A real Convex waitlist with normalized idempotent subscriptions, hashed requester fingerprints, bounded rate limits, signed unsubscribe links, optional Resend delivery, and secret-based export.
+- A generated-profile CI matrix covering every fixed profile.
+
+## Full demo foundation
+
 ### Added
 
 - Workspace and organization model with members, invites, entitlements, notifications, API keys, audit logs, and usage counters.
