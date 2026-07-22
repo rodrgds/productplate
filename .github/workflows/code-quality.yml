@@ -3,10 +3,11 @@ name: Code Quality Checks
 on: [push, pull_request]
 
 env:
+  NODE_OPTIONS: --max_old_space_size=6144
   # Required environment variables for type checking
   # PUBLIC_* vars - required for client code
-  PUBLIC_CONVEX_URL: 'https://fake-convex-url.convex.cloud'
-  PUBLIC_CONVEX_SITE_URL: 'https://fake-convex-site-url.convex.site'
+  PUBLIC_CONVEX_URL: 'https://agreeable-otter-123.convex.cloud'
+  PUBLIC_CONVEX_SITE_URL: 'https://agreeable-otter-123.convex.site'
   # SITE_URL - imported in hooks.server.ts and admin/+layout.server.ts
   SITE_URL: 'https://fake-site-url.com'
   # Better Auth rejects its package default during production-mode builds.
@@ -45,6 +46,9 @@ jobs:
 
       - name: Unit tests
         run: bun run test:unit
+
+      - name: Dependency audit
+        run: bun run audit
 
       - name: Build
         run: bun run build
