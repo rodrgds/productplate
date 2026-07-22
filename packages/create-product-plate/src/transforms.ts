@@ -358,6 +358,7 @@ function generatedAppCss(theme: ProductPlateManifest['theme']) {
 	--destructive: oklch(0.58 0.22 27); --border: oklch(0.88 0.008 85); --input: oklch(0.88 0.008 85); --ring: oklch(${palette.primary}); --radius: ${palette.radius};
 }
 .dark { --background: oklch(0.18 0.008 75); --foreground: oklch(0.96 0.004 90); --card: oklch(0.22 0.008 75); --card-foreground: var(--foreground); --popover: var(--card); --popover-foreground: var(--foreground); --primary-foreground: oklch(0.12 0 0); --secondary: oklch(0.28 0.01 75); --secondary-foreground: var(--foreground); --muted: oklch(0.27 0.008 75); --muted-foreground: oklch(0.72 0.01 80); --accent: oklch(0.3 0.012 75); --accent-foreground: var(--foreground); --border: oklch(1 0 0 / 14%); --input: oklch(1 0 0 / 18%); }
+@media (pointer: coarse), (max-width: 639px) { [data-slot='button'], [data-slot='input'] { min-width: 2.75rem; min-height: 2.75rem; } [data-slot='input'] { font-size: 1rem; } }
 @layer base { * { @apply border-border outline-ring/50; } body { @apply bg-background text-foreground; font-family: Inter, ui-sans-serif, system-ui, sans-serif; } }
 `;
 }
@@ -533,6 +534,15 @@ test('landing and waitlist', async ({ page }) => {
 	await page.getByRole('button', { name: 'Join waitlist' }).click();
 	await expect(page.getByText('You are on the list.')).toBeVisible();
 });
+test('touch-sized waitlist controls', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.goto('/');
+	const emailBox = await page.getByLabel('Email address').boundingBox();
+	const submitBox = await page.getByRole('button', { name: 'Join waitlist' }).boundingBox();
+	expect(emailBox?.height).toBeGreaterThanOrEqual(44);
+	expect(submitBox?.height).toBeGreaterThanOrEqual(44);
+	expect(Math.abs((emailBox?.width ?? 0) - (submitBox?.width ?? 0))).toBeLessThanOrEqual(1);
+});
 `;
 	}
 	const aiProviderTest =
@@ -558,6 +568,13 @@ test('password recovery surfaces are available', async ({ page }) => {
 	await expect(page.getByRole('heading', { name: 'Forgot password' })).toBeVisible();
 	await page.goto('/auth/reset-password?token=browser-smoke');
 	await expect(page.getByRole('heading', { name: 'Reset password' })).toBeVisible();
+});
+test('touch-sized authentication controls', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.goto('/auth/sign-up');
+	for (const label of ['Name', 'Email', 'Password']) {
+		expect((await page.getByLabel(label, { exact: true }).boundingBox())?.height).toBeGreaterThanOrEqual(44);
+	}
 });
 ${aiProviderTest}
 `;

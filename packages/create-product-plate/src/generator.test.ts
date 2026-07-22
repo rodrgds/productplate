@@ -177,9 +177,10 @@ describe('project generation', () => {
 			name: 'launch-list',
 			private: true
 		});
-		expect(await Bun.file(join(destination, '.env.local')).text()).toMatch(
-			/WAITLIST_FINGERPRINT_SECRET=.{32,}/
-		);
+		const localEnvironment = await Bun.file(join(destination, '.env.local')).text();
+		expect(localEnvironment).toContain('PUBLIC_CONVEX_URL=https://your-project.convex.cloud');
+		expect(localEnvironment).toContain('PUBLIC_CONVEX_SITE_URL=https://your-project.convex.site');
+		expect(localEnvironment).toMatch(/WAITLIST_FINGERPRINT_SECRET=.{32,}/);
 		expect(await Bun.file(join(destination, 'src/routes/auth/demo/+page.svelte')).exists()).toBe(
 			false
 		);
@@ -216,6 +217,10 @@ describe('project generation', () => {
 			install: false,
 			git: false
 		});
+
+		const localEnvironment = await Bun.file(join(destination, '.env.local')).text();
+		expect(localEnvironment).toContain('PUBLIC_CONVEX_URL=https://your-project.convex.cloud');
+		expect(localEnvironment).toMatch(/BETTER_AUTH_SECRET=.{32,}/);
 
 		expect(
 			await Bun.file(join(destination, 'src/routes/(app)/workspace/+page.svelte')).exists()
@@ -261,8 +266,13 @@ describe('project generation', () => {
 				'Product Plate'
 			);
 			const browserTest = await Bun.file(join(destination, 'e2e/profile.test.ts')).text();
-			if (profile === 'prelaunch') expect(browserTest).toContain('landing and waitlist');
-			else expect(browserTest).toContain('password recovery surfaces');
+			if (profile === 'prelaunch') {
+				expect(browserTest).toContain('landing and waitlist');
+				expect(browserTest).toContain('touch-sized waitlist controls');
+			} else {
+				expect(browserTest).toContain('password recovery surfaces');
+				expect(browserTest).toContain('touch-sized authentication controls');
+			}
 			if (profile === 'ai-saas') expect(browserTest).toContain('missing AI provider');
 			const deployWorkflow = await Bun.file(
 				join(destination, '.github/workflows/deploy.yml')

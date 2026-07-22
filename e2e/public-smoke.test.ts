@@ -106,6 +106,36 @@ test('mobile landing navigation remains interactive', async ({ page }) => {
 	await expect(page.getByRole('link', { name: /Components/i }).last()).toBeVisible();
 });
 
+test('waitlist controls remain touch-sized and aligned on a phone viewport', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.goto('/');
+
+	const email = page.getByLabel('Email address');
+	const submit = page.getByRole('button', { name: 'Join waitlist' });
+	await expect(email).toBeVisible();
+	await expect(submit).toBeVisible();
+
+	const emailBox = await email.boundingBox();
+	const submitBox = await submit.boundingBox();
+	expect(emailBox?.height).toBeGreaterThanOrEqual(44);
+	expect(submitBox?.height).toBeGreaterThanOrEqual(44);
+	expect(Math.abs((emailBox?.width ?? 0) - (submitBox?.width ?? 0))).toBeLessThanOrEqual(1);
+});
+
+test('authentication inputs remain touch-sized on a phone viewport', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.goto('/auth/sign-up');
+
+	for (const label of ['Name', 'Email', 'Password']) {
+		const field = page.getByLabel(label, { exact: true });
+		await expect(field).toBeVisible();
+		expect(
+			(await field.boundingBox())?.height,
+			`${label} should be touch-sized`
+		).toBeGreaterThanOrEqual(44);
+	}
+});
+
 test('protected profile routes redirect signed-out visitors before backend access', async ({
 	page
 }) => {

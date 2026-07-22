@@ -191,7 +191,7 @@ function generatedReadme(manifest: ProductPlateManifest) {
 		manifest.providers.auth === 'better-auth'
 			? '\n\nProduction examples require email verification and configured delivery. Magic-link sign-in is available as an opt-in Better Auth recipe: set `AUTH_MAGIC_LINK_ENABLED=true`, configure Resend, and add a deliberate magic-link control to the sign-in screen. It is disabled by default.'
 			: '';
-	return `# ${manifest.product.name}\n\n${manifest.product.description}\n\n## Start locally\n\n\`\`\`sh\nbun install\nbun convex dev\nbun run dev\n\`\`\`\n\nCopy \`.env.example\` to \`.env.local\` and fill the required values. Run \`bun run doctor\` at any time, and \`bun run verify:launch\` before a production deploy.${authRecipe}\n\n## Product profile\n\nThis app was generated with the \`${manifest.profile}\` Product Plate profile. Its selected capabilities are recorded in \`product-plate.json\`.\n`;
+	return `# ${manifest.product.name}\n\n${manifest.product.description}\n\n## Start locally\n\n\`\`\`sh\nbun install\nbun convex dev\nbun run dev\n\`\`\`\n\nThe generator created an ignored \`.env.local\` with secure local secrets and safe placeholder provider values. Replace those values as you connect services. Run \`bun run doctor\` at any time, and \`bun run verify:launch\` before a production deploy.${authRecipe}\n\n## Product profile\n\nThis app was generated with the \`${manifest.profile}\` Product Plate profile. Its selected capabilities are recorded in \`product-plate.json\`.\n`;
 }
 
 function generatedStartHere(manifest: ProductPlateManifest) {
@@ -274,16 +274,22 @@ async function writeGeneratedConfiguration(destination: string, manifest: Produc
 </html>
 `
 	);
-	const localEnvironment = [
-		'# Local secrets. This file is ignored by Git.',
-		...(manifest.profile === 'prelaunch'
+	let localEnvironment = await readFile(join(destination, '.env.example'), 'utf8');
+	const secrets =
+		manifest.profile === 'prelaunch'
 			? [
-					`WAITLIST_FINGERPRINT_SECRET=${randomBytes(32).toString('base64url')}`,
-					`WAITLIST_EXPORT_SECRET=${randomBytes(32).toString('base64url')}`
+					['WAITLIST_FINGERPRINT_SECRET', randomBytes(32).toString('base64url')],
+					['WAITLIST_EXPORT_SECRET', randomBytes(32).toString('base64url')]
 				]
-			: [`BETTER_AUTH_SECRET=${randomBytes(32).toString('base64url')}`]),
-		''
-	].join('\n');
+			: [['BETTER_AUTH_SECRET', randomBytes(32).toString('base64url')]];
+	for (const [name, value] of secrets) {
+		const setting = new RegExp(`^${name}=.*$`, 'm');
+		if (!setting.test(localEnvironment)) {
+			throw new Error(`Generated environment is missing ${name}.`);
+		}
+		localEnvironment = localEnvironment.replace(setting, `${name}=${value}`);
+	}
+	localEnvironment = `# Local configuration. This file is ignored by Git.\n${localEnvironment}`;
 	await writeFile(join(destination, '.env.local'), localEnvironment, { mode: 0o600 });
 	await writeManagedState(destination, manifest.templateVersion);
 }
