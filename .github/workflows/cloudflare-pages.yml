@@ -23,6 +23,8 @@ jobs:
       SITE_URL: ${{ github.event_name == 'pull_request' && format('https://{0}.{1}.pages.dev', github.head_ref, vars.CLOUDFLARE_PROJECT_NAME || 'productplate') || vars.SITE_URL }}
       BETTER_AUTH_URL: ${{ github.event_name == 'pull_request' && format('https://{0}.{1}.pages.dev', github.head_ref, vars.CLOUDFLARE_PROJECT_NAME || 'productplate') || vars.SITE_URL }}
       BETTER_AUTH_SECRET: 'ci-build-only-secret-not-used-at-runtime'
+      PUBLIC_CONVEX_URL: ${{ vars.PUBLIC_CONVEX_URL }}
+      PUBLIC_CONVEX_SITE_URL: ${{ vars.PUBLIC_CONVEX_SITE_URL }}
       GIT_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4

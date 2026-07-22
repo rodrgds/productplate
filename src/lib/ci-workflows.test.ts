@@ -15,6 +15,8 @@ describe('CI workflow environment', () => {
 		expect(source).toContain('--preview-name');
 		expect(environment).toBeGreaterThan(-1);
 		expect(deployKey).toBeGreaterThan(environment);
+		expect(source).toContain('PUBLIC_CONVEX_URL: ${{ vars.PUBLIC_CONVEX_URL }}');
+		expect(source).toContain('PUBLIC_CONVEX_SITE_URL: ${{ vars.PUBLIC_CONVEX_SITE_URL }}');
 	});
 
 	it('builds through Convex before Cloudflare and smokes the public result', async () => {
