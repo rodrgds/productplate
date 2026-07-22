@@ -10,6 +10,10 @@
 
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import type { PageData } from './$types';
+	import { env } from '$env/dynamic/public';
+	import { page } from '$app/state';
+	import { onMount } from 'svelte';
+	import { getBrowserTelemetry } from '$lib/telemetry-browser';
 
 	const { data }: { data: PageData } = $props();
 
@@ -62,8 +66,21 @@
 		(data.customerData as CustomerData | null) ?? null
 	);
 
+	onMount(() => {
+		if (page.url.searchParams.get('checkout') !== 'completed') return;
+		getBrowserTelemetry(env.PUBLIC_POSTHOG_KEY, env.PUBLIC_POSTHOG_HOST).capture(
+			'checkout_completed',
+			{ path: page.url.pathname, plan: page.url.searchParams.get('plan') ?? undefined }
+		);
+		window.history.replaceState({}, '', page.url.pathname);
+	});
+
 	async function handleCheckout(productId: string) {
 		try {
+			getBrowserTelemetry(env.PUBLIC_POSTHOG_KEY, env.PUBLIC_POSTHOG_HOST).capture(
+				'checkout_started',
+				{ path: location.pathname, plan: productId }
+			);
 			const result = await client.action(api.billing.checkout, { productId });
 			if (result.url) {
 				window.location.href = result.url;

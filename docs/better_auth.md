@@ -1,5 +1,13 @@
 # Better Auth
 
+## Production email policy
+
+Set `AUTH_REQUIRE_EMAIL_VERIFICATION=true` and configure `RESEND_API_KEY` plus `TRANSACTIONAL_EMAIL_FROM` for production auth profiles. Local development may leave verification off and use the email service preview result. Password reset revokes the account's other sessions, and the explicit Better Auth rate-limit block covers sign-in, sign-up, reset, verification, and email-change paths.
+
+## Optional magic-link recipe
+
+Magic-link support is compiled into the auth factory but disabled by default. To opt in, set `AUTH_MAGIC_LINK_ENABLED=true`, keep Resend delivery configured, and add a deliberate magic-link request control to the sign-in screen. Do not enable the environment flag without a tested email delivery path. Google OAuth and explicit account linking remain supported independently.
+
 This project uses `better-auth` for its hybrid authentication system, providing both email/password authentication and social OAuth providers (currently Google).
 
 Instead of duplicating extensive documentation, this guide provides links to the official resources. Please refer to them for detailed setup, configuration, and API usage.

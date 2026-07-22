@@ -17,6 +17,7 @@
 	import ThemeRuntime from '$lib/components/theme-runtime.svelte';
 	import { Toaster } from '$lib/components/ui/sonner/index.js';
 	import { soundPreferences } from '$lib/sound-preferences.svelte.js';
+	import AnalyticsConsent from '$lib/components/analytics-consent.svelte';
 	createSvelteAuthClient({ authClient });
 
 	let { children } = $props();
@@ -60,6 +61,7 @@
 <ModeWatcher />
 <ThemeRuntime />
 <Toaster richColors />
+<AnalyticsConsent />
 
 {@render children?.()}
 

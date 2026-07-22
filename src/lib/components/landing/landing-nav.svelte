@@ -15,7 +15,7 @@
 	import { APP_NAME } from '$lib/constants';
 
 	interface Props {
-		active?: 'theme-builder' | 'components';
+		active?: 'theme-builder' | 'components' | 'showcase';
 		isAuthenticated?: boolean;
 	}
 
@@ -25,6 +25,7 @@
 		{ key: 'stack', label: 'Stack', href: '/#stack' },
 		{ key: 'theme-builder', label: 'Theme Builder', href: '/theme-builder' },
 		{ key: 'components', label: 'Components', href: '/components' },
+		{ key: 'showcase', label: 'Showcase', href: '/showcase' },
 		{ key: 'faq', label: 'FAQ', href: '/#faq' }
 	] as const;
 

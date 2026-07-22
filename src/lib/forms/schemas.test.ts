@@ -4,7 +4,8 @@ import {
 	authSignUpFormSchema,
 	accountProfileUpdateSchema,
 	onboardingFormSchema,
-	passwordFormSchema
+	passwordFormSchema,
+	waitlistFormSchema
 } from './schemas';
 
 describe('baseline form schemas', () => {
@@ -56,5 +57,23 @@ describe('baseline form schemas', () => {
 		});
 
 		expect(result.success).toBe(false);
+	});
+
+	it('normalizes valid waitlist input and rejects bots or oversized attribution', () => {
+		const valid = waitlistFormSchema.safeParse({
+			email: '  Ada@Example.COM ',
+			source: 'landing'
+		});
+		expect(valid.success).toBe(true);
+		if (valid.success) expect(valid.data.email).toBe('Ada@Example.COM');
+
+		expect(
+			waitlistFormSchema.safeParse({ email: 'ada@example.com', website: 'https://spam.example' })
+				.success
+		).toBe(false);
+		expect(
+			waitlistFormSchema.safeParse({ email: 'ada@example.com', utmCampaign: 'x'.repeat(201) })
+				.success
+		).toBe(false);
 	});
 });

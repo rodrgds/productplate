@@ -1,12 +1,14 @@
 <script lang="ts">
 	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
 	import CheckIcon from '@lucide/svelte/icons/check';
-	import Code2Icon from '@lucide/svelte/icons/code-2';
 	import TerminalIcon from '@lucide/svelte/icons/terminal';
 	import { resolve } from '$app/paths';
 	import type { PageData } from './$types';
 	import AppLogo from '$lib/components/app-logo.svelte';
 	import LandingNav from '$lib/components/landing/landing-nav.svelte';
+	import WaitlistForm from '$lib/components/waitlist-form.svelte';
+	import { env } from '$env/dynamic/public';
+	import { getBrowserTelemetry } from '$lib/telemetry-browser';
 	import * as Accordion from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -21,6 +23,7 @@
 	} from '$lib/constants';
 
 	let { data }: { data: PageData } = $props();
+	let createCommandCopied = $state(false);
 
 	const githubUrl = 'https://github.com/rodrgds/productplate';
 	const docsUrl = 'https://github.com/rodrgds/productplate/blob/main/README.md';
@@ -29,6 +32,17 @@
 	const to = {
 		demo: resolve('/auth/demo')
 	};
+	function captureLandingCta(source: string) {
+		getBrowserTelemetry(env.PUBLIC_POSTHOG_KEY, env.PUBLIC_POSTHOG_HOST).capture(
+			'landing_cta_clicked',
+			{ path: location.pathname, source }
+		);
+	}
+	async function copyCreateCommand(source: string) {
+		await navigator.clipboard.writeText('bun create product-plate my-app');
+		createCommandCopied = true;
+		captureLandingCta(source);
+	}
 
 	const productSurfaces = [
 		{
@@ -170,18 +184,22 @@
 						SvelteKit starter, ready to become your product.
 					</h1>
 					<p class="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl">
-						Auth, billing, realtime data, AI, product UI, tests, and deployment are already wired. A
-						practical kickstart prompt helps your coding agent keep what matters and remove what
-						does not.
+						Generate a focused prelaunch, solo, team, or AI product with the selected auth, billing,
+						data, tests, and deployment path already wired.
 					</p>
 					<div class="mt-7 flex flex-wrap gap-3">
-						<Button href={to.demo} size="lg">
-							Open live demo
-							<ArrowRightIcon data-icon="inline-end" />
+						<Button size="lg" onclick={() => copyCreateCommand('hero_create')}>
+							{createCommandCopied ? 'Command copied' : 'Copy create command'}
+							<TerminalIcon data-icon="inline-end" />
 						</Button>
-						<Button href={githubUrl} variant="outline" size="lg">
-							<Code2Icon data-icon="inline-start" />
-							View source
+						<Button
+							href={to.demo}
+							variant="outline"
+							size="lg"
+							onclick={() => captureLandingCta('hero_demo')}
+						>
+							Open full demo
+							<ArrowRightIcon data-icon="inline-end" />
 						</Button>
 					</div>
 					<div class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
@@ -442,6 +460,21 @@
 			</div>
 		</section>
 
+		<section class="border-b py-16 sm:py-20">
+			<div class="mx-auto max-w-7xl px-5 sm:px-8">
+				<div class="max-w-2xl">
+					<p class="text-sm font-semibold text-[var(--signal)]">Release updates</p>
+					<h2 class="mt-3 text-3xl font-semibold text-balance sm:text-4xl">
+						Know when the next profile ships.
+					</h2>
+					<p class="mt-4 mb-6 leading-7 text-muted-foreground">
+						Get concise Product Plate release notes. Unsubscribe from any email.
+					</p>
+					<WaitlistForm />
+				</div>
+			</div>
+		</section>
+
 		<section class="bg-foreground text-background">
 			<div
 				class="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 px-5 py-16 sm:px-8 sm:py-20 md:flex-row md:items-end"
@@ -453,9 +486,9 @@
 					</h2>
 				</div>
 				<div class="flex flex-wrap gap-3">
-					<Button href={to.demo} variant="secondary" size="lg">
-						Open live demo
-						<ArrowRightIcon data-icon="inline-end" />
+					<Button variant="secondary" size="lg" onclick={() => copyCreateCommand('footer_create')}>
+						{createCommandCopied ? 'Command copied' : 'Copy create command'}
+						<TerminalIcon data-icon="inline-end" />
 					</Button>
 					<Button
 						href={githubUrl}

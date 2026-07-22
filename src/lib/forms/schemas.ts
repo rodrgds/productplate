@@ -63,6 +63,27 @@ export const passwordFormSchema = z
 		path: ['confirmPassword']
 	});
 
+const optionalAttribution = z
+	.string()
+	.trim()
+	.max(200, 'Keep attribution under 200 characters.')
+	.optional();
+
+export const waitlistFormSchema = z.object({
+	email: z.string().trim().email('Enter a valid email address.').max(320).default(''),
+	source: z.string().trim().max(100, 'Keep the source under 100 characters.').optional(),
+	utmSource: optionalAttribution,
+	utmMedium: optionalAttribution,
+	utmCampaign: optionalAttribution,
+	website: z.string().max(0, 'Unable to accept this submission.').optional().default('')
+});
+
+export const feedbackFormSchema = z.object({
+	category: z.enum(['bug', 'idea', 'question', 'other']).default('idea'),
+	message: z.string().trim().min(10, 'Add at least 10 characters.').max(2_000).default(''),
+	currentPath: z.string().trim().max(500).default('/settings')
+});
+
 export type OnboardingForm = z.infer<typeof onboardingFormSchema>;
 export type AccountForm = z.infer<typeof accountFormSchema>;
 export type AccountProfileUpdate = z.infer<typeof accountProfileUpdateSchema>;
@@ -71,3 +92,5 @@ export type AuthSignUpForm = z.infer<typeof authSignUpFormSchema>;
 export type AuthForm = AuthSignInForm & Partial<Pick<AuthSignUpForm, 'name'>>;
 export type EmailForm = z.infer<typeof emailFormSchema>;
 export type PasswordForm = z.infer<typeof passwordFormSchema>;
+export type WaitlistForm = z.infer<typeof waitlistFormSchema>;
+export type FeedbackForm = z.infer<typeof feedbackFormSchema>;

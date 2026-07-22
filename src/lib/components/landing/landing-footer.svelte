@@ -13,7 +13,8 @@
 			links: [
 				{ label: 'Home', href: '/' },
 				{ label: 'Docs', href: '/docs' },
-				{ label: 'Changelog', href: '/changelog' }
+				{ label: 'Changelog', href: '/changelog' },
+				{ label: 'Showcase', href: '/showcase' }
 			]
 		},
 		{

@@ -13,6 +13,8 @@
 	import { Loader2 } from '@lucide/svelte';
 	import { page } from '$app/state';
 	import { getOAuthErrorMessage } from '$lib/auth-errors.js';
+	import { env } from '$env/dynamic/public';
+	import { getBrowserTelemetry } from '$lib/telemetry-browser';
 
 	interface Props {
 		mode?: 'signin' | 'signup';
@@ -86,6 +88,10 @@
 					{
 						onSuccess: () => {
 							if (browser) {
+								getBrowserTelemetry(env.PUBLIC_POSTHOG_KEY, env.PUBLIC_POSTHOG_HOST).capture(
+									'signup_completed',
+									{ path: location.pathname, source: 'email' }
+								);
 								window.location.assign(resolve('/onboarding'));
 							}
 						},
@@ -142,7 +148,7 @@
 <Card.Root class="w-full border-0 shadow-none lg:border lg:shadow-sm">
 	<Card.Header class="space-y-1 pb-4">
 		<Card.Title class="text-2xl font-semibold tracking-tight">
-			{isSignUp ? 'Create an account' : 'Welcome back'}
+			<h1>{isSignUp ? 'Create an account' : 'Welcome back'}</h1>
 		</Card.Title>
 		<Card.Description class="text-base text-muted-foreground">
 			{isSignUp

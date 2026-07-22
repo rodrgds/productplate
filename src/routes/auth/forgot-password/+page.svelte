@@ -44,7 +44,8 @@
 <div class="flex min-h-screen items-center justify-center px-4">
 	<Card.Root class="mx-auto w-full max-w-sm border-0 shadow-none lg:border lg:shadow-sm">
 		<Card.Header class="space-y-1 pb-4">
-			<Card.Title class="text-2xl font-semibold tracking-tight">Forgot password</Card.Title>
+			<Card.Title class="text-2xl font-semibold tracking-tight"><h1>Forgot password</h1></Card.Title
+			>
 			<Card.Description class="text-base text-muted-foreground">
 				Enter your email and we'll send you a reset link
 			</Card.Description>

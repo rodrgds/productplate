@@ -5,7 +5,10 @@
 // for information about these interfaces
 declare global {
 	namespace App {
-		// interface Error {}
+		interface Error {
+			message: string;
+			requestId?: string;
+		}
 		interface Locals {
 			token?: string;
 			requestId?: string;

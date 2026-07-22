@@ -208,5 +208,44 @@ export default defineSchema({
 		status: v.union(v.literal('pending'), v.literal('running')),
 		createdAt: v.number(),
 		updatedAt: v.number()
-	}).index('by_userId', ['userId'])
+	}).index('by_userId', ['userId']),
+	waitlistSubscribers: defineTable({
+		email: v.string(),
+		emailNormalized: v.string(),
+		status: v.union(v.literal('subscribed'), v.literal('unsubscribed')),
+		source: v.optional(v.string()),
+		utmSource: v.optional(v.string()),
+		utmMedium: v.optional(v.string()),
+		utmCampaign: v.optional(v.string()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+		unsubscribedAt: v.optional(v.number())
+	})
+		.index('by_emailNormalized', ['emailNormalized'])
+		.index('by_status_and_createdAt', ['status', 'createdAt']),
+	waitlistRateLimits: defineTable({
+		fingerprint: v.string(),
+		windowStart: v.number(),
+		count: v.number(),
+		updatedAt: v.number()
+	})
+		.index('by_fingerprint_and_windowStart', ['fingerprint', 'windowStart'])
+		.index('by_updatedAt', ['updatedAt']),
+	feedback: defineTable({
+		category: v.union(
+			v.literal('bug'),
+			v.literal('idea'),
+			v.literal('question'),
+			v.literal('other')
+		),
+		message: v.string(),
+		currentPath: v.string(),
+		userId: v.string(),
+		requestId: v.string(),
+		status: v.union(v.literal('open'), v.literal('in_progress'), v.literal('closed')),
+		createdAt: v.number(),
+		updatedAt: v.number()
+	})
+		.index('by_userId_and_createdAt', ['userId', 'createdAt'])
+		.index('by_status_and_createdAt', ['status', 'createdAt'])
 });

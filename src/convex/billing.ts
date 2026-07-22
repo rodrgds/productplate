@@ -207,7 +207,7 @@ export const checkout = action({
 		const result: unknown = await autumn.checkout({
 			customer_id: billingContext.customerId,
 			product_id: args.productId,
-			success_url: `${process.env.SITE_URL}/billing`,
+			success_url: `${process.env.SITE_URL}/billing?checkout=completed&plan=${encodeURIComponent(args.productId)}`,
 			customer_data: {
 				name: billingContext.organizationName,
 				email: billingContext.actorEmail

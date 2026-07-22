@@ -1,0 +1,85 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`product email service > matches the email-change-approval HTML snapshot 1`] = `
+"<div style="font-family:Inter,Arial,sans-serif;line-height:1.55;color:#171717">
+<p style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#737373">Launch List</p>
+<h1 style="font-size:22px;margin:0 0 12px">Approve your email change</h1>
+<p>Hello Ada,</p>
+<p>Confirm the requested change to your account email address.</p>
+<p><a href="https://example.com/action" style="display:inline-block;padding:10px 16px;border-radius:8px;background:#171717;color:#fff;text-decoration:none">Approve change</a></p>
+<p style="font-size:12px;color:#737373;word-break:break-all">https://example.com/action</p>
+<p style="font-size:12px;color:#737373;margin-top:28px">This message was sent by Launch List.</p>
+</div>"
+`;
+
+exports[`product email service > matches the password-reset HTML snapshot 1`] = `
+"<div style="font-family:Inter,Arial,sans-serif;line-height:1.55;color:#171717">
+<p style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#737373">Launch List</p>
+<h1 style="font-size:22px;margin:0 0 12px">Reset your password</h1>
+<p>Hello Ada,</p>
+<p>Use this secure link to choose a new password. Ignore this message if you did not request it.</p>
+<p><a href="https://example.com/action" style="display:inline-block;padding:10px 16px;border-radius:8px;background:#171717;color:#fff;text-decoration:none">Reset password</a></p>
+<p style="font-size:12px;color:#737373;word-break:break-all">https://example.com/action</p>
+<p style="font-size:12px;color:#737373;margin-top:28px">This message was sent by Launch List.</p>
+</div>"
+`;
+
+exports[`product email service > matches the subscription-status HTML snapshot 1`] = `
+"<div style="font-family:Inter,Arial,sans-serif;line-height:1.55;color:#171717">
+<p style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#737373">Launch List</p>
+<h1 style="font-size:22px;margin:0 0 12px">Subscription update</h1>
+<p>Hello Ada,</p>
+<p>Your subscription status is now active.</p>
+<p><a href="https://example.com/action" style="display:inline-block;padding:10px 16px;border-radius:8px;background:#171717;color:#fff;text-decoration:none">Review billing</a></p>
+<p style="font-size:12px;color:#737373;word-break:break-all">https://example.com/action</p>
+<p style="font-size:12px;color:#737373;margin-top:28px">This message was sent by Launch List.</p>
+</div>"
+`;
+
+exports[`product email service > matches the verify-email HTML snapshot 1`] = `
+"<div style="font-family:Inter,Arial,sans-serif;line-height:1.55;color:#171717">
+<p style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#737373">Launch List</p>
+<h1 style="font-size:22px;margin:0 0 12px">Verify your email</h1>
+<p>Hello Ada,</p>
+<p>Confirm this address to finish setting up your account.</p>
+<p><a href="https://example.com/action" style="display:inline-block;padding:10px 16px;border-radius:8px;background:#171717;color:#fff;text-decoration:none">Verify email</a></p>
+<p style="font-size:12px;color:#737373;word-break:break-all">https://example.com/action</p>
+<p style="font-size:12px;color:#737373;margin-top:28px">This message was sent by Launch List.</p>
+</div>"
+`;
+
+exports[`product email service > matches the waitlist-confirmation HTML snapshot 1`] = `
+"<div style="font-family:Inter,Arial,sans-serif;line-height:1.55;color:#171717">
+<p style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#737373">Launch List</p>
+<h1 style="font-size:22px;margin:0 0 12px">You are on the list</h1>
+<p>Hello Ada,</p>
+<p>We will send useful launch updates for Launch List.</p>
+<p><a href="https://example.com/action" style="display:inline-block;padding:10px 16px;border-radius:8px;background:#171717;color:#fff;text-decoration:none">Unsubscribe</a></p>
+<p style="font-size:12px;color:#737373;word-break:break-all">https://example.com/action</p>
+<p style="font-size:12px;color:#737373;margin-top:28px">This message was sent by Launch List.</p>
+</div>"
+`;
+
+exports[`product email service > matches the welcome HTML snapshot 1`] = `
+"<div style="font-family:Inter,Arial,sans-serif;line-height:1.55;color:#171717">
+<p style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#737373">Launch List</p>
+<h1 style="font-size:22px;margin:0 0 12px">Welcome</h1>
+<p>Hello Ada,</p>
+<p>Your Launch List account is ready.</p>
+<p><a href="https://example.com/action" style="display:inline-block;padding:10px 16px;border-radius:8px;background:#171717;color:#fff;text-decoration:none">Open your account</a></p>
+<p style="font-size:12px;color:#737373;word-break:break-all">https://example.com/action</p>
+<p style="font-size:12px;color:#737373;margin-top:28px">This message was sent by Launch List.</p>
+</div>"
+`;
+
+exports[`product email service > matches the workspace-invite HTML snapshot 1`] = `
+"<div style="font-family:Inter,Arial,sans-serif;line-height:1.55;color:#171717">
+<p style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#737373">Launch List</p>
+<h1 style="font-size:22px;margin:0 0 12px">You have been invited</h1>
+<p>Hello Ada,</p>
+<p>Join Founders and start working with the team.</p>
+<p><a href="https://example.com/action" style="display:inline-block;padding:10px 16px;border-radius:8px;background:#171717;color:#fff;text-decoration:none">Accept invite</a></p>
+<p style="font-size:12px;color:#737373;word-break:break-all">https://example.com/action</p>
+<p style="font-size:12px;color:#737373;margin-top:28px">This message was sent by Launch List.</p>
+</div>"
+`;

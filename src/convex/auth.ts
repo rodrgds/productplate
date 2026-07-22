@@ -6,10 +6,15 @@ import { query } from './_generated/server';
 import { v } from 'convex/values';
 import { betterAuth } from 'better-auth';
 import type { BetterAuthOptions } from 'better-auth/minimal';
-import { admin } from 'better-auth/plugins';
+import { admin, magicLink } from 'better-auth/plugins';
 import authSchema from './betterAuth/schema';
 import authConfig from './auth.config';
 import { queueUserDeletionForAuth } from './lifecycle';
+import {
+	deliverProductEmail,
+	renderProductEmail,
+	type ProductEmailTemplate
+} from '../lib/email/service';
 
 function getRuntimeEnv(key: string) {
 	return typeof process === 'undefined' ? undefined : process.env[key];
@@ -82,39 +87,34 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 
 export const { onCreate, onUpdate, onDelete } = authComponent.triggersApi();
 
-function escapeHtml(value: string) {
-	return value
-		.replaceAll('&', '&amp;')
-		.replaceAll('<', '&lt;')
-		.replaceAll('>', '&gt;')
-		.replaceAll('"', '&quot;')
-		.replaceAll("'", '&#039;');
-}
-
-async function sendAuthEmail(args: { to: string; subject: string; html: string }) {
-	const resendApiKey = process.env.RESEND_API_KEY;
-	if (!resendApiKey) {
-		throw new Error('Email delivery is unavailable because RESEND_API_KEY is not configured.');
-	}
-
-	const response = await fetch('https://api.resend.com/emails', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${resendApiKey}`
-		},
-		body: JSON.stringify({
-			from: process.env.RESET_EMAIL_FROM || 'App <no-reply@yourdomain.com>',
+async function sendAuthEmail(args: {
+	to: string;
+	subject: string;
+	template: ProductEmailTemplate;
+	actionUrl?: string;
+	recipientName?: string;
+}) {
+	const productName = getRuntimeEnv('PRODUCT_NAME') ?? 'Product Plate';
+	return await deliverProductEmail(
+		{
 			to: args.to,
 			subject: args.subject,
-			...(process.env.RESET_EMAIL_REPLY_TO ? { reply_to: process.env.RESET_EMAIL_REPLY_TO } : {}),
-			html: args.html
-		})
-	});
-
-	if (!response.ok) {
-		throw new Error(`Email delivery failed with status ${response.status}.`);
-	}
+			replyTo: getRuntimeEnv('RESET_EMAIL_REPLY_TO'),
+			html: renderProductEmail({
+				template: args.template,
+				productName,
+				actionUrl: args.actionUrl,
+				recipientName: args.recipientName
+			})
+		},
+		{
+			apiKey: getRuntimeEnv('RESEND_API_KEY'),
+			from:
+				getRuntimeEnv('TRANSACTIONAL_EMAIL_FROM') ??
+				getRuntimeEnv('RESET_EMAIL_FROM') ??
+				`${productName} <no-reply@example.com>`
+		}
+	);
 }
 
 export const createAuthOptions = (
@@ -135,7 +135,22 @@ export const createAuthOptions = (
 		baseURL: siteUrl,
 		trustedOrigins: getTrustedOrigins(siteUrl),
 		advanced: {
-			useSecureCookies: siteUrl.startsWith('https://')
+			useSecureCookies: siteUrl.startsWith('https://'),
+			ipAddress: {
+				ipAddressHeaders: ['cf-connecting-ip', 'x-real-ip', 'x-forwarded-for']
+			}
+		},
+		rateLimit: {
+			enabled: true,
+			window: 60,
+			max: 30,
+			storage: 'memory',
+			customRules: {
+				'/sign-in/email': { window: 60, max: 5 },
+				'/sign-up/email': { window: 60, max: 5 },
+				'/request-password-reset': { window: 300, max: 3 },
+				'/send-verification-email': { window: 300, max: 3 }
+			}
 		},
 		account: {
 			accountLinking: {
@@ -150,36 +165,51 @@ export const createAuthOptions = (
 			deleteUser: { enabled: true },
 			changeEmail: {
 				enabled: true,
-				sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+				sendChangeEmailConfirmation: async ({ user, url }) => {
 					await sendAuthEmail({
 						to: user.email,
 						subject: 'Approve email change',
-						html: `<p>Hello ${escapeHtml(user.name ?? 'there')},</p>
-<p>We received a request to change your email address to <strong>${escapeHtml(newEmail)}</strong>.</p>
-<p>Click the button below to approve this change:</p>
-<p><a href="${escapeHtml(url)}" style="display:inline-block;padding:10px 16px;background:#111827;color:#fff;border-radius:6px;text-decoration:none">Approve Email Change</a></p>
-<p>If the button doesn't work, copy and paste this URL into your browser:</p>
-						<p><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></p>
-<p>If you didn't request this change, please ignore this email or contact support.</p>`
+						template: 'email-change-approval',
+						actionUrl: url,
+						recipientName: user.name
 					});
 				}
 			}
 		},
-		// Configure simple, non-verified email/password to get started
+		emailVerification: {
+			sendOnSignUp: true,
+			sendOnSignIn: true,
+			autoSignInAfterVerification: true,
+			sendVerificationEmail: async ({ user, url }) => {
+				await sendAuthEmail({
+					to: user.email,
+					subject: 'Verify your email',
+					template: 'verify-email',
+					actionUrl: url,
+					recipientName: user.name
+				});
+			},
+			afterEmailVerification: async (user) => {
+				await sendAuthEmail({
+					to: user.email,
+					subject: 'Welcome',
+					template: 'welcome',
+					actionUrl: `${siteUrl}/onboarding`,
+					recipientName: user.name
+				});
+			}
+		},
 		emailAndPassword: {
 			enabled: true,
-			requireEmailVerification: false,
-			// Send password reset emails via Resend
+			requireEmailVerification: getRuntimeEnv('AUTH_REQUIRE_EMAIL_VERIFICATION') === 'true',
+			revokeSessionsOnPasswordReset: true,
 			sendResetPassword: async ({ user, url }) => {
 				await sendAuthEmail({
 					to: user.email,
 					subject: 'Reset your password',
-					html: `<p>Hello ${escapeHtml(user.name ?? 'there')},</p>
-<p>We received a request to reset your password. Click the button below to set a new password:</p>
-<p><a href="${escapeHtml(url)}" style="display:inline-block;padding:10px 16px;background:#111827;color:#fff;border-radius:6px;text-decoration:none">Reset Password</a></p>
-<p>If the button doesn't work, copy and paste this URL into your browser:</p>
-					<p><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></p>
-<p>If you didn't request this, you can safely ignore this email.</p>`
+					template: 'password-reset',
+					actionUrl: url,
+					recipientName: user.name
 				});
 			}
 		},
@@ -197,7 +227,23 @@ export const createAuthOptions = (
 			// The Convex plugin is required for Convex compatibility
 			convex({ authConfig }),
 			// Admin plugin for roles/impersonation/banning APIs
-			admin()
+			admin(),
+			...(getRuntimeEnv('AUTH_MAGIC_LINK_ENABLED') === 'true'
+				? [
+						magicLink({
+							disableSignUp: true,
+							rateLimit: { window: 60, max: 3 },
+							sendMagicLink: async ({ email, url }) => {
+								await sendAuthEmail({
+									to: email,
+									subject: 'Your sign-in link',
+									template: 'verify-email',
+									actionUrl: url
+								});
+							}
+						})
+					]
+				: [])
 		]
 	} satisfies BetterAuthOptions;
 };

@@ -19,6 +19,8 @@
 	import { resolve } from '$app/paths';
 	import { setMode, resetMode } from 'mode-watcher';
 	import { soundPreferences } from '$lib/sound-preferences.svelte.js';
+	import { env } from '$env/dynamic/public';
+	import { getBrowserTelemetry } from '$lib/telemetry-browser';
 
 	let { user }: { user: { name: string; email: string; avatar: string } } = $props();
 
@@ -37,6 +39,7 @@
 		try {
 			sidebar.setOpenMobile(false);
 			await authClient.signOut();
+			getBrowserTelemetry(env.PUBLIC_POSTHOG_KEY, env.PUBLIC_POSTHOG_HOST).reset();
 			goto(resolve('/auth/sign-in'));
 		} catch (e) {
 			console.error('Failed to sign out', e);

@@ -23,6 +23,8 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { OnboardingForm } from '$lib/forms/schemas.js';
+	import { env } from '$env/dynamic/public';
+	import { getBrowserTelemetry } from '$lib/telemetry-browser';
 
 	const convex = useConvexClient();
 	let isSubmitting = $state(false);
@@ -55,6 +57,10 @@
 						name: validatedForm.data.displayName
 					});
 					await convex.mutation(api.organizations.completeOnboarding, validatedForm.data);
+					getBrowserTelemetry(env.PUBLIC_POSTHOG_KEY, env.PUBLIC_POSTHOG_HOST).capture(
+						'onboarding_completed',
+						{ path: location.pathname }
+					);
 					completed = true;
 					redirectTimer = setTimeout(() => {
 						goto(resolve('/dashboard'));

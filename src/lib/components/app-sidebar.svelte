@@ -14,7 +14,8 @@
 		Cuboid,
 		MapPinned,
 		Building2,
-		Code2
+		Code2,
+		MessageSquareWarning
 	} from '@lucide/svelte';
 	import NavMain from './nav-main.svelte';
 	import NavSecondary from './nav-secondary.svelte';
@@ -26,6 +27,8 @@
 	import AppLogo from '$lib/components/app-logo.svelte';
 	import type { Doc } from '$convex/_generated/dataModel.js';
 	import { isDemoAccountEmail } from '$lib/demo-account.js';
+	import { env } from '$env/dynamic/public';
+	import { getBrowserTelemetry } from '$lib/telemetry-browser';
 
 	interface WorkspaceOptionSource {
 		organization: Doc<'organizations'>;
@@ -35,6 +38,13 @@
 	const workspacesResponse = useQuery(api.organizations.listCurrent, {});
 	const currentWorkspaceResponse = useQuery(api.organizations.getCurrent, {});
 	let user = $derived(currentUserResponse.data);
+	let identifiedUserId: string | undefined;
+	$effect(() => {
+		if (user?._id && user._id !== identifiedUserId) {
+			identifiedUserId = user._id;
+			getBrowserTelemetry(env.PUBLIC_POSTHOG_KEY, env.PUBLIC_POSTHOG_HOST).identify(user._id);
+		}
+	});
 	let workspaceOptions = $derived(
 		(workspacesResponse.data ?? []).map((workspace: WorkspaceOptionSource) => ({
 			id: workspace.organization._id,
@@ -116,6 +126,11 @@
 				name: 'Organizations',
 				url: '/admin/organizations',
 				icon: Building2
+			},
+			{
+				name: 'Feedback',
+				url: '/admin/feedback',
+				icon: MessageSquareWarning
 			}
 		]
 	}));

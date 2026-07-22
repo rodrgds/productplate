@@ -8,6 +8,10 @@
 	import AccountSettings from './account-settings.svelte';
 	import PasswordSettings from './password-settings.svelte';
 	import EmailSettings from './email-settings.svelte';
+	import FeedbackSettings from './feedback-settings.svelte';
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
 
 	// Get current user from Convex
 	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
@@ -46,6 +50,7 @@
 				<Tabs.Trigger value="account">Account</Tabs.Trigger>
 				<Tabs.Trigger value="password">Password</Tabs.Trigger>
 				<Tabs.Trigger value="email">Email</Tabs.Trigger>
+				<Tabs.Trigger value="feedback">Feedback</Tabs.Trigger>
 			</Tabs.List>
 
 			<Tabs.Content value="account" class="space-y-6">
@@ -62,6 +67,10 @@
 				{#if user}
 					<EmailSettings {user} />
 				{/if}
+			</Tabs.Content>
+
+			<Tabs.Content value="feedback" class="space-y-6">
+				<FeedbackSettings data={data.feedbackForm} />
 			</Tabs.Content>
 		</Tabs.Root>
 	</div>

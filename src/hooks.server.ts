@@ -1,7 +1,11 @@
-import type { Handle } from '@sveltejs/kit';
+import type { Handle, HandleServerError } from '@sveltejs/kit';
 import { createAuth } from '$convex/auth.js';
 import { getToken } from '@mmailaender/convex-better-auth-svelte/sveltekit';
 import { env } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
+import { handleErrorWithSentry, init, sentryHandle, setTag } from '@sentry/sveltekit';
+import { sequence } from '@sveltejs/kit/hooks';
+import { scrubSentryEvent } from '$lib/sentry';
 
 function trimTrailingSlash(value: string) {
 	return value.endsWith('/') ? value.slice(0, -1) : value;
@@ -21,11 +25,29 @@ function syncRuntimeAuthEnvironment(origin?: string) {
 
 syncRuntimeAuthEnvironment();
 
-export const handle: Handle = async ({ event, resolve }) => {
+let initializedSentryDsn: string | undefined;
+
+function initializeSentry() {
+	const dsn = publicEnv.PUBLIC_SENTRY_DSN;
+	if (!dsn || initializedSentryDsn === dsn) return;
+	initializedSentryDsn = dsn;
+	init({
+		dsn,
+		enabled: true,
+		release: env.GIT_SHA,
+		sendDefaultPii: false,
+		beforeSend: (event) => scrubSentryEvent(event, { gitSha: env.GIT_SHA })
+	});
+}
+
+const appHandle: Handle = async ({ event, resolve }) => {
+	initializeSentry();
 	const startedAt = Date.now();
 	const requestId = event.request.headers.get('x-request-id') ?? crypto.randomUUID();
 	syncRuntimeAuthEnvironment(event.url.origin);
 	event.locals.requestId = requestId;
+	setTag('request_id', requestId);
+	if (env.GIT_SHA) setTag('git_sha', env.GIT_SHA);
 	event.locals.token = await getToken(createAuth, event.cookies);
 
 	const resolvedResponse = await resolve(event);
@@ -54,3 +76,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	return response;
 };
+
+export const handle = sequence(sentryHandle(), appHandle);
+
+const appHandleError: HandleServerError = ({ event, status, message }) => ({
+	message: status === 404 ? message : 'The request could not be completed.',
+	requestId: event.locals.requestId
+});
+
+export const handleError = handleErrorWithSentry(appHandleError);

@@ -17,6 +17,7 @@ import type * as crons from "../crons.js";
 import type * as demo from "../demo.js";
 import type * as developer from "../developer.js";
 import type * as emails from "../emails.js";
+import type * as feedback from "../feedback.js";
 import type * as http from "../http.js";
 import type * as lifecycle from "../lifecycle.js";
 import type * as maintenance from "../maintenance.js";
@@ -24,6 +25,7 @@ import type * as notifications from "../notifications.js";
 import type * as organizations from "../organizations.js";
 import type * as storage from "../storage.js";
 import type * as userProfiles from "../userProfiles.js";
+import type * as waitlist from "../waitlist.js";
 
 import type {
   ApiFromModules,
@@ -41,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   demo: typeof demo;
   developer: typeof developer;
   emails: typeof emails;
+  feedback: typeof feedback;
   http: typeof http;
   lifecycle: typeof lifecycle;
   maintenance: typeof maintenance;
@@ -48,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   organizations: typeof organizations;
   storage: typeof storage;
   userProfiles: typeof userProfiles;
+  waitlist: typeof waitlist;
 }>;
 
 /**
