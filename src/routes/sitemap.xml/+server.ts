@@ -1,20 +1,13 @@
 import { APP_URL } from '$lib/constants';
 import { getPublishedBlogPosts } from '$lib/content/blog';
+import { SITEMAP_EXCLUDED_ROUTE_PATTERNS } from '$lib/content/sitemap';
 import { response } from 'super-sitemap/sveltekit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async () =>
 	await response({
 		origin: APP_URL,
-		excludeRoutePatterns: [
-			/^\/\(app\)/,
-			/^\/admin/,
-			/^\/api/,
-			/^\/auth/,
-			/^\/components/,
-			/^\/landing-components/,
-			/^\/theme-builder/
-		],
+		excludeRoutePatterns: SITEMAP_EXCLUDED_ROUTE_PATTERNS,
 		paramValues: {
 			'/blog/[slug]': getPublishedBlogPosts().map((post) => ({
 				values: [post.slug],
