@@ -7,7 +7,7 @@ test('public starter routes render with truthful navigation', async ({ page }) =
 	await expect(
 		page.getByRole('heading', { name: /SvelteKit starter, ready to become your product/i })
 	).toBeVisible();
-	await expect(page.getByRole('link', { name: /Open live demo/i }).first()).toHaveAttribute(
+	await expect(page.getByRole('link', { name: /Open full demo/i }).first()).toHaveAttribute(
 		'href',
 		'/auth/demo'
 	);
