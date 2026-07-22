@@ -205,20 +205,13 @@ function prelaunchHooks() {
 	return `import type { Handle, HandleServerError } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import { env as publicEnv } from '$env/dynamic/public';
-import { handleErrorWithSentry, init, sentryHandle, setTag } from '@sentry/sveltekit';
+import { handleErrorWithSentry, initCloudflareSentryHandle, sentryHandle, setTag } from '@sentry/sveltekit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { scrubSentryEvent } from '$lib/sentry';
 
-let initializedSentryDsn: string | undefined;
-function initializeSentry() {
-	const dsn = publicEnv.PUBLIC_SENTRY_DSN;
-	if (!dsn || initializedSentryDsn === dsn) return;
-	initializedSentryDsn = dsn;
-	init({ dsn, enabled: true, release: env.GIT_SHA, sendDefaultPii: false, beforeSend: (event) => scrubSentryEvent(event, { gitSha: env.GIT_SHA }) });
-}
+const cloudflareSentryHandle = initCloudflareSentryHandle({ dsn: publicEnv.PUBLIC_SENTRY_DSN, enabled: Boolean(publicEnv.PUBLIC_SENTRY_DSN), release: env.GIT_SHA, sendDefaultPii: false, beforeSend: (event) => scrubSentryEvent(event, { gitSha: env.GIT_SHA }) });
 
 const appHandle: Handle = async ({ event, resolve }) => {
-	initializeSentry();
 	const startedAt = Date.now();
 	const requestId = event.request.headers.get('x-request-id') ?? crypto.randomUUID();
 	event.locals.requestId = requestId;
@@ -235,7 +228,7 @@ const appHandle: Handle = async ({ event, resolve }) => {
 	return response;
 };
 
-export const handle = sequence(sentryHandle(), appHandle);
+export const handle = sequence(cloudflareSentryHandle, sentryHandle(), appHandle);
 const appHandleError: HandleServerError = ({ event, status, message }) => ({ message: status === 404 ? message : 'The request could not be completed.', requestId: event.locals.requestId });
 export const handleError = handleErrorWithSentry(appHandleError);
 `;

@@ -67,6 +67,7 @@
 		"convex-test": "^0.0.54",
 		"d3-scale": "^4.0.2",
 		"d3-shape": "^3.2.0",
+		"esbuild": "0.27.3",
 		"eslint": "^9.39.5",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.20.0",

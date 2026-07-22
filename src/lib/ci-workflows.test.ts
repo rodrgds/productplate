@@ -33,6 +33,14 @@ describe('CI workflow environment', () => {
 		expect(source).toContain('Rollback:');
 	});
 
+	it('bundles the Cloudflare worker before Convex activates the backend', async () => {
+		const source = await readFile('scripts/build-for-convex.ts', 'utf8');
+
+		expect(source).toContain("from 'esbuild'");
+		expect(source).toContain("conditions: ['worker', 'browser']");
+		expect(source).toContain("external: ['cloudflare:*', 'node:*']");
+	});
+
 	it.each(['code-quality.yml', 'cloudflare-pages.yml'])(
 		'provides Better Auth with a non-production secret while building %s',
 		async (workflow) => {

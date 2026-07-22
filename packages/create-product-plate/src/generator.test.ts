@@ -271,6 +271,11 @@ describe('project generation', () => {
 			expect(deployWorkflow.includes('BETTER_AUTH_SECRET')).toBe(profile !== 'prelaunch');
 			expect(deployWorkflow.includes('AUTUMN_SECRET_KEY')).toBe(profile !== 'prelaunch');
 			expect(deployWorkflow.includes('OPENROUTER_API_KEY')).toBe(profile === 'ai-saas');
+			if (profile === 'prelaunch') {
+				const serverHooks = await Bun.file(join(destination, 'src/hooks.server.ts')).text();
+				expect(serverHooks).toContain('initCloudflareSentryHandle');
+				expect(serverHooks).not.toContain('init, sentryHandle');
+			}
 			const qualityWorkflow = await Bun.file(
 				join(destination, '.github/workflows/quality.yml')
 			).text();
