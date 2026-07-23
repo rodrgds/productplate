@@ -239,7 +239,8 @@ export default defineSchema({
 			v.literal('other')
 		),
 		message: v.string(),
-		currentPath: v.string(),
+		// Deprecated. Kept optional so feedback created before its removal remains valid.
+		currentPath: v.optional(v.string()),
 		userId: v.string(),
 		requestId: v.string(),
 		status: v.union(v.literal('open'), v.literal('in_progress'), v.literal('closed')),

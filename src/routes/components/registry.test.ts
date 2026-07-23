@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { categories } from './registry';
 
-const newSectionKeys = [
+const removedSectionKeys = [
 	'dashboard-hero',
+	'bento',
 	'problem-solution',
 	'workflow-steps',
 	'use-case-switcher',
@@ -15,13 +16,14 @@ const newSectionKeys = [
 ] as const;
 
 describe('landing component registry', () => {
-	it('publishes the ten expanded SaaS landing sections', () => {
+	it('publishes the retained expanded SaaS landing sections', () => {
 		const keys = categories.flatMap((category) =>
 			category.components.map((component) => component.key)
 		);
 
-		expect(keys).toEqual(expect.arrayContaining([...newSectionKeys]));
+		expect(keys).not.toEqual(expect.arrayContaining([...removedSectionKeys]));
+		expect(categories.some((category) => category.id === 'conversion')).toBe(false);
 		expect(new Set(keys).size).toBe(keys.length);
-		expect(keys).toHaveLength(32);
+		expect(keys).toHaveLength(21);
 	});
 });

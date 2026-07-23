@@ -15,7 +15,7 @@ const feedbackValidator = v.object({
 	_creationTime: v.number(),
 	category,
 	message: v.string(),
-	currentPath: v.string(),
+	currentPath: v.optional(v.string()),
 	userId: v.string(),
 	requestId: v.string(),
 	status,
@@ -27,7 +27,6 @@ export const create = mutation({
 	args: {
 		category,
 		message: v.string(),
-		currentPath: v.string(),
 		requestId: v.string()
 	},
 	returns: v.id('feedback'),
@@ -35,14 +34,11 @@ export const create = mutation({
 		const user = await authComponent.getAuthUser(ctx);
 		const message = args.message.trim();
 		if (message.length < 10 || message.length > 2_000) throw new Error('Invalid feedback message.');
-		if (args.currentPath.length > 500 || args.requestId.length > 200) {
-			throw new Error('Invalid feedback context.');
-		}
+		if (args.requestId.length > 200) throw new Error('Invalid feedback context.');
 		const now = Date.now();
 		return await ctx.db.insert('feedback', {
 			category: args.category,
 			message,
-			currentPath: args.currentPath,
 			userId: user._id,
 			requestId: args.requestId,
 			status: 'open',

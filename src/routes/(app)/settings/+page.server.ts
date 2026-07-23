@@ -19,9 +19,8 @@ export const actions: Actions = {
 		await client.mutation(api.feedback.create, {
 			category: form.data.category,
 			message: form.data.message,
-			currentPath: form.data.currentPath,
 			requestId: locals.requestId ?? crypto.randomUUID()
 		});
-		return message(form, 'Feedback sent. Thank you.');
+		return message(form, 'Feedback sent.');
 	}
 };

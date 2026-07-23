@@ -3,6 +3,7 @@ import {
 	authSignInFormSchema,
 	authSignUpFormSchema,
 	accountProfileUpdateSchema,
+	feedbackFormSchema,
 	onboardingFormSchema,
 	passwordFormSchema,
 	waitlistFormSchema
@@ -75,5 +76,18 @@ describe('baseline form schemas', () => {
 			waitlistFormSchema.safeParse({ email: 'ada@example.com', utmCampaign: 'x'.repeat(201) })
 				.success
 		).toBe(false);
+	});
+
+	it('accepts feedback without route context', () => {
+		const result = feedbackFormSchema.parse({
+			category: 'idea',
+			message: 'Add keyboard shortcuts.',
+			currentPath: '/settings'
+		});
+
+		expect(result).toEqual({
+			category: 'idea',
+			message: 'Add keyboard shortcuts.'
+		});
 	});
 });

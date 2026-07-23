@@ -50,7 +50,7 @@
 						<div>
 							<p class="text-sm font-medium capitalize">{item.category}</p>
 							<p class="mt-1 text-xs text-muted-foreground">
-								{new Date(item.createdAt).toLocaleString()} · {item.currentPath}
+								{new Date(item.createdAt).toLocaleString()}
 							</p>
 						</div>
 						<label class="flex items-center gap-2 text-sm">

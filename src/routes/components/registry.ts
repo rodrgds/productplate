@@ -1,13 +1,9 @@
 import {
 	LandingAppleCardsCarousel,
-	LandingBentoFeatures,
-	LandingCaseStudy,
 	LandingComparisonTable,
 	LandingCtaBand,
-	LandingDashboardHero,
 	LandingFaqSection,
 	LandingFeatureComparison,
-	LandingFeatureSpotlight,
 	LandingFeatureTabs,
 	LandingFinalCta,
 	LandingHero,
@@ -15,22 +11,15 @@ import {
 	LandingIntegrationCloud,
 	LandingLensShowcase,
 	LandingLogoMarquee,
-	LandingMigrationPlan,
 	LandingOrbitingCircles,
 	LandingPricingCards,
 	LandingPricingComparison,
 	LandingPricingMatrix,
 	LandingProcessTimeline,
-	LandingProblemSolution,
-	LandingReleaseTimeline,
-	LandingRoiCalculator,
 	LandingStatsGrid,
 	LandingStatsStrip,
 	LandingTestimonialMarquee,
-	LandingTestimonialWall,
-	LandingTrustCenter,
-	LandingUseCaseSwitcher,
-	LandingWorkflowSteps
+	LandingTestimonialWall
 } from '$lib/components/landing';
 import type { Component } from 'svelte';
 
@@ -54,37 +43,28 @@ export const categories: readonly Category[] = [
 		blurb: 'Above-the-fold openers with product previews and video dialogs.',
 		components: [
 			{ key: 'hero', label: 'Product hero', Component: LandingHero },
-			{ key: 'video-dialog', label: 'Hero video dialog', Component: LandingHeroVideoDialog },
-			{ key: 'dashboard-hero', label: 'Dashboard hero', Component: LandingDashboardHero }
+			{ key: 'video-dialog', label: 'Hero video dialog', Component: LandingHeroVideoDialog }
 		]
 	},
 	{
 		id: 'features',
 		title: 'Features',
-		blurb: 'Bento grids, tabbed explorers, comparison tables, and timelines.',
+		blurb: 'Tabbed explorers, comparison tables, timelines, and visual diagrams.',
 		components: [
-			{ key: 'bento', label: 'Bento features', Component: LandingBentoFeatures },
 			{ key: 'tabs', label: 'Feature tabs', Component: LandingFeatureTabs },
 			{ key: 'feature-comparison', label: 'Comparison table', Component: LandingFeatureComparison },
 			{ key: 'image-comparison', label: 'Image comparison', Component: LandingComparisonTable },
 			{ key: 'timeline', label: 'Process timeline', Component: LandingProcessTimeline },
-			{ key: 'orbiting', label: 'Orbiting circles', Component: LandingOrbitingCircles },
-			{ key: 'problem-solution', label: 'Problem and outcome', Component: LandingProblemSolution },
-			{ key: 'workflow-steps', label: 'Workflow steps', Component: LandingWorkflowSteps },
-			{ key: 'use-case-switcher', label: 'Use-case switcher', Component: LandingUseCaseSwitcher },
-			{ key: 'feature-spotlight', label: 'Feature spotlight', Component: LandingFeatureSpotlight }
+			{ key: 'orbiting', label: 'Orbiting circles', Component: LandingOrbitingCircles }
 		]
 	},
 	{
 		id: 'proof',
 		title: 'Proof',
-		blurb: 'Customer evidence, trust programs, testimonials, and product momentum.',
+		blurb: 'Customer quotes and testimonial collections.',
 		components: [
 			{ key: 'wall', label: 'Testimonial mosaic', Component: LandingTestimonialWall },
-			{ key: 'marquee', label: 'Testimonial marquee', Component: LandingTestimonialMarquee },
-			{ key: 'case-study', label: 'Customer case study', Component: LandingCaseStudy },
-			{ key: 'trust-center', label: 'Trust center', Component: LandingTrustCenter },
-			{ key: 'release-timeline', label: 'Release momentum', Component: LandingReleaseTimeline }
+			{ key: 'marquee', label: 'Testimonial marquee', Component: LandingTestimonialMarquee }
 		]
 	},
 	{
@@ -121,15 +101,6 @@ export const categories: readonly Category[] = [
 			{ key: 'stats-strip', label: 'Stats strip', Component: LandingStatsStrip },
 			{ key: 'stats-grid', label: 'Stats grid', Component: LandingStatsGrid },
 			{ key: 'integration', label: 'Integration cloud', Component: LandingIntegrationCloud }
-		]
-	},
-	{
-		id: 'conversion',
-		title: 'Conversion',
-		blurb: 'Interactive business cases and low-risk migration closes.',
-		components: [
-			{ key: 'roi-calculator', label: 'ROI calculator', Component: LandingRoiCalculator },
-			{ key: 'migration-plan', label: 'Migration plan', Component: LandingMigrationPlan }
 		]
 	},
 	{

@@ -80,8 +80,7 @@ export const waitlistFormSchema = z.object({
 
 export const feedbackFormSchema = z.object({
 	category: z.enum(['bug', 'idea', 'question', 'other']).default('idea'),
-	message: z.string().trim().min(10, 'Add at least 10 characters.').max(2_000).default(''),
-	currentPath: z.string().trim().max(500).default('/settings')
+	message: z.string().trim().min(10, 'Add at least 10 characters.').max(2_000).default('')
 });
 
 export type OnboardingForm = z.infer<typeof onboardingFormSchema>;
