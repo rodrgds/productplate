@@ -52,7 +52,7 @@
 	</div>
 </header>
 
-<main class="flex flex-1 items-start p-4 lg:p-6">
+<div class="flex flex-1 items-start p-4 lg:p-6">
 	<Card.Root class="w-full max-w-xl">
 		<Card.Header>
 			<Card.Title class="flex items-center gap-2">
@@ -87,4 +87,4 @@
 			{/if}
 		</Card.Content>
 	</Card.Root>
-</main>
+</div>

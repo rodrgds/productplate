@@ -28,7 +28,11 @@ test('public routes have no horizontal overflow on a phone viewport', async ({ p
 		'/components/hero',
 		'/components/features',
 		'/components/proof',
-		'/components/conversion',
+		'/components/pricing',
+		'/components/faq',
+		'/components/cta',
+		'/components/utility',
+		'/components/showcase',
 		'/docs',
 		'/auth/demo'
 	]) {
@@ -40,61 +44,31 @@ test('public routes have no horizontal overflow on a phone viewport', async ({ p
 	}
 });
 
-test('ROI calculator updates the visible business case', async ({ page }) => {
-	await page.goto('/components/conversion');
+test('current landing component categories render bounded variants', async ({ page }) => {
+	const categories = [
+		{ path: '/components/hero', title: 'Hero components', variants: 2 },
+		{ path: '/components/features', title: 'Features components', variants: 5 },
+		{ path: '/components/proof', title: 'Proof components', variants: 2 },
+		{ path: '/components/pricing', title: 'Pricing components', variants: 3 },
+		{ path: '/components/faq', title: 'FAQ components', variants: 1 },
+		{ path: '/components/cta', title: 'Call to action components', variants: 2 },
+		{ path: '/components/utility', title: 'Utility components', variants: 4 },
+		{ path: '/components/showcase', title: 'Showcase components', variants: 2 }
+	] as const;
 
-	const sliderTracks = page.locator('[data-slot="slider-track"]');
-	await expect(sliderTracks).toHaveCount(3);
-	for (const track of await sliderTracks.all()) {
-		const box = await track.boundingBox();
-		expect(box?.height, 'slider tracks should remain visibly rendered').toBeGreaterThanOrEqual(4);
-	}
-
-	const teamSize = page.locator('[aria-label="People doing the work"] [role="slider"]');
-	await expect(teamSize).toHaveAttribute('aria-valuenow', '12');
-	await teamSize.press('ArrowRight');
-
-	await expect(teamSize).toHaveAttribute('aria-valuenow', '13');
-	await expect(page.getByText('$114,270', { exact: true })).toBeVisible();
-});
-
-test('new landing sections remain present, bounded, and paint-safe', async ({ page }) => {
-	const sectionsByRoute = {
-		'/components/hero': ['dashboard-hero'],
-		'/components/features': [
-			'problem-solution',
-			'workflow-steps',
-			'use-case-switcher',
-			'feature-spotlight'
-		],
-		'/components/proof': ['case-study', 'trust-center', 'release-timeline'],
-		'/components/conversion': ['roi-calculator', 'migration-plan']
-	} as const;
-
-	for (const [path, sectionKeys] of Object.entries(sectionsByRoute)) {
+	for (const { path, title, variants } of categories) {
 		await page.goto(path);
+		await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
 
-		for (const key of sectionKeys) {
-			const section = page.locator(`[aria-labelledby="${key}-heading"]`);
-			await expect(section).toBeVisible();
-			expect(
-				await section.evaluate((element) => element.scrollWidth <= element.clientWidth),
-				`${key} should not overflow its gallery frame`
-			).toBe(true);
-		}
-	}
-
-	await page.goto('/components/features');
-	const featureBento = page.getByTestId('feature-bento');
-	await expect(featureBento).toBeVisible();
-	expect(
-		await featureBento
-			.locator('*')
-			.evaluateAll((elements) =>
-				elements.every((element) => getComputedStyle(element).backdropFilter === 'none')
+		const previews = page.locator('section.variant');
+		await expect(previews).toHaveCount(variants);
+		expect(
+			await previews.evaluateAll((sections) =>
+				sections.every((section) => section.scrollWidth <= section.clientWidth)
 			),
-		'the feature bento should not create scroll-bound backdrop-filter paint layers'
-	).toBe(true);
+			`${path} variants should not overflow their gallery frames`
+		).toBe(true);
+	}
 });
 
 test('mobile landing navigation remains interactive', async ({ page }) => {

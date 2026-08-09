@@ -28,13 +28,13 @@
 			<AppLogo class="size-8 rounded-lg" />
 			{APP_NAME}
 		</a>
-		<div class="space-y-4">
-			<blockquote class="space-y-2">
-				<p class="text-lg leading-relaxed font-medium text-foreground/90">
-					"The best way to predict the future is to invent it."
-				</p>
-				<footer class="text-sm text-muted-foreground">— Alan Kay</footer>
-			</blockquote>
+		<div class="max-w-md space-y-2">
+			<p class="text-lg leading-relaxed font-medium text-foreground/90">
+				Your product starts with working account flows.
+			</p>
+			<p class="text-sm leading-6 text-muted-foreground">
+				Sign in to inspect the protected workspace, live data, and profile settings.
+			</p>
 		</div>
 		<p class="text-sm text-muted-foreground">
 			&copy; {APP_YEAR}
@@ -42,7 +42,7 @@
 		</p>
 	</div>
 
-	<div class="flex flex-col items-center justify-center p-4 lg:p-8">
+	<main class="flex flex-col items-center justify-center p-4 lg:p-8">
 		<div class="w-full max-w-sm">
 			<a
 				href={resolve('/')}
@@ -54,5 +54,5 @@
 			</a>
 			{@render children()}
 		</div>
-	</div>
+	</main>
 </div>

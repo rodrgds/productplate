@@ -48,5 +48,3 @@ export const APP_BACKGROUND_COLOR = '#181817';
 export const APP_DISPLAY = 'standalone' as const;
 
 export const APP_ORIENTATION = 'portrait' as const;
-
-export const NAV_ITEMS = [] as const;

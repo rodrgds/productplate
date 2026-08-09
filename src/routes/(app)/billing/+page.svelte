@@ -4,9 +4,10 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Alert from '$lib/components/ui/alert/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Badge } from '$lib/components/ui/badge/index.js';
-	import { Check } from '@lucide/svelte';
+	import { Check, TriangleAlert } from '@lucide/svelte';
 
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import type { PageData } from './$types';
@@ -58,6 +59,9 @@
 	const client = useConvexClient();
 	const workspaceResponse = useQuery(api.organizations.getBillingOverview, {});
 	let workspace = $derived(workspaceResponse.data);
+	let pendingAction = $state<'checkout' | 'portal' | null>(null);
+	let pendingProductId = $state<string | null>(null);
+	let actionError = $state('');
 
 	// Get data from server load function
 	let products = $derived<Product[]>(data.products || []);
@@ -75,29 +79,48 @@
 		window.history.replaceState({}, '', page.url.pathname);
 	});
 
+	function getBillingError(cause: unknown, fallback: string) {
+		return cause instanceof Error && cause.message.trim() ? cause.message : fallback;
+	}
+
 	async function handleCheckout(productId: string) {
+		if (pendingAction) return;
+
+		pendingAction = 'checkout';
+		pendingProductId = productId;
+		actionError = '';
 		try {
 			getBrowserTelemetry(env.PUBLIC_POSTHOG_KEY, env.PUBLIC_POSTHOG_HOST).capture(
 				'checkout_started',
 				{ path: location.pathname, plan: productId }
 			);
 			const result = await client.action(api.billing.checkout, { productId });
-			if (result.url) {
-				window.location.href = result.url;
-			}
-		} catch (error) {
-			console.error('Checkout error:', error);
+			if (!result.url) throw new Error('Checkout is unavailable right now.');
+			window.location.href = result.url;
+		} catch (cause) {
+			console.error('Checkout error:', cause);
+			actionError = getBillingError(cause, 'Unable to open checkout. Try again.');
+		} finally {
+			pendingProductId = null;
+			pendingAction = null;
 		}
 	}
 
 	async function handleManageSubscription() {
+		if (pendingAction) return;
+
+		pendingAction = 'portal';
+		pendingProductId = null;
+		actionError = '';
 		try {
 			const result = await client.action(api.billing.billingPortal, {});
-			if (result.url) {
-				window.location.href = result.url;
-			}
-		} catch (error) {
-			console.error('Billing portal error:', error);
+			if (!result.url) throw new Error('The billing portal is unavailable right now.');
+			window.location.href = result.url;
+		} catch (cause) {
+			console.error('Billing portal error:', cause);
+			actionError = getBillingError(cause, 'Unable to open the billing portal. Try again.');
+		} finally {
+			pendingAction = null;
 		}
 	}
 
@@ -190,6 +213,16 @@
 		</div>
 
 		<Separator />
+		{#if actionError}
+			<Alert.Root variant="destructive">
+				<TriangleAlert />
+				<Alert.Title>Billing action failed</Alert.Title>
+				<Alert.Description>
+					<p>{actionError}</p>
+					<Button variant="outline" size="sm" onclick={() => (actionError = '')}>Dismiss</Button>
+				</Alert.Description>
+			</Alert.Root>
+		{/if}
 		{#if !workspaceResponse.isLoading && !workspace}
 			<Card.Root>
 				<Card.Header>
@@ -228,9 +261,14 @@
 							</ul>
 						</Card.Content>
 						<Card.Footer>
-							<Button variant="outline" onclick={handleManageSubscription} disabled={!workspace}
-								>Manage Subscription</Button
+							<Button
+								variant="outline"
+								onclick={handleManageSubscription}
+								disabled={!workspace || Boolean(pendingAction)}
+								aria-busy={pendingAction === 'portal'}
 							>
+								{pendingAction === 'portal' ? 'Opening portal...' : 'Manage subscription'}
+							</Button>
 						</Card.Footer>
 					</Card.Root>
 				{:else}
@@ -306,9 +344,14 @@
 								<Button
 									class="w-full"
 									onclick={() => handleCheckout(plan.id)}
-									disabled={!workspace}
+									disabled={!workspace || Boolean(pendingAction)}
+									aria-busy={pendingAction === 'checkout' && pendingProductId === plan.id}
 								>
-									{plan.price === 0 ? 'Downgrade' : 'Upgrade'}
+									{pendingAction === 'checkout' && pendingProductId === plan.id
+										? 'Opening checkout...'
+										: plan.price === 0
+											? 'Downgrade'
+											: 'Upgrade'}
 								</Button>
 							{/if}
 						</Card.Footer>

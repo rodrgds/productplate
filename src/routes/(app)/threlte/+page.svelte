@@ -87,7 +87,7 @@
 	</div>
 </header>
 
-<main
+<div
 	class="min-h-[calc(100svh-4rem)] bg-muted/30 p-0 lg:h-[calc(100svh-4rem)] lg:min-h-0 lg:overflow-hidden lg:p-4"
 >
 	<div
@@ -184,7 +184,7 @@
 			</section>
 		</aside>
 	</div>
-</main>
+</div>
 
 <style>
 	.scene-panel,

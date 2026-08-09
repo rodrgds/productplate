@@ -9,7 +9,7 @@
 	import { useConvexClient } from 'convex-svelte';
 	import { Upload, Camera, Trash2 } from '@lucide/svelte';
 	import * as Form from '$lib/components/ui/form/index.js';
-	import { superForm } from 'sveltekit-superforms';
+	import { formFieldProxy, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { accountFormSchema, type AccountForm } from '$lib/forms/schemas.js';
 	import ProfileImageEditor from '$lib/components/profile-image-editor.svelte';
@@ -75,6 +75,9 @@
 		}
 	);
 	const { form: formData, enhance, errors } = form;
+	const { value: name } = formFieldProxy(form, 'name');
+	const { value: image } = formFieldProxy(form, 'image');
+	const { value: bio } = formFieldProxy(form, 'bio');
 
 	let hasErrors = $state(false);
 	$effect(() => {
@@ -139,9 +142,9 @@
 			<!-- Profile Picture Section -->
 			<div class="flex flex-col gap-6 sm:flex-row sm:items-center">
 				<div class="group relative">
-					{#if $formData.image}
+					{#if $image}
 						<img
-							src={$formData.image}
+							src={$image}
 							alt="Profile preview"
 							class="h-24 w-24 rounded-full border-2 border-border bg-muted object-cover"
 							onerror={(e) => {
@@ -159,7 +162,7 @@
 					<button
 						type="button"
 						onclick={() => (isEditorOpen = true)}
-						class="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100"
+						class="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-none"
 						aria-label="Change profile picture"
 					>
 						<Camera class="size-6" />
@@ -176,7 +179,7 @@
 							<Upload class="mr-2 size-3.5" />
 							Change Picture
 						</Button>
-						{#if $formData.image}
+						{#if $image}
 							<Button
 								type="button"
 								variant="ghost"
@@ -200,7 +203,7 @@
 					<Form.Control>
 						{#snippet children({ props })}
 							<Form.Label>Name</Form.Label>
-							<Input {...props} type="text" bind:value={$formData.name} required />
+							<Input {...props} type="text" bind:value={$name} required />
 						{/snippet}
 					</Form.Control>
 					<Form.Description>This is your public display name.</Form.Description>
@@ -213,7 +216,7 @@
 							<Form.Label>Bio</Form.Label>
 							<textarea
 								{...props}
-								bind:value={$formData.bio}
+								bind:value={$bio}
 								rows="4"
 								class="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
 							></textarea>

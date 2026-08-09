@@ -24,8 +24,9 @@ test('email signup and later sign-in reach the protected dashboard', async ({ pa
 
 	await page.waitForURL('**/dashboard');
 	await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
-	await expect(page.getByText(/Welcome back, Product Plate E2E!/)).toBeVisible();
-	await expect(page.getByText(/AI workbench/i)).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Welcome, Product Plate E2E' })).toBeVisible();
+	await expect(page.getByText('Product workbench')).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Live setup' })).toBeVisible();
 
 	await context.clearCookies();
 	await page.goto('/auth/sign-in');

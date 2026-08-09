@@ -31,7 +31,7 @@
 	<h1 class="ml-3 font-medium">Feedback</h1>
 </header>
 
-<main class="space-y-6 p-6 md:p-10">
+<div class="space-y-6 p-6 md:p-10">
 	<div>
 		<h2 class="text-3xl font-semibold">Customer feedback</h2>
 		<p class="mt-2 text-muted-foreground">Review product feedback and keep its status current.</p>
@@ -74,4 +74,4 @@
 			{/each}
 		</div>
 	{/if}
-</main>
+</div>

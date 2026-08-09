@@ -2,7 +2,6 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { useEditor, useEditorDerivedValue } from 'prosekit/svelte';
-	import { get } from 'svelte/store';
 	import type { BasicExtension } from 'prosekit/basic';
 	import type { Editor } from 'prosekit/core';
 	import { Bold, Italic, List, ListOrdered, Pilcrow, Heading2, Undo2, Redo2 } from '@lucide/svelte';
@@ -53,15 +52,24 @@
 	}
 
 	const toolbarState = useEditorDerivedValue(getToolbarState);
+	let currentEditor = $derived($editor);
+	let bold = $derived($toolbarState.bold);
+	let italic = $derived($toolbarState.italic);
+	let heading2 = $derived($toolbarState.heading2);
+	let paragraph = $derived($toolbarState.paragraph);
+	let bulletList = $derived($toolbarState.bulletList);
+	let orderedList = $derived($toolbarState.orderedList);
+	let undo = $derived($toolbarState.undo);
+	let redo = $derived($toolbarState.redo);
 </script>
 
 <div class="flex flex-wrap items-center gap-1 border-b p-2">
 	<Button
 		variant="ghost"
 		size="icon"
-		class={$toolbarState.bold?.isActive ? 'bg-accent text-accent-foreground' : ''}
-		disabled={!$toolbarState.bold?.canExec}
-		onclick={() => get(editor)?.commands.toggleBold()}
+		class={bold?.isActive ? 'bg-accent text-accent-foreground' : ''}
+		disabled={!bold?.canExec}
+		onclick={() => currentEditor?.commands.toggleBold()}
 		aria-label="Bold"
 		title="Bold"
 		type="button"
@@ -71,9 +79,9 @@
 	<Button
 		variant="ghost"
 		size="icon"
-		class={$toolbarState.italic?.isActive ? 'bg-accent text-accent-foreground' : ''}
-		disabled={!$toolbarState.italic?.canExec}
-		onclick={() => get(editor)?.commands.toggleItalic()}
+		class={italic?.isActive ? 'bg-accent text-accent-foreground' : ''}
+		disabled={!italic?.canExec}
+		onclick={() => currentEditor?.commands.toggleItalic()}
 		aria-label="Italic"
 		title="Italic"
 		type="button"
@@ -86,9 +94,9 @@
 	<Button
 		variant="ghost"
 		size="icon"
-		class={$toolbarState.heading2?.isActive ? 'bg-accent text-accent-foreground' : ''}
-		disabled={!$toolbarState.heading2?.canExec}
-		onclick={() => get(editor)?.commands.toggleHeading({ level: 2 })}
+		class={heading2?.isActive ? 'bg-accent text-accent-foreground' : ''}
+		disabled={!heading2?.canExec}
+		onclick={() => currentEditor?.commands.toggleHeading({ level: 2 })}
 		aria-label="Heading"
 		title="Heading"
 		type="button"
@@ -98,9 +106,9 @@
 	<Button
 		variant="ghost"
 		size="icon"
-		class={$toolbarState.paragraph?.isActive ? 'bg-accent text-accent-foreground' : ''}
-		disabled={!$toolbarState.paragraph?.canExec}
-		onclick={() => get(editor)?.commands.setParagraph()}
+		class={paragraph?.isActive ? 'bg-accent text-accent-foreground' : ''}
+		disabled={!paragraph?.canExec}
+		onclick={() => currentEditor?.commands.setParagraph()}
 		aria-label="Paragraph"
 		title="Paragraph"
 		type="button"
@@ -113,9 +121,9 @@
 	<Button
 		variant="ghost"
 		size="icon"
-		class={$toolbarState.bulletList?.isActive ? 'bg-accent text-accent-foreground' : ''}
-		disabled={!$toolbarState.bulletList?.canExec}
-		onclick={() => get(editor)?.commands.toggleList({ kind: 'bullet' })}
+		class={bulletList?.isActive ? 'bg-accent text-accent-foreground' : ''}
+		disabled={!bulletList?.canExec}
+		onclick={() => currentEditor?.commands.toggleList({ kind: 'bullet' })}
 		aria-label="Bullet list"
 		title="Bullet list"
 		type="button"
@@ -125,9 +133,9 @@
 	<Button
 		variant="ghost"
 		size="icon"
-		class={$toolbarState.orderedList?.isActive ? 'bg-accent text-accent-foreground' : ''}
-		disabled={!$toolbarState.orderedList?.canExec}
-		onclick={() => get(editor)?.commands.toggleList({ kind: 'ordered' })}
+		class={orderedList?.isActive ? 'bg-accent text-accent-foreground' : ''}
+		disabled={!orderedList?.canExec}
+		onclick={() => currentEditor?.commands.toggleList({ kind: 'ordered' })}
 		aria-label="Ordered list"
 		title="Ordered list"
 		type="button"
@@ -140,8 +148,8 @@
 	<Button
 		variant="ghost"
 		size="icon"
-		disabled={!$toolbarState.undo?.canExec}
-		onclick={() => get(editor)?.commands.undo()}
+		disabled={!undo?.canExec}
+		onclick={() => currentEditor?.commands.undo()}
 		aria-label="Undo"
 		title="Undo"
 		type="button"
@@ -151,8 +159,8 @@
 	<Button
 		variant="ghost"
 		size="icon"
-		disabled={!$toolbarState.redo?.canExec}
-		onclick={() => get(editor)?.commands.redo()}
+		disabled={!redo?.canExec}
+		onclick={() => currentEditor?.commands.redo()}
 		aria-label="Redo"
 		title="Redo"
 		type="button"

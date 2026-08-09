@@ -8,7 +8,7 @@
 	import { Checkbox } from '$lib/components/ui/checkbox/index.js';
 	import { toast } from 'svelte-sonner';
 	import { Info } from '@lucide/svelte';
-	import { superForm } from 'sveltekit-superforms';
+	import { formFieldProxy, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { passwordFormSchema, type PasswordForm } from '$lib/forms/schemas.js';
 	import { soundPreferences } from '$lib/sound-preferences.svelte.js';
@@ -59,6 +59,10 @@
 		}
 	);
 	const { form: formData, enhance, errors } = form;
+	const { value: currentPassword } = formFieldProxy(form, 'currentPassword');
+	const { value: newPassword } = formFieldProxy(form, 'newPassword');
+	const { value: confirmPassword } = formFieldProxy(form, 'confirmPassword');
+	const { value: revokeOtherSessions } = formFieldProxy(form, 'revokeOtherSessions');
 
 	let hasErrors = $state(false);
 	$effect(() => {
@@ -91,7 +95,7 @@
 						<Input
 							{...props}
 							type="password"
-							bind:value={$formData.currentPassword}
+							bind:value={$currentPassword}
 							placeholder="Enter current password"
 							required
 							autocomplete="current-password"
@@ -108,7 +112,7 @@
 						<Input
 							{...props}
 							type="password"
-							bind:value={$formData.newPassword}
+							bind:value={$newPassword}
 							placeholder="Enter new password"
 							required
 							autocomplete="new-password"
@@ -126,7 +130,7 @@
 						<Input
 							{...props}
 							type="password"
-							bind:value={$formData.confirmPassword}
+							bind:value={$confirmPassword}
 							placeholder="Confirm new password"
 							required
 							autocomplete="new-password"
@@ -137,7 +141,7 @@
 			</Form.Field>
 
 			<div class="flex items-center gap-2">
-				<Checkbox id="revoke-sessions" bind:checked={$formData.revokeOtherSessions} />
+				<Checkbox id="revoke-sessions" bind:checked={$revokeOtherSessions} />
 				<label
 					for="revoke-sessions"
 					class="text-sm leading-none font-normal peer-disabled:cursor-not-allowed peer-disabled:opacity-70"

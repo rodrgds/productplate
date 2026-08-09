@@ -15,7 +15,7 @@ test('home page presents Product Plate and its starter capabilities', async ({ p
 	await expect(
 		page.getByRole('heading', { name: /SvelteKit starter, ready to become your product/i })
 	).toBeVisible();
-	await expect(page.getByRole('img', { name: /Product Plate dashboard/i })).toBeVisible();
+	await expect(page.getByRole('img', { name: /Product Plate workbench/i })).toBeVisible();
 	await expect(page.getByRole('link', { name: /Open live demo/i }).first()).toHaveAttribute(
 		'href',
 		'/auth/demo'
@@ -87,6 +87,11 @@ test('demo entry opens the dashboard with sidebar navigation', async ({ page }) 
 	await enterDemo(page);
 
 	await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Live setup' })).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Dashboard', exact: true })).toHaveAttribute(
+		'aria-current',
+		'page'
+	);
 	await expect(page.getByRole('link', { name: /Assistant/i })).toBeVisible();
 	await expect(page.getByRole('link', { name: /Editor/i })).toBeVisible();
 	await expect(page.getByRole('link', { name: /Map/i })).toBeVisible();

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { superForm } from 'sveltekit-superforms';
+	import { formFieldProxy, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { feedbackFormSchema } from '$lib/forms/schemas';
@@ -17,7 +17,9 @@
 		validators: zodClient(feedbackFormSchema),
 		resetForm: true
 	});
-	const { form, enhance, errors, message, submitting } = feedback;
+	const { enhance, message, submitting } = feedback;
+	const { value: category } = formFieldProxy(feedback, 'category');
+	const { value: feedbackMessage, errors: messageErrors } = formFieldProxy(feedback, 'message');
 </script>
 
 <section class="max-w-2xl rounded-lg border p-5">
@@ -37,7 +39,7 @@
 				<select
 					id="feedback-category"
 					name="category"
-					bind:value={$form.category}
+					bind:value={$category}
 					class="h-10 w-full rounded-md border bg-background px-3 text-sm"
 				>
 					<option value="bug">Bug</option>
@@ -51,13 +53,13 @@
 				<textarea
 					id="feedback-message"
 					name="message"
-					bind:value={$form.message}
+					bind:value={$feedbackMessage}
 					rows="5"
 					maxlength="2000"
 					required
 					class="w-full rounded-md border bg-background p-3 text-sm"
 				></textarea>
-				{#if $errors.message}<p class="text-sm text-destructive">{$errors.message}</p>{/if}
+				{#if $messageErrors}<p class="text-sm text-destructive">{$messageErrors}</p>{/if}
 			</div>
 			<Button type="submit" disabled={$submitting}>
 				{$submitting ? 'Sending…' : 'Send feedback'}

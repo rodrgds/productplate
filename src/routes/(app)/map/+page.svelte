@@ -92,7 +92,7 @@
 	</div>
 </header>
 
-<main class="flex min-h-0 flex-1 bg-muted/20 p-0 lg:p-4">
+<div class="flex min-h-0 flex-1 bg-muted/20 p-0 lg:p-4">
 	<section class="map-frame" data-map-theme={mapTheme} aria-label="Workspace map">
 		<MapLibre
 			class="app-map"
@@ -115,7 +115,7 @@
 			{/each}
 		</MapLibre>
 	</section>
-</main>
+</div>
 
 <style>
 	.map-frame {
@@ -134,8 +134,9 @@
 		min-height: 100%;
 	}
 
-	.map-frame :global(.maplibregl-canvas) {
-		outline: none;
+	.map-frame :global(.maplibregl-canvas:focus-visible) {
+		outline: 3px solid var(--ring);
+		outline-offset: -3px;
 	}
 
 	.map-frame :global(.maplibregl-ctrl-top-right) {

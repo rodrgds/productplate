@@ -64,7 +64,7 @@
 	</div>
 </header>
 
-<main class="grid flex-1 gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:p-6">
+<div class="grid flex-1 gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:p-6">
 	<Card.Root class="self-start">
 		<Card.Header class="border-b">
 			<Card.Title class="flex items-center gap-2 text-base">
@@ -176,4 +176,4 @@
 			{/if}
 		</Card.Content>
 	</Card.Root>
-</main>
+</div>

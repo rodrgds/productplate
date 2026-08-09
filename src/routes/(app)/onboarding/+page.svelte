@@ -20,7 +20,7 @@
 	} from '@lucide/svelte';
 	import { confetti } from '@neoconfetti/svelte';
 	import { onDestroy } from 'svelte';
-	import { superForm } from 'sveltekit-superforms';
+	import { formFieldProxy, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { OnboardingForm } from '$lib/forms/schemas.js';
 	import { env } from '$env/dynamic/public';
@@ -74,7 +74,11 @@
 		}
 	);
 
-	const { form: formData, enhance, errors } = form;
+	const { enhance, errors } = form;
+	const { value: displayName } = formFieldProxy(form, 'displayName');
+	const { value: workspaceName } = formFieldProxy(form, 'workspaceName');
+	const { value: role } = formFieldProxy(form, 'role');
+	const { value: bio } = formFieldProxy(form, 'bio');
 
 	let hasErrors = $state(false);
 	$effect(() => {
@@ -89,7 +93,7 @@
 	<title>Onboarding | {APP_NAME}</title>
 </svelte:head>
 
-<main class="relative flex min-h-screen items-center justify-center bg-muted/30 p-4">
+<div class="relative flex min-h-screen items-center justify-center bg-muted/30 p-4">
 	{#if completed}
 		<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
 			<div use:confetti></div>
@@ -134,7 +138,7 @@
 										</div>
 										<Input
 											{...props}
-											bind:value={$formData.displayName}
+											bind:value={$displayName}
 											autocomplete="name"
 											placeholder="Alex Chen"
 										/>
@@ -152,7 +156,7 @@
 											<Building2 class="size-4 text-muted-foreground" />
 											<Form.Label class="text-sm font-medium">Workspace</Form.Label>
 										</div>
-										<Input {...props} bind:value={$formData.workspaceName} placeholder="Acme Lab" />
+										<Input {...props} bind:value={$workspaceName} placeholder="Acme Lab" />
 									{/snippet}
 								</Form.Control>
 								<Form.FieldErrors />
@@ -170,11 +174,7 @@
 											>What are you building toward?</Form.Label
 										>
 									</div>
-									<Input
-										{...props}
-										bind:value={$formData.role}
-										placeholder="Prototype, product, research"
-									/>
+									<Input {...props} bind:value={$role} placeholder="Prototype, product, research" />
 								{/snippet}
 							</Form.Control>
 							<Form.Description class="text-xs text-muted-foreground"
@@ -194,7 +194,7 @@
 									</div>
 									<textarea
 										{...props}
-										bind:value={$formData.bio}
+										bind:value={$bio}
 										rows="4"
 										class="min-h-24 w-full resize-y rounded-lg border border-input bg-background px-3 py-2.5 text-sm shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
 										placeholder="A quick note about you or your team."
@@ -224,4 +224,4 @@
 			</Card.Content>
 		</Card.Root>
 	</div>
-</main>
+</div>

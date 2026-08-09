@@ -33,7 +33,7 @@
 </svelte:head>
 
 <PublicPageShell>
-	<main id="main-content" class="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-16">
+	<div class="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-16">
 		<section class="max-w-3xl space-y-4">
 			<p class="text-sm font-medium text-primary">Documentation</p>
 			<h1 class="text-4xl font-semibold tracking-tight">Build from a working product.</h1>
@@ -78,5 +78,5 @@
 				> covers request logging, security headers, and secret-handling defaults.
 			</p>
 		</section>
-	</main>
+	</div>
 </PublicPageShell>

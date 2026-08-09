@@ -56,7 +56,11 @@
 
 	function scrollToBottom() {
 		if (scrollContainer) {
-			scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
+			const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			scrollContainer.scrollTo({
+				top: scrollContainer.scrollHeight,
+				behavior: prefersReducedMotion ? 'auto' : 'smooth'
+			});
 		}
 	}
 
@@ -69,6 +73,7 @@
 
 <section
 	class="flex h-full flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm"
+	aria-labelledby="agent-panel-heading"
 >
 	<!-- Header -->
 	<div class="flex items-center justify-between border-b px-4 py-3">
@@ -79,7 +84,7 @@
 				<Bot class="size-4" />
 			</div>
 			<div>
-				<h2 class="text-sm font-semibold">AI workbench</h2>
+				<h2 id="agent-panel-heading" class="text-sm font-semibold">AI workbench</h2>
 				<p class="text-xs text-muted-foreground">OpenRouter free router with a calculator tool.</p>
 			</div>
 		</div>
@@ -96,6 +101,10 @@
 		bind:this={scrollContainer}
 		onscroll={handleScroll}
 		class="relative flex-1 overflow-y-auto p-4"
+		role="log"
+		aria-label="Conversation"
+		aria-live="polite"
+		aria-relevant="additions"
 	>
 		{#if chat.messages.length === 0}
 			<div class="flex h-full flex-col items-center justify-center gap-6 py-12">
@@ -180,7 +189,7 @@
 		{/each}
 
 		{#if chat.status === 'submitted'}
-			<div class="flex justify-start gap-3">
+			<div class="flex justify-start gap-3" role="status">
 				<div
 					class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
 				>
@@ -206,6 +215,7 @@
 		{#if chat.error}
 			<div
 				class="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive"
+				role="alert"
 			>
 				{chat.error.message}
 			</div>

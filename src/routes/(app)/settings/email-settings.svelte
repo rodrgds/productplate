@@ -9,7 +9,7 @@
 	import { Info, CircleCheck } from '@lucide/svelte';
 	import * as Form from '$lib/components/ui/form/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
-	import { superForm } from 'sveltekit-superforms';
+	import { formFieldProxy, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { emailFormSchema, type EmailForm } from '$lib/forms/schemas.js';
 	import { soundPreferences } from '$lib/sound-preferences.svelte.js';
@@ -67,6 +67,7 @@
 		}
 	);
 	const { form: formData, enhance, errors } = form;
+	const { value: newEmail } = formFieldProxy(form, 'newEmail');
 
 	let hasErrors = $state(false);
 	$effect(() => {
@@ -121,7 +122,7 @@
 							<Input
 								{...props}
 								type="email"
-								bind:value={$formData.newEmail}
+								bind:value={$newEmail}
 								placeholder="Enter new email address"
 								required
 								autocomplete="email"

@@ -267,16 +267,19 @@
 
 				<section class="control-section preset-input">
 					<h2>Open Preset</h2>
+					<label for="preset-code">Preset code</label>
 					<div>
 						<input
 							id="preset-code"
 							bind:value={presetInput}
 							placeholder={`--preset ${presetCode}`}
+							aria-invalid={presetError ? 'true' : undefined}
+							aria-describedby={presetError ? 'preset-code-error' : undefined}
 						/>
 						<Button variant="secondary" size="sm" onclick={applyPreset}>Apply</Button>
 					</div>
 					{#if presetError}
-						<p>{presetError}</p>
+						<p id="preset-code-error" role="alert">{presetError}</p>
 					{/if}
 				</section>
 
@@ -473,7 +476,16 @@
 				</section>
 			</aside>
 
-			<section class="preview-column style-{config.style}" style={previewStyle}>
+			<section
+				class="preview-column style-{config.style}"
+				style={previewStyle}
+				aria-labelledby="theme-preview-heading"
+				aria-describedby="theme-preview-description"
+			>
+				<div class="preview-description">
+					<h2 id="theme-preview-heading">Theme preview</h2>
+					<p id="theme-preview-description">Visual sample only. Sample controls are inactive.</p>
+				</div>
 				<div class="preview-toolbar">
 					<div>
 						<span></span>
@@ -483,7 +495,7 @@
 					<p>{shareUrl || 'productplate.dev/theme-builder'}</p>
 				</div>
 
-				<div class="mock-page">
+				<div class="mock-page" inert aria-hidden="true">
 					<aside class="mock-sidebar">
 						<div class="mock-brand">
 							<span></span>
@@ -849,6 +861,11 @@
 		font-size: 0.86rem;
 	}
 
+	.preset-input label {
+		font-size: 0.8rem;
+		font-weight: 700;
+	}
+
 	.preset-input p,
 	.export-error {
 		margin: 0;
@@ -979,6 +996,32 @@
 		color: var(--muted-foreground);
 		font-size: 0.72rem;
 		line-height: 1.6;
+	}
+
+	.preview-description {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		border-bottom: 1px solid var(--border);
+		background: var(--card);
+		padding: 0.75rem 1rem;
+	}
+
+	.preview-description h2,
+	.preview-description p {
+		margin: 0;
+	}
+
+	.preview-description h2 {
+		font-size: 0.86rem;
+		font-weight: 800;
+	}
+
+	.preview-description p {
+		color: var(--muted-foreground);
+		font-size: 0.76rem;
+		text-align: right;
 	}
 
 	.preview-toolbar {
@@ -1393,6 +1436,29 @@
 		}
 	}
 
+	@media (pointer: coarse), (max-width: 639px) {
+		.mode-row button,
+		.choice-card,
+		.swatch-grid button,
+		.preset-input input,
+		.preset-input :global(button),
+		.export-actions :global(button),
+		.icon-actions :global(button) {
+			min-height: 2.75rem;
+		}
+
+		.icon-actions :global(button) {
+			min-width: 2.75rem;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.choice-card,
+		.swatch-grid button {
+			transition-duration: 0.01ms;
+		}
+	}
+
 	@media (max-width: 560px) {
 		.theme-workbench {
 			padding: 0.75rem;
@@ -1403,6 +1469,15 @@
 		.export-actions,
 		.mode-row {
 			grid-template-columns: 1fr;
+		}
+
+		.preview-description {
+			display: grid;
+			gap: 0.2rem;
+		}
+
+		.preview-description p {
+			text-align: left;
 		}
 
 		.mock-row {

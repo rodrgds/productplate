@@ -3,6 +3,7 @@
 	import type { IconProps } from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 
 	let { items }: { items: { title: string; url: string; icon?: Component<IconProps> }[] } =
 		$props();
@@ -11,6 +12,12 @@
 	function closeMobileSidebar() {
 		if (sidebar.isMobile) sidebar.setOpenMobile(false);
 	}
+
+	function isActive(url: string) {
+		if (!url.startsWith('/')) return false;
+		const href = resolve(url as '/');
+		return page.url.pathname === href || page.url.pathname.startsWith(`${href}/`);
+	}
 </script>
 
 <Sidebar.Group>
@@ -18,11 +25,16 @@
 		<Sidebar.Menu>
 			{#each items as item (item.title)}
 				<Sidebar.MenuItem>
-					<Sidebar.MenuButton tooltipContent={item.title}>
+					<Sidebar.MenuButton tooltipContent={item.title} isActive={isActive(item.url)}>
 						{#snippet child({ props })}
 							{#if item.url && item.url.startsWith('/')}
 								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-								<a href={resolve(item.url as '/')} {...props} onclick={closeMobileSidebar}>
+								<a
+									href={resolve(item.url as '/')}
+									{...props}
+									onclick={closeMobileSidebar}
+									aria-current={isActive(item.url) ? 'page' : undefined}
+								>
 									{#if item.icon}
 										<item.icon />
 									{/if}

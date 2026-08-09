@@ -11,7 +11,7 @@
 </svelte:head>
 
 <PublicPageShell>
-	<main id="main-content" class="mx-auto max-w-3xl space-y-6 px-6 py-16">
+	<div class="mx-auto max-w-3xl space-y-6 px-6 py-16">
 		<p class="text-sm font-medium text-primary">Legal</p>
 		<h1 class="text-4xl font-semibold tracking-tight">Terms of Service</h1>
 		<p class="text-muted-foreground">
@@ -29,5 +29,5 @@
 				your actual offer.
 			</p>
 		</section>
-	</main>
+	</div>
 </PublicPageShell>

@@ -11,8 +11,6 @@ export const authSignUpFormSchema = authCredentialsSchema.extend({
 	name: z.string().trim().min(2, 'Name must be at least 2 characters.').default('')
 });
 
-export const authFormSchema = authSignUpFormSchema;
-
 export const onboardingFormSchema = z.object({
 	displayName: z.string().trim().min(2, 'Add the name you want people to see.').default(''),
 	bio: z
@@ -85,11 +83,9 @@ export const feedbackFormSchema = z.object({
 
 export type OnboardingForm = z.infer<typeof onboardingFormSchema>;
 export type AccountForm = z.infer<typeof accountFormSchema>;
-export type AccountProfileUpdate = z.infer<typeof accountProfileUpdateSchema>;
-export type AuthSignInForm = z.infer<typeof authSignInFormSchema>;
-export type AuthSignUpForm = z.infer<typeof authSignUpFormSchema>;
+type AuthSignInForm = z.infer<typeof authSignInFormSchema>;
+type AuthSignUpForm = z.infer<typeof authSignUpFormSchema>;
 export type AuthForm = AuthSignInForm & Partial<Pick<AuthSignUpForm, 'name'>>;
 export type EmailForm = z.infer<typeof emailFormSchema>;
 export type PasswordForm = z.infer<typeof passwordFormSchema>;
-export type WaitlistForm = z.infer<typeof waitlistFormSchema>;
 export type FeedbackForm = z.infer<typeof feedbackFormSchema>;

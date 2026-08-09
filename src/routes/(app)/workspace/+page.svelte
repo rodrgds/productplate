@@ -134,7 +134,7 @@
 	</div>
 </header>
 
-<main class="flex min-w-0 flex-1 flex-col gap-4 bg-muted/20 p-4 lg:p-6">
+<div class="flex min-w-0 flex-1 flex-col gap-4 bg-muted/20 p-4 lg:p-6">
 	{#if workspaceResponse.isLoading && !workspace}
 		<Card.Root class="gap-0 py-0"
 			><Card.Content class="p-6 text-sm text-muted-foreground">Loading workspace...</Card.Content
@@ -352,4 +352,4 @@
 		</div>
 	{/if}
 	{#if error}<p class="text-sm text-destructive" role="alert" aria-live="polite">{error}</p>{/if}
-</main>
+</div>

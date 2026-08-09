@@ -22,7 +22,7 @@
 
 <div class="flex min-h-screen flex-col bg-background text-foreground">
 	<LandingNav />
-	<div id="main-content" class="flex-1">
+	<main id="main-content" class="flex-1">
 		{#if title}
 			<header class="mx-auto max-w-5xl px-6 pt-16 pb-10 sm:pt-24">
 				{#if eyebrow}<p class="text-sm font-medium text-primary">{eyebrow}</p>{/if}
@@ -33,6 +33,6 @@
 			</header>
 		{/if}
 		{@render children()}
-	</div>
+	</main>
 	<LandingFooter />
 </div>

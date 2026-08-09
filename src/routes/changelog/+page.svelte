@@ -16,7 +16,7 @@
 </svelte:head>
 
 <PublicPageShell>
-	<main id="main-content" class="mx-auto max-w-4xl px-6 py-16">
+	<div class="mx-auto max-w-4xl px-6 py-16">
 		<div class="mb-10 space-y-3">
 			<p class="text-sm font-medium text-primary">Changelog</p>
 			<h1 class="text-4xl font-semibold tracking-tight">What changed</h1>
@@ -52,5 +52,5 @@
 				</article>
 			{/each}
 		</div>
-	</main>
+	</div>
 </PublicPageShell>

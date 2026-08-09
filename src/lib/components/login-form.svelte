@@ -7,7 +7,7 @@
 	import { resolve } from '$app/paths';
 	import { getContext } from 'svelte';
 	import * as Form from '$lib/components/ui/form/index.js';
-	import { superForm } from 'sveltekit-superforms';
+	import { formFieldProxy, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { authSignInFormSchema, authSignUpFormSchema, type AuthForm } from '$lib/forms/schemas.js';
 	import { Loader2 } from '@lucide/svelte';
@@ -42,6 +42,9 @@
 		}
 	);
 	const { form: formData, errors } = form;
+	const { value: name } = formFieldProxy(form, 'name');
+	const { value: email } = formFieldProxy(form, 'email');
+	const { value: password } = formFieldProxy(form, 'password');
 
 	let hasErrors = $state(false);
 	$effect(() => {
@@ -52,7 +55,7 @@
 	});
 
 	$effect(() => {
-		authEmailCtx?.set($formData.email);
+		authEmailCtx?.set($email);
 	});
 
 	function getAuthErrorMessage(message: string | undefined, fallback: string) {
@@ -177,7 +180,7 @@
 								{...props}
 								type="text"
 								autocomplete="name"
-								bind:value={$formData.name}
+								bind:value={$name}
 								required
 								placeholder="Alex Chen"
 							/>
@@ -196,7 +199,7 @@
 							type="email"
 							autocomplete="email"
 							placeholder="alex@example.com"
-							bind:value={$formData.email}
+							bind:value={$email}
 							required
 						/>
 					{/snippet}
@@ -222,7 +225,7 @@
 							{...props}
 							type="password"
 							autocomplete={isSignUp ? 'new-password' : 'current-password'}
-							bind:value={$formData.password}
+							bind:value={$password}
 							required
 							placeholder={isSignUp ? 'At least 8 characters' : 'Enter your password'}
 						/>

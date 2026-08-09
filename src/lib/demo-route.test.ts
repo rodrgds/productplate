@@ -23,4 +23,18 @@ describe('disposable demo route', () => {
 		expect(mutation).toContain('process.env.DEMO_CREATION_SECRET');
 		expect(route).not.toContain('secret: privateEnv.BETTER_AUTH_SECRET');
 	});
+
+	it('keeps README screenshot capture on its local onboarding account', async () => {
+		const source = await readFile('docs/scripts/capture-readme-screenshots.ts', 'utf8');
+
+		expect(source).toContain("from '@playwright/test'");
+		expect(source).toContain('ALLOW_REMOTE_SCREENSHOT_MUTATIONS');
+		expect(source).toContain("getByRole('button', { name: /finish onboarding/i })");
+		expect(source).not.toContain('fetch(`${baseUrl}/auth/demo`');
+		for (const unusedCapture of ['landing', 'landing-components', 'sign-up', 'onboarding']) {
+			expect(source).not.toContain(`screenshot(page, '${unusedCapture}'`);
+		}
+		expect(source).not.toContain("'billing',");
+		expect(source).not.toContain("'settings',");
+	});
 });

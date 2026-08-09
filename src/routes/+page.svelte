@@ -53,7 +53,7 @@
 		{
 			number: '02',
 			title: 'Serious product building blocks',
-			detail: 'Forms, tables, charts, uploads, rich text, graph UI, 3D, and streaming AI.'
+			detail: 'Forms, uploads, rich text, graph UI, maps, 3D, and streaming AI.'
 		},
 		{
 			number: '03',
@@ -222,7 +222,7 @@
 					</div>
 					<img
 						src="/screenshots/dashboard.png"
-						alt="Product Plate dashboard with analytics and an AI workbench"
+						alt="Product Plate workbench with live account and workspace status"
 						class="mt-2 block h-auto w-full rounded-md border"
 						width="1440"
 						height="1100"
