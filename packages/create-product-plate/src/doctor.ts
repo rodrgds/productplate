@@ -1,6 +1,8 @@
+import { createHash } from 'node:crypto';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { DoctorCheck, DoctorResult, ProductPlateManifest } from './types.ts';
+import { resolveProfile } from './profiles.ts';
+import { productPlateManifestSchema, type DoctorCheck, type DoctorResult } from './types.ts';
 
 interface DoctorOptions {
 	cwd: string;
@@ -10,6 +12,24 @@ interface DoctorOptions {
 }
 
 const placeholders = ['your-project', 'yourdomain.com', 'example.com', 'productplate.pages.dev'];
+const LEGACY_PRODUCT_PLATE_OG_SHA256 =
+	'a5358e75e1970c46b7f95167669dac378d92d842c148010c20e9a8e2f7c9a95e';
+
+export function isLegacyProductPlateSocialImageHash(hash: string | null) {
+	return hash === LEGACY_PRODUCT_PLATE_OG_SHA256;
+}
+
+function normalizedProductionUrl(value: string | null | undefined) {
+	if (!value) return null;
+	try {
+		const url = new URL(value);
+		if (url.protocol !== 'https:') return null;
+		const path = url.pathname.replace(/\/+$/, '');
+		return `${url.origin}${path}${url.search}${url.hash}`;
+	} catch {
+		return null;
+	}
+}
 
 function statusForMissing(strict: boolean): DoctorCheck['status'] {
 	return strict ? 'failure' : 'warning';
@@ -68,6 +88,16 @@ async function readOptional(path: string) {
 	}
 }
 
+async function fileHash(path: string) {
+	try {
+		return createHash('sha256')
+			.update(await readFile(path))
+			.digest('hex');
+	} catch {
+		return null;
+	}
+}
+
 function configurationCheck(
 	id: string,
 	label: string,
@@ -101,11 +131,16 @@ async function liveCheck(url: string, id: string, label: string): Promise<Doctor
 
 export async function runDoctor(options: DoctorOptions): Promise<DoctorResult> {
 	const env = options.env ?? process.env;
-	const manifest = (await Bun.file(
-		join(options.cwd, 'product-plate.json')
-	).json()) as ProductPlateManifest;
-	if (manifest.schemaVersion !== 1)
-		throw new Error('Unsupported product-plate.json schema version.');
+	const parsedManifest = productPlateManifestSchema.safeParse(
+		await Bun.file(join(options.cwd, 'product-plate.json')).json()
+	);
+	if (!parsedManifest.success) {
+		throw new Error(
+			`product-plate.json is invalid: ${parsedManifest.error.issues[0]?.message ?? 'invalid data'}`
+		);
+	}
+	const manifest = parsedManifest.data;
+	const profile = resolveProfile(manifest.profile);
 	const checks: Array<DoctorCheck> = [];
 	for (const key of ['PUBLIC_CONVEX_URL', 'PUBLIC_CONVEX_SITE_URL']) {
 		checks.push(envCheck(env, key, options.strict));
@@ -166,6 +201,45 @@ export async function runDoctor(options: DoctorOptions): Promise<DoctorResult> {
 		message: validProductionUrl
 			? 'Production URL is configured.'
 			: 'Set a final HTTPS production URL.'
+	});
+	const productDeploymentUrlMatches =
+		normalizedProductionUrl(productUrl) !== null &&
+		normalizedProductionUrl(productUrl) === normalizedProductionUrl(env.SITE_URL);
+	checks.push({
+		id: 'product.production-url-match',
+		label: 'Product URL matches SITE_URL',
+		status: productDeploymentUrlMatches ? 'pass' : statusForMissing(options.strict),
+		message: productDeploymentUrlMatches
+			? 'Product and deployment URLs match.'
+			: 'Set product.productionUrl and SITE_URL to the same final HTTPS URL.'
+	});
+
+	const constants = await readOptional(join(options.cwd, 'src/lib/constants.ts'));
+	const configuredSocialPath =
+		constants.match(/APP_OG_IMAGE_PATH\s*=\s*['"](\/[^'"]+)['"]/)?.[1] ?? '/og.svg';
+	const configuredSocialAsset = join(
+		options.cwd,
+		'static',
+		configuredSocialPath.replace(/^\/+/, '')
+	);
+	const configuredSocialAssetExists = await exists(configuredSocialAsset);
+	const legacySocialAsset =
+		isLegacyProductPlateSocialImageHash(await fileHash(join(options.cwd, 'static/og.png'))) ||
+		isLegacyProductPlateSocialImageHash(await fileHash(configuredSocialAsset));
+	checks.push({
+		id: 'content.social-image',
+		label: 'Social image uses product branding',
+		status:
+			configuredSocialAssetExists && !legacySocialAsset
+				? 'pass'
+				: options.strict
+					? 'failure'
+					: 'warning',
+		message: legacySocialAsset
+			? 'Replace the legacy Product Plate social image.'
+			: configuredSocialAssetExists
+				? `Social metadata uses ${configuredSocialPath}.`
+				: `Create the configured social image at static${configuredSocialPath}.`
 	});
 
 	if (manifest.providers.auth === 'better-auth') {
@@ -267,13 +341,7 @@ export async function runDoctor(options: DoctorOptions): Promise<DoctorResult> {
 		devDependencies?: Record<string, string>;
 	};
 	const installed = { ...packageJson.dependencies, ...packageJson.devDependencies };
-	const forbidden = [
-		...(manifest.profile !== 'ai-saas' ? ['@ai-sdk/svelte', 'ai'] : []),
-		...(manifest.profile === 'prelaunch' ? ['better-auth', '@useautumn/convex'] : []),
-		'@threlte/core',
-		'@xyflow/svelte',
-		'maplibre-gl'
-	].filter((dependency) => dependency in installed);
+	const forbidden = profile.removeDependencies.filter((dependency) => dependency in installed);
 	checks.push({
 		id: 'dependencies.profile',
 		label: 'Dependencies match the profile',
@@ -284,18 +352,9 @@ export async function runDoctor(options: DoctorOptions): Promise<DoctorResult> {
 				: `Remove excluded dependencies: ${forbidden.join(', ')}.`
 	});
 
-	const excludedRouteCandidates = [
-		'src/routes/auth/demo',
-		'src/routes/components',
-		'src/routes/theme-builder',
-		'src/routes/(app)/map',
-		'src/routes/(app)/flow',
-		'src/routes/(app)/threlte',
-		...(manifest.profile !== 'ai-saas' ? ['src/routes/(app)/assistant'] : []),
-		...(manifest.profile !== 'team-saas'
-			? ['src/routes/(app)/workspace', 'src/routes/(app)/invite']
-			: [])
-	];
+	const excludedRouteCandidates = profile.removePaths.filter((path) =>
+		path.startsWith('src/routes/')
+	);
 	const remainingExcludedRoutes = [];
 	for (const path of excludedRouteCandidates) {
 		if (await exists(join(options.cwd, path))) remainingExcludedRoutes.push(path);

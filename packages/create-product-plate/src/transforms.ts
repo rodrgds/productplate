@@ -20,7 +20,7 @@ export const APP_TAGLINE = ${JSON.stringify(manifest.product.description)};
 export const APP_SOCIAL_TITLE = ${JSON.stringify(manifest.product.name)};
 export const APP_SOCIAL_DESCRIPTION = APP_DESCRIPTION;
 export const APP_KEYWORDS = [${JSON.stringify(manifest.product.name)}, 'SvelteKit', 'Convex'] as const;
-export const APP_OG_IMAGE_PATH = '/og.png';
+export const APP_OG_IMAGE_PATH = '/og.svg';
 export const APP_OG_IMAGE_URL = \`\${APP_URL}\${APP_OG_IMAGE_PATH}\`;
 export const APP_TWITTER_CARD = 'summary_large_image';
 export const DEFAULT_LOGO_PATH = '/favicon.svg';
@@ -28,7 +28,6 @@ export const APP_THEME_COLOR = '#181817';
 export const APP_BACKGROUND_COLOR = '#181817';
 export const APP_DISPLAY = 'standalone' as const;
 export const APP_ORIENTATION = 'portrait' as const;
-export const NAV_ITEMS = [] as const;
 `;
 }
 
@@ -280,6 +279,7 @@ export default defineSchema({
 }
 
 function environmentExample(manifest: ProductPlateManifest, production: boolean) {
+	const transactionalEmailFrom = `${manifest.product.name} <no-reply@example.com>`;
 	const lines = [
 		`CONVEX_DEPLOYMENT=${production ? 'prod' : 'dev'}:your-project`,
 		'PUBLIC_CONVEX_URL=https://your-project.convex.cloud',
@@ -290,7 +290,7 @@ function environmentExample(manifest: ProductPlateManifest, production: boolean)
 		'PUBLIC_POSTHOG_HOST=https://us.i.posthog.com',
 		'PUBLIC_SENTRY_DSN=',
 		'RESEND_API_KEY=',
-		`TRANSACTIONAL_EMAIL_FROM="${manifest.product.name} <no-reply@example.com>"`
+		`TRANSACTIONAL_EMAIL_FROM="${transactionalEmailFrom.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`
 	];
 	if (manifest.profile === 'prelaunch') {
 		lines.push('WAITLIST_FINGERPRINT_SECRET=', 'WAITLIST_EXPORT_SECRET=');
@@ -382,7 +382,7 @@ ${authEnvironment}jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-        with: { bun-version: 1.3.3 }
+        with: { bun-version: 1.3.13 }
       - run: bun install --frozen-lockfile
       - run: bunx playwright install --with-deps chromium
       - run: bun run lint
@@ -407,16 +407,267 @@ export default defineConfig({
 `;
 }
 
+function cloudflareRuntimeEnvironment(manifest: ProductPlateManifest) {
+	return [
+		'PUBLIC_CONVEX_URL',
+		'PUBLIC_CONVEX_SITE_URL',
+		'RESEND_API_KEY',
+		'TRANSACTIONAL_EMAIL_FROM',
+		...(manifest.profile === 'prelaunch'
+			? ['WAITLIST_FINGERPRINT_SECRET', 'WAITLIST_EXPORT_SECRET']
+			: ['BETTER_AUTH_SECRET']),
+		...(manifest.profile === 'ai-saas' ? ['OPENROUTER_API_KEY'] : [])
+	];
+}
+
+function convexRuntimeEnvironment(manifest: ProductPlateManifest) {
+	return manifest.profile === 'prelaunch'
+		? ['WAITLIST_EXPORT_SECRET']
+		: [
+				'SITE_URL',
+				'BETTER_AUTH_URL',
+				'BETTER_AUTH_SECRET',
+				'AUTH_REQUIRE_EMAIL_VERIFICATION',
+				'AUTH_MAGIC_LINK_ENABLED',
+				'AUTUMN_SECRET_KEY',
+				'RESEND_API_KEY',
+				'TRANSACTIONAL_EMAIL_FROM',
+				'PRODUCT_NAME'
+			];
+}
+
+function provisionRuntimeScript(manifest: ProductPlateManifest) {
+	const cloudflareRequired = cloudflareRuntimeEnvironment(manifest);
+	const convexRequired = convexRuntimeEnvironment(manifest);
+	return `#!/usr/bin/env bun
+interface CommandInvocation {
+	command: Array<string>;
+	input: string;
+	label: string;
+}
+
+interface ProvisionOptions {
+	environment?: Record<string, string | undefined>;
+	projectExists?: (projectName: string) => Promise<boolean>;
+	run?: (invocation: CommandInvocation) => Promise<void>;
+}
+
+const requiredCloudflareEnvironment = ${JSON.stringify(cloudflareRequired)} as const;
+const optionalCloudflareEnvironment = ['PUBLIC_POSTHOG_KEY', 'PUBLIC_POSTHOG_HOST', 'PUBLIC_SENTRY_DSN', 'SUPPORT_EMAIL'] as const;
+const requiredConvexEnvironment = ${JSON.stringify(convexRequired)} as const;
+
+async function runCommand({ command, input, label }: CommandInvocation) {
+	const child = Bun.spawn(command, { stdin: 'pipe', stdout: 'inherit', stderr: 'inherit' });
+	child.stdin.write(input);
+	child.stdin.end();
+	if ((await child.exited) !== 0) throw new Error(\`\${label} failed.\`);
+}
+
+async function pagesProjectExists(projectName: string) {
+	const child = Bun.spawn(
+		[process.execPath, 'x', 'wrangler@4.110.0', 'pages', 'project', 'list', '--json'],
+		{ stdout: 'pipe', stderr: 'inherit' }
+	);
+	const output = await new Response(child.stdout).text();
+	if ((await child.exited) !== 0) throw new Error('Cloudflare Pages project lookup failed.');
+	const projects: unknown = JSON.parse(output);
+	if (!Array.isArray(projects)) {
+		throw new Error('Cloudflare Pages project lookup returned an unexpected response.');
+	}
+	return projects.some((project) => {
+		if (typeof project !== 'object' || project === null) return false;
+		const record = project as Record<string, unknown>;
+		return record['Project Name'] === projectName || record.name === projectName;
+	});
+}
+
+function requiredValue(environment: Record<string, string | undefined>, name: string) {
+	const value = environment[name];
+	if (!value?.trim()) throw new Error(\`Required deployment value \${name} is missing. Configure it in the selected GitHub environment.\`);
+	return value;
+}
+
+async function withProductIdentity(environment: Record<string, string | undefined>) {
+	if (environment.PRODUCT_NAME?.trim()) return environment;
+	const manifest = await Bun.file('product-plate.json').json() as { product?: { name?: unknown } };
+	const productName = typeof manifest.product?.name === 'string' ? manifest.product.name.trim() : '';
+	if (!productName || /[\\r\\n\\u2028\\u2029]/u.test(productName)) {
+		throw new Error('product-plate.json must contain a single-line product name.');
+	}
+	return {
+		...environment,
+		PRODUCT_NAME: productName
+	};
+}
+
+function assertValidEmailSender(value: string) {
+	const trimmed = value.trim();
+	if (/[\\r\\n\\u2028\\u2029]/u.test(trimmed)) {
+		throw new Error('TRANSACTIONAL_EMAIL_FROM must contain a valid, non-placeholder email address.');
+	}
+	const namedAddress = trimmed.match(/^[^<>]+\\s*<([^<>\\s]+)>$/u);
+	const address = namedAddress?.[1] ?? (/[<>]/u.test(trimmed) ? '' : trimmed);
+	const email = address.match(
+		/^[a-z0-9.!#$%&'*+/=?^_\\x60{|}~-]+@([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+)$/iu
+	);
+	const domain = email?.[1]?.toLowerCase() ?? '';
+	if (
+		!email ||
+		['example.com', 'example.net', 'example.org'].includes(domain) ||
+		domain.endsWith('.example') ||
+		domain.endsWith('.invalid') ||
+		domain.endsWith('.test')
+	) {
+		throw new Error('TRANSACTIONAL_EMAIL_FROM must contain a valid, non-placeholder email address.');
+	}
+}
+
+export async function provisionRuntime(options: ProvisionOptions = {}) {
+	const environment = await withProductIdentity(options.environment ?? process.env);
+	const run = options.run ?? runCommand;
+	const projectExists = options.projectExists ?? pagesProjectExists;
+	const deployEnvironment = environment.DEPLOY_ENV;
+	if (deployEnvironment !== 'preview' && deployEnvironment !== 'production') {
+		throw new Error('DEPLOY_ENV must be preview or production.');
+	}
+	const runtimeTarget = environment.RUNTIME_TARGET ?? 'all';
+	if (!['all', 'cloudflare', 'convex', 'validate'].includes(runtimeTarget)) {
+		throw new Error('RUNTIME_TARGET must be all, cloudflare, convex, or validate.');
+	}
+	const validateOnly = runtimeTarget === 'validate';
+	const provisionCloudflare =
+		runtimeTarget === 'all' || runtimeTarget === 'cloudflare' || validateOnly;
+	const provisionConvex = runtimeTarget === 'all' || runtimeTarget === 'convex' || validateOnly;
+	const projectName = provisionCloudflare ? requiredValue(environment, 'CLOUDFLARE_PROJECT_NAME') : '';
+	const convexUrl = provisionConvex ? requiredValue(environment, 'PUBLIC_CONVEX_URL') : '';
+	if (provisionConvex) requiredValue(environment, 'CONVEX_DEPLOY_KEY');
+	const convexDeployment = provisionConvex
+		? new URL(convexUrl).hostname.match(/^([a-z0-9-]+)\\.convex\\.cloud$/)?.[1]
+		: '';
+	if (provisionConvex && !convexDeployment) {
+		throw new Error('PUBLIC_CONVEX_URL must identify a Convex Cloud deployment.');
+	}
+	const cloudflareValues = [...requiredCloudflareEnvironment, ...optionalCloudflareEnvironment]
+		.map((name) => [name, environment[name]] as const)
+		.filter((entry): entry is readonly [string, string] => Boolean(entry[1]?.trim()));
+
+	if (provisionCloudflare) {
+		for (const name of requiredCloudflareEnvironment) requiredValue(environment, name);
+	}
+	if (provisionConvex) {
+		for (const name of requiredConvexEnvironment) requiredValue(environment, name);
+	}
+	if (
+		provisionCloudflare ||
+		(provisionConvex &&
+			(requiredConvexEnvironment as readonly string[]).includes('TRANSACTIONAL_EMAIL_FROM'))
+	) {
+		assertValidEmailSender(requiredValue(environment, 'TRANSACTIONAL_EMAIL_FROM'));
+	}
+	if (validateOnly) return;
+
+	for (const name of provisionConvex ? requiredConvexEnvironment : []) {
+		await run({
+			command: [process.execPath, 'convex', 'env', 'set', name],
+			input: requiredValue(environment, name),
+			label: \`Convex runtime value \${name}\`
+		});
+	}
+	if (provisionCloudflare && !(await projectExists(projectName))) {
+		await run({
+			command: [process.execPath, 'x', 'wrangler@4.110.0', 'pages', 'project', 'create', projectName, '--production-branch', 'main'],
+			input: '',
+			label: \`Cloudflare Pages project \${projectName}\`
+		});
+	}
+	for (const [name, value] of provisionCloudflare ? cloudflareValues : []) {
+		await run({
+			command: [process.execPath, 'x', 'wrangler@4.110.0', 'pages', 'secret', 'put', name, '--project-name', projectName],
+			input: value,
+			label: \`Cloudflare runtime value \${name}\`
+		});
+	}
+}
+
+if (import.meta.main) {
+	await provisionRuntime();
+	console.log(
+		process.env.RUNTIME_TARGET === 'validate'
+			? 'Runtime configuration validated without printing secret values.'
+			: 'Runtime configuration provisioned without printing secret values.'
+	);
+}
+`;
+}
+
+function convexReadinessQuery(manifest: ProductPlateManifest) {
+	return `import { query } from './_generated/server';
+import { v } from 'convex/values';
+
+const requiredEnvironment = ${JSON.stringify(convexRuntimeEnvironment(manifest))} as const;
+
+export const check = query({
+	args: {},
+	returns: v.object({ ready: v.boolean() }),
+	handler: async () => ({
+		ready: requiredEnvironment.every((name) => Boolean(process.env[name]?.trim()))
+	})
+});
+`;
+}
+
+function runtimeHealthRoute(manifest: ProductPlateManifest) {
+	const requiredEnvironment = cloudflareRuntimeEnvironment(manifest);
+	const runtimeEnvironment = requiredEnvironment
+		.map((name) =>
+			name.startsWith('PUBLIC_')
+				? `\t${JSON.stringify(name)}: publicEnv.${name}`
+				: `\t${JSON.stringify(name)}: env.${name}`
+		)
+		.join(',\n');
+	return `import { env } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
+import { ConvexHttpClient } from 'convex/browser';
+import { makeFunctionReference } from 'convex/server';
+import { json } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+
+const profile = ${JSON.stringify(manifest.profile)};
+const requiredEnvironment = ${JSON.stringify(requiredEnvironment)} as const;
+const runtimeEnvironment = {
+${runtimeEnvironment}
+} satisfies Record<(typeof requiredEnvironment)[number], string | undefined>;
+const readinessQuery = makeFunctionReference<'query', Record<string, never>, { ready: boolean }>('readiness:check');
+
+export const GET: RequestHandler = async () => {
+	const missing = requiredEnvironment.filter((name) => !runtimeEnvironment[name]?.trim());
+	if (missing.length > 0) {
+		console.error('readiness.runtime_missing', { missing });
+		return json({ ready: false, profile }, { status: 503 });
+	}
+	try {
+		const client = new ConvexHttpClient(publicEnv.PUBLIC_CONVEX_URL);
+		const backend = await client.query(readinessQuery, {});
+		if (!backend.ready) return json({ ready: false, profile }, { status: 503 });
+		return json({ ready: true, profile }, { headers: { 'cache-control': 'no-store' } });
+	} catch (error) {
+		console.error('readiness.convex_failed', { error: error instanceof Error ? error.message : 'unknown' });
+		return json({ ready: false, profile }, { status: 503 });
+	}
+};
+`;
+}
+
 function generatedDeployWorkflow(manifest: ProductPlateManifest) {
 	const profileEnvironment =
 		manifest.profile === 'prelaunch'
 			? `  WAITLIST_FINGERPRINT_SECRET: \${{ secrets.WAITLIST_FINGERPRINT_SECRET }}
   WAITLIST_EXPORT_SECRET: \${{ secrets.WAITLIST_EXPORT_SECRET }}
 `
-			: `  BETTER_AUTH_URL: \${{ github.event_name == 'pull_request' && format('https://{0}.{1}.pages.dev', github.head_ref, vars.CLOUDFLARE_PROJECT_NAME) || vars.SITE_URL }}
-  BETTER_AUTH_SECRET: \${{ secrets.BETTER_AUTH_SECRET }}
+			: `  BETTER_AUTH_SECRET: \${{ secrets.BETTER_AUTH_SECRET }}
   AUTUMN_SECRET_KEY: \${{ secrets.AUTUMN_SECRET_KEY }}
-  AUTH_REQUIRE_EMAIL_VERIFICATION: 'true'
+  AUTH_REQUIRE_EMAIL_VERIFICATION: \${{ github.event_name == 'pull_request' && 'false' || 'true' }}
+  AUTH_MAGIC_LINK_ENABLED: 'false'
 ${
 	manifest.profile === 'ai-saas'
 		? `  OPENROUTER_API_KEY: \${{ secrets.OPENROUTER_API_KEY }}
@@ -427,14 +678,23 @@ ${
 on:
   push: { branches: [main] }
   pull_request: { branches: [main] }
+concurrency:
+  group: product-plate-runtime
+  cancel-in-progress: false
 permissions:
   contents: read
   deployments: write
   pull-requests: write
 env:
-  CONVEX_DEPLOY_KEY: \${{ github.event_name == 'pull_request' && secrets.CONVEX_PREVIEW_DEPLOY_KEY || secrets.CONVEX_PRODUCTION_DEPLOY_KEY }}
-  SITE_URL: \${{ github.event_name == 'pull_request' && format('https://{0}.{1}.pages.dev', github.head_ref, vars.CLOUDFLARE_PROJECT_NAME) || vars.SITE_URL }}
+  DEPLOY_ENV: \${{ github.event_name == 'pull_request' && 'preview' || 'production' }}
+  CONVEX_DEPLOY_KEY: \${{ secrets.CONVEX_DEPLOY_KEY }}
+  CLOUDFLARE_PROJECT_NAME: \${{ vars.CLOUDFLARE_PROJECT_NAME }}
+  CLOUDFLARE_API_TOKEN: \${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: \${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  SITE_URL: \${{ github.event_name == 'pull_request' && 'http://localhost:5173' || vars.SITE_URL }}
+  BETTER_AUTH_URL: \${{ github.event_name == 'pull_request' && 'http://localhost:5173' || vars.SITE_URL }}
   RESEND_API_KEY: \${{ secrets.RESEND_API_KEY }}
+  TRANSACTIONAL_EMAIL_FROM: \${{ vars.TRANSACTIONAL_EMAIL_FROM }}
 ${profileEnvironment}
   PUBLIC_POSTHOG_KEY: \${{ vars.PUBLIC_POSTHOG_KEY }}
   PUBLIC_POSTHOG_HOST: \${{ vars.PUBLIC_POSTHOG_HOST }}
@@ -442,22 +702,28 @@ ${profileEnvironment}
   SUPPORT_EMAIL: \${{ vars.SUPPORT_EMAIL }}
 jobs:
   deploy:
+    environment: \${{ github.event_name == 'pull_request' && 'preview' || 'production' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-        with: { bun-version: 1.3.3 }
+        with: { bun-version: 1.3.13 }
       - run: bun install --frozen-lockfile
-      - name: Verify deploy keys are isolated
-        env:
-          PREVIEW_KEY: \${{ secrets.CONVEX_PREVIEW_DEPLOY_KEY }}
-          PRODUCTION_KEY: \${{ secrets.CONVEX_PRODUCTION_DEPLOY_KEY }}
+      - name: Verify selected deployment environment
         run: |
           test -n "$CONVEX_DEPLOY_KEY"
-          if [ "\${{ github.event_name }}" = "pull_request" ] && [ "$PREVIEW_KEY" = "$PRODUCTION_KEY" ]; then
-            echo "Preview and production Convex deploy keys must differ." >&2
-            exit 1
-          fi
+          test -n "$CLOUDFLARE_PROJECT_NAME"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+      - name: Strict production source preflight
+        if: github.event_name != 'pull_request'
+        env:
+          RUNTIME_TARGET: validate
+          PUBLIC_CONVEX_URL: https://preflight.convex.cloud
+          PUBLIC_CONVEX_SITE_URL: https://preflight.convex.site
+        run: |
+          bun scripts/provision-runtime.ts
+          bun run doctor -- --strict
       - name: Build, then deploy Convex
         run: |
           if [ "\${{ github.event_name }}" = "pull_request" ]; then
@@ -465,8 +731,13 @@ jobs:
           else
             bun convex deploy --cmd "bun scripts/build-for-convex.ts" --cmd-url-env-var-name PUBLIC_CONVEX_URL --message "\${{ github.sha }}"
           fi
-      - name: Strict launch doctor
-        run: bun run doctor -- --strict
+      - name: Provision Convex production runtime configuration
+        if: github.event_name != 'pull_request'
+        env: { RUNTIME_TARGET: convex }
+        run: bun scripts/provision-runtime.ts
+      - name: Provision Cloudflare runtime configuration
+        env: { RUNTIME_TARGET: cloudflare }
+        run: bun scripts/provision-runtime.ts
       - name: Deploy built artifact to Cloudflare Pages
         id: cloudflare
         uses: cloudflare/wrangler-action@v3
@@ -474,7 +745,20 @@ jobs:
           apiToken: \${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: \${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: 4.110.0
-          command: pages deploy .svelte-kit/cloudflare --project-name=\${{ vars.CLOUDFLARE_PROJECT_NAME }} --branch=\${{ github.head_ref || github.ref_name }}
+          command: pages deploy .svelte-kit/cloudflare --project-name=\${{ vars.CLOUDFLARE_PROJECT_NAME }} --branch=main
+      - name: Provision Convex preview runtime for the deployed origin
+        if: github.event_name == 'pull_request'
+        env:
+          RUNTIME_TARGET: convex
+          SITE_URL: \${{ github.event_name == 'pull_request' && steps.cloudflare.outputs.deployment-url || vars.SITE_URL }}
+          BETTER_AUTH_URL: \${{ github.event_name == 'pull_request' && steps.cloudflare.outputs.deployment-url || vars.SITE_URL }}
+        run: bun scripts/provision-runtime.ts
+      - name: Preview launch doctor
+        if: github.event_name == 'pull_request'
+        env:
+          SITE_URL: \${{ steps.cloudflare.outputs.deployment-url }}
+          BETTER_AUTH_URL: \${{ steps.cloudflare.outputs.deployment-url }}
+        run: bun run doctor
       - name: Smoke deployed profile
         env:
           DEPLOYED_URL: \${{ steps.cloudflare.outputs.deployment-url }}
@@ -511,15 +795,88 @@ if (process.env.GITHUB_ENV) await appendFile(process.env.GITHUB_ENV, \`PUBLIC_CO
 `;
 }
 
-function smokeDeployScript() {
+function smokeDeployScript(manifest: ProductPlateManifest) {
+	const routeSmoke =
+		manifest.profile === 'prelaunch'
+			? `
+	const waitlist = await fetcher(new URL('/api/waitlist', baseUrl), {
+		method: 'POST',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify({ email: 'invalid' }),
+		signal: AbortSignal.timeout(15_000)
+	});
+	if (waitlist.status !== 400) throw new Error(\`Waitlist route returned \${waitlist.status}.\`);`
+			: `
+	const session = await fetcher(new URL('/api/auth/get-session', baseUrl), {
+		headers: { accept: 'application/json' },
+		signal: AbortSignal.timeout(15_000)
+	});
+	if (session.status !== 200) throw new Error(\`Auth session route returned \${session.status}.\`);${
+		manifest.profile === 'ai-saas'
+			? `
+	const chat = await fetcher(new URL('/api/chat', baseUrl), {
+		method: 'POST',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify({ messages: [] }),
+		signal: AbortSignal.timeout(15_000)
+	});
+	if (chat.status !== 401) throw new Error(\`Unauthenticated chat route returned \${chat.status}.\`);`
+			: ''
+	}`;
 	return `#!/usr/bin/env bun
-const url = process.env.DEPLOYED_URL;
-if (!url) throw new Error('DEPLOYED_URL is required.');
-const response = await fetch(url, { redirect: 'follow' });
-if (!response.ok) throw new Error(\`Deployment smoke failed with \${response.status}.\`);
-const html = await response.text();
-if (!html.toLowerCase().includes('<main')) throw new Error('Deployment did not render the primary page.');
-console.log(\`Smoke passed: \${url}\`);
+interface SmokeOptions {
+	fetcher?: typeof fetch;
+	wait?: (delayMs: number) => Promise<void>;
+	attempts?: number;
+	delayMs?: number;
+}
+
+const defaultWait = (delayMs: number) => new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+
+async function smokeAttempt(baseUrl: string, fetcher: typeof fetch) {
+	const page = await fetcher(baseUrl, { redirect: 'follow', signal: AbortSignal.timeout(15_000) });
+	if (!page.ok) throw new Error(\`Deployment page returned \${page.status}.\`);
+	if (!(await page.text()).toLowerCase().includes('<main')) throw new Error('Deployment did not render the primary page.');
+
+	const health = await fetcher(new URL('/api/health', baseUrl), {
+		headers: { accept: 'application/json' },
+		signal: AbortSignal.timeout(15_000)
+	});
+	if (!health.ok) throw new Error(\`Runtime readiness returned \${health.status}.\`);
+	const readiness = await health.json() as { ready?: boolean; profile?: string };
+	if (!readiness.ready || readiness.profile !== ${JSON.stringify(manifest.profile)}) {
+		throw new Error('Runtime readiness response did not match the generated profile.');
+	}
+${routeSmoke}
+}
+
+export async function smokeDeployment(url: string, options: SmokeOptions = {}) {
+	const fetcher = options.fetcher ?? fetch;
+	const wait = options.wait ?? defaultWait;
+	const attempts = options.attempts ?? 12;
+	const delayMs = options.delayMs ?? 5_000;
+	let lastError: Error | undefined;
+	for (let attempt = 1; attempt <= attempts; attempt += 1) {
+		try {
+			await smokeAttempt(url, fetcher);
+			return;
+		} catch (error) {
+			lastError = error instanceof Error ? error : new Error('Deployment smoke failed.');
+			if (attempt < attempts) {
+				console.warn(\`Smoke attempt \${attempt}/\${attempts} failed: \${lastError.message}\`);
+				await wait(delayMs);
+			}
+		}
+	}
+	throw lastError ?? new Error('Deployment smoke failed.');
+}
+
+if (import.meta.main) {
+	const url = process.env.DEPLOYED_URL;
+	if (!url) throw new Error('DEPLOYED_URL is required.');
+	await smokeDeployment(url);
+	console.log(\`Smoke passed: \${url}\`);
+}
 `;
 }
 
@@ -548,10 +905,10 @@ test('touch-sized waitlist controls', async ({ page }) => {
 	const aiProviderTest =
 		manifest.profile === 'ai-saas'
 			? `
-test('missing AI provider fails safely', async ({ request }) => {
+test('unauthenticated AI request fails safely', async ({ request }) => {
 	const response = await request.post('/api/chat', { data: { messages: [{ id: 'message-1', role: 'user', parts: [{ type: 'text', text: 'Hello' }] }] } });
-	expect(response.status()).toBe(503);
-	expect(await response.text()).toContain('OPENROUTER_API_KEY is not configured');
+	expect(response.status()).toBe(401);
+	expect(await response.text()).not.toContain('OPENROUTER_API_KEY');
 });
 `
 			: '';
@@ -577,7 +934,85 @@ test('touch-sized authentication controls', async ({ page }) => {
 	}
 });
 ${aiProviderTest}
-`;
+	`;
+}
+
+async function stripPwaTypeReferences(destination: string) {
+	const appTypesPath = join(destination, 'src/app.d.ts');
+	if (!(await exists(appTypesPath))) return;
+	const content = await readFile(appTypesPath, 'utf8');
+	const next = content.replace(
+		/^\/\/\/ <reference types="vite-plugin-pwa\/(?:svelte|info)" \/>\r?\n/gm,
+		''
+	);
+	if (next !== content) await writeFile(appTypesPath, next.replace(/^\r?\n/, ''));
+}
+
+async function stripRepositoryOnlyDevenvCommands(destination: string, productName: string) {
+	const devenvPath = join(destination, 'devenv.nix');
+	if (!(await exists(devenvPath))) return;
+	const content = await readFile(devenvPath, 'utf8');
+	const encodedBanner = Array.from(
+		new TextEncoder().encode(productName),
+		(byte) => `\\${byte.toString(8).padStart(3, '0')}`
+	).join('');
+	const next = content
+		.split('\n')
+		.filter((line) => {
+			const trimmed = line.trim();
+			return !(
+				trimmed.startsWith('verify-full.exec =') ||
+				trimmed.startsWith('verify-profiles.exec =') ||
+				trimmed.startsWith('echo "  verify-full ') ||
+				trimmed.startsWith('echo "  verify-profiles ')
+			);
+		})
+		.join('\n')
+		.replace('    echo "  Product Plate"', `    printf '  ${encodedBanner}\\n'`);
+	if (next !== content) await writeFile(devenvPath, next);
+}
+
+async function rewriteGeneratedEslintGuidance(destination: string) {
+	const eslintPath = join(destination, 'eslint.config.js');
+	if (!(await exists(eslintPath))) return;
+	const content = await readFile(eslintPath, 'utf8');
+	const next = content.replace(
+		'Prefer Svelte 5 runes for local state. See docs/svelte/advanced_state_management.md when a shared store is still appropriate.',
+		'Prefer Svelte 5 runes for local state. Use a Svelte store only for state shared outside a component tree.'
+	);
+	if (next !== content) await writeFile(eslintPath, next);
+}
+
+async function preferCloudflareDeploymentUrl(destination: string) {
+	const hooksPath = join(destination, 'src/hooks.server.ts');
+	if (!(await exists(hooksPath))) return;
+	const content = await readFile(hooksPath, 'utf8');
+	const next = content.replace(
+		'env.SITE_URL ?? env.CF_PAGES_URL ?? origin',
+		'env.CF_PAGES_URL ?? env.SITE_URL ?? origin'
+	);
+	if (next !== content) await writeFile(hooksPath, next);
+}
+
+async function protectAiProviderConfiguration(destination: string) {
+	const chatPath = join(destination, 'src/routes/api/chat/+server.ts');
+	if (!(await exists(chatPath))) return;
+	const content = await readFile(chatPath, 'utf8');
+	const providerCheck = `\tif (!env.OPENROUTER_API_KEY) {
+\t\treturn new Response('OPENROUTER_API_KEY is not configured.', { status: 503 });
+\t}
+\tif (!locals.token) return new Response('Unauthorized.', { status: 401 });`;
+	const protectedCheck = `\tif (!locals.token) return new Response('Unauthorized.', { status: 401 });
+\tif (!env.OPENROUTER_API_KEY) {
+\t\treturn new Response('OPENROUTER_API_KEY is not configured.', { status: 503 });
+\t}`;
+	const next = content
+		.replace(providerCheck, protectedCheck)
+		.replace(
+			"'HTTP-Referer': env.SITE_URL ?? 'http://localhost:5173'",
+			"'HTTP-Referer': env.CF_PAGES_URL ?? env.SITE_URL ?? 'http://localhost:5173'"
+		);
+	if (next !== content) await writeFile(chatPath, next);
 }
 
 export async function applyProfileTransforms(destination: string, manifest: ProductPlateManifest) {
@@ -598,9 +1033,17 @@ export async function applyProfileTransforms(destination: string, manifest: Prod
 	await write(destination, '.github/workflows/quality.yml', generatedQualityWorkflow(manifest));
 	await write(destination, '.github/workflows/deploy.yml', generatedDeployWorkflow(manifest));
 	await write(destination, 'scripts/build-for-convex.ts', buildForConvexScript());
-	await write(destination, 'scripts/smoke-deploy.ts', smokeDeployScript());
+	await write(destination, 'scripts/provision-runtime.ts', provisionRuntimeScript(manifest));
+	await write(destination, 'scripts/smoke-deploy.ts', smokeDeployScript(manifest));
+	await write(destination, 'src/convex/readiness.ts', convexReadinessQuery(manifest));
+	await write(destination, 'src/routes/api/health/+server.ts', runtimeHealthRoute(manifest));
 	await write(destination, 'e2e/profile.test.ts', profileE2e(manifest));
 	await write(destination, 'vite.config.ts', generatedViteConfig());
+	await stripPwaTypeReferences(destination);
+	await stripRepositoryOnlyDevenvCommands(destination, manifest.product.name);
+	await rewriteGeneratedEslintGuidance(destination);
+	await preferCloudflareDeploymentUrl(destination);
+	if (manifest.profile === 'ai-saas') await protectAiProviderConfiguration(destination);
 
 	if (authenticated) {
 		await write(destination, 'src/routes/(app)/+layout.server.ts', appLayoutServer());
@@ -724,12 +1167,34 @@ function packageName(specifier: string) {
 }
 
 export async function pruneUnusedDependencies(destination: string) {
+	const packagePath = join(destination, 'package.json');
+	const packageJson = (await Bun.file(packagePath).json()) as {
+		dependencies?: Record<string, string>;
+		devDependencies?: Record<string, string>;
+		scripts?: Record<string, string>;
+	};
+	const declaredDependencies = new Set([
+		...Object.keys(packageJson.dependencies ?? {}),
+		...Object.keys(packageJson.devDependencies ?? {})
+	]);
+	const analyzableExtensions = new Set([
+		'.cjs',
+		'.css',
+		'.js',
+		'.json',
+		'.jsonc',
+		'.mjs',
+		'.svelte',
+		'.ts'
+	]);
 	const files = [
 		...(await allFiles(join(destination, 'src'))),
 		...(await allFiles(join(destination, 'scripts'))),
 		...(await allFiles(join(destination, 'e2e')))
-	];
+	].filter((file) => analyzableExtensions.has(extname(file)));
 	for (const file of [
+		'.prettierrc',
+		'tsconfig.json',
 		'vite.config.ts',
 		'svelte.config.js',
 		'eslint.config.js',
@@ -740,6 +1205,8 @@ export async function pruneUnusedDependencies(destination: string) {
 	}
 	const used = new Set<string>();
 	const dependencyPattern = /(?:from\s*|import\s*\(|import\s*|url\()['"]([^'"$./][^'"]*)['"]/g;
+	let usesNodeTypes = false;
+	let usesTypeScript = false;
 	for (const file of files) {
 		let content: string;
 		try {
@@ -748,34 +1215,43 @@ export async function pruneUnusedDependencies(destination: string) {
 			continue;
 		}
 		for (const match of content.matchAll(dependencyPattern)) used.add(packageName(match[1]));
+		for (const dependency of declaredDependencies) {
+			if (content.includes(`'${dependency}'`) || content.includes(`"${dependency}"`)) {
+				used.add(dependency);
+			}
+		}
+		// Vitest loads this optional peer from its worker when a retained test selects
+		// the Edge Runtime through either the file directive or the shared config.
+		if (
+			/@vitest-environment\s+edge-runtime\b|environment\s*:\s*['"]edge-runtime['"]/.test(content)
+		) {
+			used.add('@edge-runtime/vm');
+		}
+		usesNodeTypes ||= /['"]node:[^'"]+['"]/.test(content);
+		usesTypeScript ||= ['.ts', '.svelte'].includes(extname(file));
 	}
-	const tooling = new Set([
-		'@edge-runtime/vm',
-		'@eslint/compat',
-		'@eslint/js',
-		'@types/node',
-		'create-product-plate',
-		'eslint',
-		'eslint-config-prettier',
-		'eslint-plugin-svelte',
-		'globals',
-		'jsdom',
-		'prettier',
-		'prettier-plugin-svelte',
-		'prettier-plugin-tailwindcss',
-		'svelte-check',
-		'typescript',
-		'typescript-eslint'
-	]);
-	const packagePath = join(destination, 'package.json');
-	const packageJson = (await Bun.file(packagePath).json()) as {
-		dependencies?: Record<string, string>;
-		devDependencies?: Record<string, string>;
+	const scripts = Object.values(packageJson.scripts ?? {}).join('\n');
+	const binaryOverrides: Record<string, Array<string>> = {
+		'@playwright/test': ['playwright'],
+		'@sveltejs/kit': ['svelte-kit'],
+		'create-product-plate': ['create-product-plate', 'product-plate'],
+		typescript: ['tsc', 'tsserver']
 	};
+	for (const dependency of declaredDependencies) {
+		const defaultBinary = dependency.startsWith('@') ? dependency.split('/')[1] : dependency;
+		for (const binary of binaryOverrides[dependency] ?? [defaultBinary]) {
+			const escapedBinary = binary.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+			if (new RegExp(`(?:^|[\\s;&|()])${escapedBinary}(?=$|[\\s;&|()])`).test(scripts)) {
+				used.add(dependency);
+			}
+		}
+	}
+	if (usesNodeTypes) used.add('@types/node');
+	if (usesTypeScript) used.add('typescript');
 	for (const group of [packageJson.dependencies, packageJson.devDependencies]) {
 		if (!group) continue;
 		for (const dependency of Object.keys(group)) {
-			if (!used.has(dependency) && !tooling.has(dependency)) delete group[dependency];
+			if (!used.has(dependency)) delete group[dependency];
 		}
 	}
 	await writeFile(packagePath, `${JSON.stringify(packageJson, null, '\t')}\n`);

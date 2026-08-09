@@ -1,10 +1,14 @@
 #!/usr/bin/env bun
+import { stderr } from 'node:process';
 import { runCreateCli } from './cli.ts';
 
-try {
-	const result = await runCreateCli(process.argv.slice(2));
-	if (result) console.log(`\nCreated ${result.manifest.product.name} in ${result.destination}`);
-} catch (error) {
-	console.error(error instanceof Error ? error.message : String(error));
-	process.exitCode = 1;
+export async function main(arguments_ = process.argv.slice(2)) {
+	try {
+		await runCreateCli(arguments_);
+	} catch (error) {
+		stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
+		process.exitCode = 1;
+	}
 }
+
+if (import.meta.main) await main();

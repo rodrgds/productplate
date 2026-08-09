@@ -4,6 +4,11 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { generateProject, GENERATOR_VERSION } from '../packages/create-product-plate/src/generator';
+import { profiles } from '../packages/create-product-plate/src/types';
+import {
+	createLegacyUpgradeBootstrap,
+	releaseMigrationInstruction
+} from '../packages/create-product-plate/src/upgrade';
 
 interface PackageManifest {
 	version: string;
@@ -67,45 +72,61 @@ await writeFile(
 
 const temporaryDirectory = await mkdtemp(join(tmpdir(), 'product-plate-release-'));
 try {
-	const generated = join(temporaryDirectory, 'generated');
-	await generateProject({
-		destination: generated,
-		templatePath: '.',
-		profile: 'prelaunch',
-		name: 'Release Profile',
-		description: 'Release asset fixture.',
-		theme: 'neutral',
-		templateVersion: version,
-		generatorVersion: version,
-		install: false,
-		git: false
-	});
 	const managedPaths = [
 		'.github/workflows/deploy.yml',
 		'.github/workflows/quality.yml',
 		'scripts/build-for-convex.ts',
-		'scripts/smoke-deploy.ts'
+		'scripts/provision-runtime.ts',
+		'scripts/smoke-deploy.ts',
+		'src/convex/readiness.ts',
+		'src/routes/api/health/+server.ts'
 	];
-	const files: Record<string, { content: string; sha256: string }> = {};
-	for (const path of managedPaths) {
-		const content = await readFile(join(generated, path), 'utf8');
-		files[path] = { content, sha256: sha256(content) };
+	const profileAssets: Record<
+		(typeof profiles)[number],
+		{ files: Record<string, { content: string; sha256: string }> }
+	> = {} as Record<
+		(typeof profiles)[number],
+		{ files: Record<string, { content: string; sha256: string }> }
+	>;
+	for (const profile of profiles) {
+		const generated = join(temporaryDirectory, profile);
+		await generateProject({
+			destination: generated,
+			templatePath: '.',
+			profile,
+			name: `Release ${profile}`,
+			description: `Release asset fixture for ${profile}.`,
+			theme: 'neutral',
+			templateVersion: version,
+			generatorVersion: version,
+			install: false,
+			git: false
+		});
+		const files: Record<string, { content: string; sha256: string }> = {};
+		for (const path of managedPaths) {
+			const content = await readFile(join(generated, path), 'utf8');
+			files[path] = { content, sha256: sha256(content) };
+		}
+		profileAssets[profile] = { files };
 	}
 	await writeFile(
-		join(outputDirectory, 'product-plate-upgrade.json'),
+		join(outputDirectory, 'product-plate-upgrade-v2.json'),
 		`${JSON.stringify(
 			{
-				schemaVersion: 1,
+				schemaVersion: 2,
 				version,
-				migrations: [
-					`Read docs/migrations/v${version}.md before applying modified infrastructure by hand.`
-				],
+				compatibleProductSchemaVersions: [1],
+				migrations: [releaseMigrationInstruction(version, repository)],
 				securityFixes: ['Review the release changelog for dependency and deployment hardening.'],
-				files
+				profiles: profileAssets
 			},
 			null,
 			2
 		)}\n`
+	);
+	await writeFile(
+		join(outputDirectory, 'product-plate-upgrade.json'),
+		`${JSON.stringify(createLegacyUpgradeBootstrap(version), null, 2)}\n`
 	);
 } finally {
 	await rm(temporaryDirectory, { recursive: true, force: true });
@@ -123,6 +144,7 @@ const assetNames = [
 	archiveName,
 	'product-plate-template.json',
 	'product-plate-upgrade.json',
+	'product-plate-upgrade-v2.json',
 	'provenance.json'
 ];
 const checksums = [];

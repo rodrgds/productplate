@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from 'bun:test';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { runDoctor } from './doctor.ts';
+import { isLegacyProductPlateSocialImageHash, runDoctor } from './doctor.ts';
 import type { ProductPlateManifest } from './types.ts';
 
 const temporaryDirectories: Array<string> = [];
@@ -86,6 +86,30 @@ describe('launch doctor', () => {
 		);
 	});
 
+	test('requires the manifest and deployment URLs to match after slash normalization', async () => {
+		const cwd = await fixture({
+			...manifest,
+			product: { ...manifest.product, productionUrl: 'https://launch-list.dev/' }
+		});
+		const matching = await runDoctor({
+			cwd,
+			strict: true,
+			env: { SITE_URL: 'https://launch-list.dev' }
+		});
+		expect(matching.checks).toContainEqual(
+			expect.objectContaining({ id: 'product.production-url-match', status: 'pass' })
+		);
+
+		const mismatched = await runDoctor({
+			cwd,
+			strict: true,
+			env: { SITE_URL: 'https://other-launch-list.dev' }
+		});
+		expect(mismatched.checks).toContainEqual(
+			expect.objectContaining({ id: 'product.production-url-match', status: 'failure' })
+		);
+	});
+
 	test('finds public starter branding, placeholder content, and excluded routes', async () => {
 		const cwd = await fixture({
 			...manifest,
@@ -104,5 +128,15 @@ describe('launch doctor', () => {
 		expect(result.checks).toContainEqual(
 			expect.objectContaining({ id: 'routes.profile', status: 'failure' })
 		);
+	});
+
+	test('recognizes the legacy Product Plate social image hash', () => {
+		expect(
+			isLegacyProductPlateSocialImageHash(
+				'a5358e75e1970c46b7f95167669dac378d92d842c148010c20e9a8e2f7c9a95e'
+			)
+		).toBe(true);
+		expect(isLegacyProductPlateSocialImageHash('current-product-image')).toBe(false);
+		expect(isLegacyProductPlateSocialImageHash(null)).toBe(false);
 	});
 });

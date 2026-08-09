@@ -31,9 +31,11 @@ const universalRemovePaths = [
 	'playwright-report',
 	'static/screenshots',
 	'static/stack',
+	'static/pwa-512x512.png',
 	'e2e',
 	'docs',
 	'data',
+	'dist',
 	'CHANGELOG.md',
 	'CONTRIBUTING.md',
 	'DESIGN.md',
@@ -66,23 +68,16 @@ const universalRemovePaths = [
 	'src/lib/demo-route.test.ts',
 	'src/lib/showcase.ts',
 	'e2e/demo.test.ts',
-	'docs/scripts/capture-readme-screenshots.ts'
+	'docs/scripts/capture-readme-screenshots.ts',
+	'scripts/prepare-release-assets.ts',
+	'scripts/verify-profiles.ts'
 ];
 
 const showcaseDependencies = [
-	'@dnd-kit-svelte/svelte',
-	'@dnd-kit/abstract',
-	'@dnd-kit/helpers',
-	'@prosekit/svelte',
 	'@threlte/core',
 	'@threlte/extras',
-	'@types/d3-scale',
-	'@types/d3-shape',
 	'@types/three',
 	'@xyflow/svelte',
-	'd3-scale',
-	'd3-shape',
-	'layerchart',
 	'maplibre-gl',
 	'prosekit',
 	'svelte-maplibre-gl',
@@ -142,7 +137,6 @@ const definitions: Record<ProductProfile, ProfileDefinition> = {
 			'@mmailaender/convex-better-auth-svelte',
 			'@useautumn/convex',
 			'ai',
-			'atmn',
 			'autumn-js',
 			'better-auth',
 			'streamdown-svelte'
