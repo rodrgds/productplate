@@ -9,7 +9,12 @@ node_modules
 .wrangler
 /.svelte-kit
 /build
+/dist
 .pre-commit-config.yaml
+
+# Product Plate upgrade recovery
+.product-plate/backups/
+.product-plate/transactions/
 
 # OS
 .DS_Store

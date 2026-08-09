@@ -1,26 +1,7 @@
 { pkgs, ... }:
 
 let
-  rawBun = pkgs.stdenvNoCC.mkDerivation {
-    pname = "bun";
-    version = "1.3.3";
-
-    src = pkgs.fetchzip {
-      url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.3/bun-linux-x64-baseline.zip";
-      hash = "sha256-RY9FSb9iXm2+mmy2BIhhPbdFovsv0agz/eT0jfaspl0=";
-    };
-
-    nativeBuildInputs = [ pkgs.autoPatchelfHook ];
-    buildInputs = [ pkgs.stdenv.cc.cc.lib ];
-    dontUnpack = true;
-
-    installPhase = ''
-      runHook preInstall
-      install -Dm755 "$src/bun" "$out/bin/bun"
-      ln -s bun "$out/bin/bunx"
-      runHook postInstall
-    '';
-  };
+  rawBun = pkgs.bun;
 
   bunLauncher = pkgs.writeText "product-plate-bun-launcher.mjs" ''
     import { execve } from "node:process";
@@ -123,6 +104,7 @@ in
     build.exec = "bun run build";
     verify.exec = "bun run verify";
     verify-full.exec = "bun run verify:full";
+    verify-profiles.exec = "bun run verify:profiles";
   };
 
   enterShell = ''
@@ -144,6 +126,7 @@ in
     echo "  build         Build for production"
     echo "  verify        Run NAS-safe lint, typecheck, and unit tests"
     echo "  verify-full   Add the resource-heavy production build"
+    echo "  verify-profiles  Generate and verify all four release profiles"
     echo ""
   '';
 
