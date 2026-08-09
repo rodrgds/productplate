@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { join } from 'node:path';
 import { parseCreateArguments, resolveCreateArguments } from './cli.ts';
+import { GENERATOR_VERSION } from './generator.ts';
 
 async function runCreate(arguments_: Array<string>) {
 	const child = Bun.spawn(
@@ -79,7 +80,10 @@ describe('create CLI', () => {
 
 	test('uses Commander help and equals-style option parsing', () => {
 		expect(parseCreateArguments(['-h'])).toMatchObject({ help: true });
-		expect(parseCreateArguments(['--version'])).toMatchObject({ version: true, output: '1.0.0\n' });
+		expect(parseCreateArguments(['--version'])).toMatchObject({
+			version: true,
+			output: `${GENERATOR_VERSION}\n`
+		});
 		expect(
 			parseCreateArguments([
 				'app',
@@ -101,7 +105,11 @@ describe('create CLI', () => {
 		expect(help.exitCode).toBe(0);
 		expect(help.stdout).toContain('Usage: create-product-plate');
 		const version = await runCreate(['--version']);
-		expect(version).toMatchObject({ exitCode: 0, stdout: '1.0.0\n', stderr: '' });
+		expect(version).toMatchObject({
+			exitCode: 0,
+			stdout: `${GENERATOR_VERSION}\n`,
+			stderr: ''
+		});
 		const unattended = await runCreate([]);
 		expect(unattended.exitCode).toBe(1);
 		expect(unattended.stderr).toContain('TTY');
