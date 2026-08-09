@@ -33,6 +33,25 @@ describe('CI workflow environment', () => {
 		expect(source).toContain('Rollback:');
 	});
 
+	it('uses the deployed Pages preview origin for Cloudflare and Convex auth', async () => {
+		const workflow = await readFile('.github/workflows/cloudflare-pages.yml', 'utf8');
+		const hooks = await readFile('src/hooks.server.ts', 'utf8');
+		const cloudflareStep = workflow.indexOf('- name: Deploy built artifact to Cloudflare Pages');
+		const authOriginStep = workflow.indexOf('- name: Configure preview auth origin');
+
+		expect(workflow).not.toContain("format('https://{0}.{1}.pages.dev'");
+		expect(workflow).toContain(
+			"SITE_URL: ${{ github.event_name == 'pull_request' && 'http://localhost:5173' || vars.SITE_URL }}"
+		);
+		expect(authOriginStep).toBeGreaterThan(cloudflareStep);
+		expect(workflow).toContain(
+			'DEPLOYED_URL: ${{ steps.cloudflare-deploy.outputs.deployment-url }}'
+		);
+		expect(workflow).toContain(`printf '%s' "$DEPLOYED_URL" | bun convex env set SITE_URL`);
+		expect(workflow).toContain(`printf '%s' "$DEPLOYED_URL" | bun convex env set BETTER_AUTH_URL`);
+		expect(hooks).toContain('env.CF_PAGES_URL ?? env.SITE_URL ?? origin');
+	});
+
 	it('bundles the Cloudflare worker before Convex activates the backend', async () => {
 		const source = await readFile('scripts/build-for-convex.ts', 'utf8');
 
@@ -58,5 +77,18 @@ describe('CI workflow environment', () => {
 		expect(release).toContain('uses: ./.github/workflows/profile-matrix.yml');
 		expect(release).toContain('needs: profiles');
 		expect(release).toContain('bun run verify:full');
+	});
+
+	it('uploads the matching GitHub release assets before publishing the CLI', async () => {
+		const release = await readFile('.github/workflows/release.yml', 'utf8');
+		const githubRelease = release.indexOf('- name: Create GitHub release');
+		const verifyAssets = release.indexOf('- name: Verify GitHub release assets');
+		const npmPublish = release.indexOf('- name: Publish create-product-plate');
+
+		expect(githubRelease).toBeGreaterThan(-1);
+		expect(verifyAssets).toBeGreaterThan(githubRelease);
+		expect(npmPublish).toBeGreaterThan(verifyAssets);
+		expect(release).toContain('product-plate-upgrade-v2.json');
+		expect(release).toContain('sha256sum --check SHA256SUMS');
 	});
 });

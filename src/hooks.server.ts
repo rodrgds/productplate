@@ -18,7 +18,7 @@ function trimTrailingSlash(value: string) {
 
 function syncRuntimeAuthEnvironment(origin?: string) {
 	try {
-		const siteUrl = env.SITE_URL ?? env.CF_PAGES_URL ?? origin;
+		const siteUrl = env.CF_PAGES_URL ?? env.SITE_URL ?? origin;
 		if (typeof process !== 'undefined') {
 			if (siteUrl) process.env.SITE_URL = trimTrailingSlash(siteUrl);
 			if (env.BETTER_AUTH_SECRET) process.env.BETTER_AUTH_SECRET = env.BETTER_AUTH_SECRET;
