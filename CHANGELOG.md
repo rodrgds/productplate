@@ -6,7 +6,27 @@ Product Plate follows semantic versioning while it is useful for template consum
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- A local `verify:profiles` command that generates and verifies release profiles sequentially.
+- A Commander and Clack initializer flow with strict non-interactive defaults, plus profile-aware managed upgrades with backups and rollback.
+
+### Fixed
+
+- README screenshot capture now reuses its local onboarding session and refuses remote account creation unless explicitly allowed.
+- Generated projects now preserve license attribution, remove starter social artwork, clean temporary downloads, and retain source when optional finishing steps fail.
+- Managed upgrades now validate release schemas, product profiles, checksums, paths, and symlink ancestry before changing project files.
+- Generated deployment workflows now create missing Pages projects, provision profile-specific Cloudflare and Convex runtime values, use the deployed preview origin, validate the email sender, and check runtime readiness before reporting success.
+- Release automation now uploads and verifies GitHub assets before publishing npm, while separate legacy and profile-aware upgrade manifests keep existing clients safe.
+- The dashboard now reports live account and workspace state instead of static sample metrics, with corrected route landmarks, navigation state, and async action feedback.
+- Generated dependency pruning now ignores documentation examples, keeps evidence-backed tooling, and removes stale PWA type references.
+- Dependency audits now resolve fixed releases of `brace-expansion`, `fast-uri`, `js-yaml`, `nanoid`, `postcss`, and `undici`.
+
+### Changed
+
+- Devenv and CI now use Bun 1.3.13 from the pinned nixpkgs package on supported Linux and macOS systems.
+- Confirmed dead dashboard, chart, table, navigation, attachment, screenshot, workflow, and duplicate PWA assets were removed. Optional Mist marketing sections now live under `_template_options/`.
+- ESLint now uses one flat configuration and checks active UI primitives instead of ignoring them.
 
 ## [1.0.0]
 

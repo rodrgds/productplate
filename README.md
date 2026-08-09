@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./docs/images/reddit.png?v=2026-07-09-refresh" alt="Product Plate product starter overview" width="100%" />
+  <img src="./static/og.png?v=2026-08-09-workbench" alt="Product Plate landing page and live product workbench" width="100%" />
 </p>
 
 <h1 align="center">Product Plate</h1>
@@ -35,7 +35,7 @@ Product Plate gives you two paths:
 - `bun create product-plate` generates a lean app from one fixed product profile.
 - This repository remains the maintained full demo and integration source for contributors and founders who want to inspect every pattern.
 
-Generated apps contain only the selected routes, backend modules, dependencies, environment contract, tests, and navigation. The generated `product-plate.json` records the profile and capabilities for launch checks and safe infrastructure upgrades.
+Generated apps contain the selected product routes, backend modules, dependencies, environment contract, tests, and navigation. The empty blog remains an explicit publish-or-remove launch decision in the generated guide. The generated `product-plate.json` records the profile and capabilities for launch checks and safe infrastructure upgrades.
 
 | Profile     | Product shape                                                                                                          |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -51,22 +51,22 @@ The hosted demo creates a fresh disposable account and opens the authenticated a
 - [Open the live demo](https://productplate.pages.dev/auth/demo)
 
 <p align="center">
-  <img src="./static/screenshots/dashboard.png?v=2026-07-09-refresh" alt="Product Plate dashboard" width="100%" />
+  <img src="./static/screenshots/dashboard.png?v=2026-08-09-workbench" alt="Product Plate dashboard" width="100%" />
 </p>
 
 <p align="center">
-  <img src="./static/screenshots/onboarding-filled.png?v=2026-07-09-refresh" alt="Product Plate onboarding" width="49%" />
-  <img src="./static/screenshots/editor.png?v=2026-07-09-refresh" alt="Product Plate editor" width="49%" />
+  <img src="./static/screenshots/onboarding-filled.png?v=2026-08-09-workbench" alt="Product Plate onboarding" width="49%" />
+  <img src="./static/screenshots/editor.png?v=2026-08-09-workbench" alt="Product Plate editor" width="49%" />
 </p>
 
 <p align="center">
-  <img src="./static/screenshots/flow.png?v=2026-07-09-refresh" alt="Product Plate workflow editor" width="49%" />
-  <img src="./static/screenshots/map.png?v=2026-07-09-refresh" alt="Product Plate map workspace" width="49%" />
+  <img src="./static/screenshots/flow.png?v=2026-08-09-workbench" alt="Product Plate workflow editor" width="49%" />
+  <img src="./static/screenshots/map.png?v=2026-08-09-workbench" alt="Product Plate map workspace" width="49%" />
 </p>
 
 <p align="center">
-  <img src="./static/screenshots/threlte.png?v=2026-07-09-refresh" alt="Product Plate 3D workspace" width="49%" />
-  <img src="./static/screenshots/assistant.png?v=2026-07-09-refresh" alt="Product Plate AI assistant" width="49%" />
+  <img src="./static/screenshots/threlte.png?v=2026-08-09-workbench" alt="Product Plate 3D workspace" width="49%" />
+  <img src="./static/screenshots/assistant.png?v=2026-08-09-workbench" alt="Product Plate AI assistant" width="49%" />
 </p>
 
 ## What is wired
@@ -120,7 +120,7 @@ bun run dev
 
 ### Optional reproducible environment
 
-Product Plate pins Bun 1.3.3 in its devenv. With direnv installed, allow the environment once, then run the named commands directly:
+Product Plate uses Bun 1.3.13 from its pinned nixpkgs in devenv. With direnv installed, allow the environment once, then run the named commands directly:
 
 ```sh
 direnv allow
@@ -184,21 +184,26 @@ The devenv Bun wrapper asks Node to parse `.env` and `.env.local` as data, then 
 
 Run these names directly inside direnv or as `devenv shell -- <command>` outside it. No Git hook rewrites or stages files; run `verify` explicitly before handoff or commit. Use `verify-full` on a release-capable machine when the resource-heavy production build is required.
 
-| Command        | Purpose                                        |
-| -------------- | ---------------------------------------------- |
-| `install`      | Install exactly from `bun.lock`                |
-| `setup`        | Frozen install; create `.env.local` if missing |
-| `dev`          | Start SvelteKit                                |
-| `convex-dev`   | Start Convex                                   |
-| `check`        | Typecheck Svelte and TypeScript                |
-| `typecheck`    | Alias for `check`                              |
-| `format-check` | Check formatting without changes               |
-| `lint`         | Check formatting and ESLint                    |
-| `test-unit`    | Run Vitest                                     |
-| `test-e2e`     | Run Playwright                                 |
-| `build`        | Build for production                           |
-| `verify`       | Run lint, checks, and unit tests               |
-| `verify-full`  | Run `verify`, audit dependencies, then build   |
+For generator work, `bun run verify:profiles` checks all four generated profiles sequentially.
+Pass profile names after `--` to narrow the run, such as
+`bun run verify:profiles -- solo-saas`.
+
+| Command           | Purpose                                        |
+| ----------------- | ---------------------------------------------- |
+| `install`         | Install exactly from `bun.lock`                |
+| `setup`           | Frozen install; create `.env.local` if missing |
+| `dev`             | Start SvelteKit                                |
+| `convex-dev`      | Start Convex                                   |
+| `check`           | Typecheck Svelte and TypeScript                |
+| `typecheck`       | Alias for `check`                              |
+| `format-check`    | Check formatting without changes               |
+| `lint`            | Check formatting and ESLint                    |
+| `test-unit`       | Run Vitest                                     |
+| `test-e2e`        | Run Playwright                                 |
+| `build`           | Build for production                           |
+| `verify`          | Run lint, checks, and unit tests               |
+| `verify-full`     | Run `verify`, audit dependencies, then build   |
+| `verify-profiles` | Generate and verify every release profile      |
 
 ## Project map
 
@@ -213,15 +218,17 @@ src/lib/components/landing/ Reusable marketing component gallery
 static/screenshots/         Product screenshots used by the site and README
 src/hooks.server.ts         Request IDs, security headers, optional request logs
 src/convex/                 Schema, auth, billing, orgs, developer APIs, storage, crons
-_template_options/          Inactive provider and database scaffolds
+_template_options/          Inactive provider, database, and marketing scaffolds
 docs/                       Integration, theme, template-option, observability/security guidance
 ```
 
 ## Deployment
 
-The default production path is one verified Convex and Cloudflare Pages workflow. Pull requests use `CONVEX_PREVIEW_DEPLOY_KEY` to create an isolated branch deployment. `main` uses `CONVEX_PRODUCTION_DEPLOY_KEY`, builds through `bun convex deploy --cmd`, activates the backward-compatible backend, uploads the exact Cloudflare artifact, and then runs a smoke test against the public URL.
+Direct full-demo forks of this repository use the checked-in Convex and Cloudflare Pages workflow. Pull requests use `CONVEX_PREVIEW_DEPLOY_KEY` to create an isolated branch deployment. `main` uses `CONVEX_PRODUCTION_DEPLOY_KEY`, builds through `bun convex deploy --cmd`, activates the backward-compatible backend, uploads the exact Cloudflare artifact, and then runs a smoke test against the public URL.
 
 Configure Cloudflare credentials, `CLOUDFLARE_PROJECT_NAME`, the final `SITE_URL`, and provider secrets in the GitHub environment. The workflow summary records the frontend URL, Convex target, Git SHA, smoke status, and rollback instruction. Preview and production deploy keys must never be the same.
+
+CLI-generated apps instead use one environment-scoped `CONVEX_DEPLOY_KEY`, a separate Pages project for preview and production, an explicit transactional email sender, runtime provisioning, and deployed readiness checks. Follow [the generated-app deployment guide](./docs/tutorial.md#4-open-a-preview).
 
 ## License
 

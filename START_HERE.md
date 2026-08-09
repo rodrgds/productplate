@@ -63,7 +63,7 @@ Inspect these files and folders before recommending changes:
 - src/routes/theme-builder/
 - src/lib/components/
 - src/lib/components/landing/
-- src/lib/components/mist/
+- _template_options/marketing/mist/
 - src/convex/
 - .env.example
 - .env.server.example
@@ -77,8 +77,8 @@ Inspect these files and folders before recommending changes:
 - static/og.png
 - static/pwa-*.png
 - static/screenshots/
-- static/sitemap.xml
-- static/robots.txt
+- src/routes/sitemap.xml/+server.ts
+- src/routes/robots.txt/+server.ts
 - .github/workflows/
 - wrangler.jsonc
 - playwright.config.ts
@@ -210,7 +210,7 @@ Core product feature implementation:
 
 Demo account:
 - Delete src/routes/auth/demo and src/lib/demo-account.ts unless I explicitly keep a public demo.
-- Remove /auth/demo from README, landing CTAs, tests, navigation, docs, static/sitemap.xml, src/lib/demo-account.test.ts, and e2e/demo.test.ts.
+- Remove /auth/demo from README, landing CTAs, tests, navigation, docs, src/routes/sitemap.xml/+server.ts, src/lib/demo-account.test.ts, and e2e/demo.test.ts.
 - If keeping a demo account, make it product-specific, disposable, safe, and outside paid/private workflows.
 - Do not create a separate public /demo page unless I explicitly ask.
 
@@ -234,7 +234,7 @@ Route cleanup:
 - Remove matching tests when routes are removed, then add product-specific smoke tests.
 - Keep src/lib/components/ui as reusable primitives.
 - Keep src/lib/components/landing only if the product needs landing sections.
-- Keep src/lib/components/mist only if the Product Plate marketing sections are still useful; otherwise delete or replace them.
+- Copy only useful Product Plate marketing sections from `_template_options/marketing/mist` into active app code, then rewrite them for the product.
 - After cleanup, every sidebar item, nav link, CTA, sitemap URL, and test route should point to a real product surface.
 
 Workspace, developer, and operator cleanup:
@@ -308,12 +308,12 @@ src/lib/theme-builder.ts    Theme builder configuration and token generation
 src/lib/components/ui/      shadcn-svelte primitives
 src/lib/components/ai/      AI assistant components
 src/lib/components/landing/ Reusable landing sections
-src/lib/components/mist/    Product Plate marketing sections
+_template_options/marketing/mist/ Inactive Product Plate marketing sections
 src/hooks.server.ts         Request IDs, security headers, optional request logs
 src/convex/                 Convex schema, auth, billing, orgs, developer APIs, storage, crons
-_template_options/          Inactive provider/database scaffolds
+_template_options/          Inactive provider, database, and marketing scaffolds
 docs/                       Integration, theme, template-option, observability/security docs
-static/                     Favicons, PWA icons, OG image, screenshots, sitemap, robots
+static/                     Favicons, PWA icons, OG image, screenshots
 e2e/                        Playwright auth/demo smoke tests
 ```
 

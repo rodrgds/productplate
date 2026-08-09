@@ -1,6 +1,6 @@
 # Template Options
 
-These files are inactive scaffolds for the kickstart agent. They are here to make Product Plate adaptable without shipping every provider in the active app.
+These files are inactive scaffolds for the kickstart agent. They keep optional providers and sections available without shipping them in the active app.
 
 Rules:
 
@@ -19,14 +19,15 @@ Rules:
 
 ## Available Scaffolds
 
-| Area    | Option        | Folder             | Use When                                                             |
-| ------- | ------------- | ------------------ | -------------------------------------------------------------------- |
-| Billing | Autumn        | `payments/_autumn` | You want the current Convex and Autumn path.                         |
-| Billing | Stripe direct | `payments/_stripe` | You need direct Stripe Checkout and webhook control.                 |
-| Billing | Polar         | `payments/_polar`  | You want Polar checkout sessions and entitlement workflows.          |
-| Billing | Creem         | `payments/_creem`  | You want Creem checkout, MoR-style operations, or license workflows. |
-| Data    | Convex        | `data/_convex`     | You want the current realtime backend.                               |
-| Data    | Drizzle       | `data/_drizzle`    | You want SQL with PostgreSQL, SQLite, Turso, D1, or another driver.  |
+| Area      | Option        | Folder             | Use When                                                             |
+| --------- | ------------- | ------------------ | -------------------------------------------------------------------- |
+| Billing   | Autumn        | `payments/_autumn` | You want the current Convex and Autumn path.                         |
+| Billing   | Stripe direct | `payments/_stripe` | You need direct Stripe Checkout and webhook control.                 |
+| Billing   | Polar         | `payments/_polar`  | You want Polar checkout sessions and entitlement workflows.          |
+| Billing   | Creem         | `payments/_creem`  | You want Creem checkout, MoR-style operations, or license workflows. |
+| Data      | Convex        | `data/_convex`     | You want the current realtime backend.                               |
+| Data      | Drizzle       | `data/_drizzle`    | You want SQL with PostgreSQL, SQLite, Turso, D1, or another driver.  |
+| Marketing | Mist          | `marketing/mist`   | You want to adapt one of the inactive marketing sections.            |
 
 ## Suggested Active Locations
 
@@ -35,5 +36,6 @@ Rules:
 - SQL database client: `src/lib/server/db/index.ts`
 - SQL schema: `src/lib/server/db/schema.ts`
 - Convex backend: `src/convex`
+- Marketing sections: `src/lib/components/landing/`
 
 The kickstart agent should adapt these paths to the final stack and update README.md, PRODUCT.md, AGENTS.md, and env examples at the same time.

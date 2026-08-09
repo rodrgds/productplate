@@ -4,7 +4,7 @@ Product Plate uses a selection model, not a runtime toggle model.
 
 - The founder default is `bun create product-plate` with one fixed profile: `prelaunch`, `solo-saas`, `team-saas`, or `ai-saas`.
 - The active default is Convex, Better Auth, and Autumn.
-- Alternate payment and database examples remain full-demo reference material in `_template_options`; generated apps never contain them.
+- Alternate payment, database, and marketing examples remain full-demo reference material in `_template_options`; generated apps never contain them.
 - Direct full-demo forks may use the long kickstart prompt to choose a different stack.
 - Do not ship imports from `_template_options`.
 
@@ -18,15 +18,16 @@ Build runtime provider abstraction only when the product truly sells through mul
 
 ## Current Choices
 
-| Area     | Default                       | Alternatives                                                       |
-| -------- | ----------------------------- | ------------------------------------------------------------------ |
-| Data     | Convex                        | Drizzle with PostgreSQL, SQLite, Turso, D1, or a custom SQL driver |
-| Auth     | Better Auth                   | OAuth-only, email/password-only, or no-auth prototype              |
-| Billing  | Autumn                        | Stripe direct, Polar, Creem, none                                  |
-| AI       | AI SDK route and assistant UI | Keep backend only or remove                                        |
-| Teams    | Organizations and invites     | Single-user profile/settings only                                  |
-| Platform | API keys                      | Activate webhooks or remove the developer surface                  |
-| Demo     | `/auth/demo` disposable demo  | Delete during kickstart or replace with a product-specific demo    |
+| Area      | Default                       | Alternatives                                                        |
+| --------- | ----------------------------- | ------------------------------------------------------------------- |
+| Data      | Convex                        | Drizzle with PostgreSQL, SQLite, Turso, D1, or a custom SQL driver  |
+| Auth      | Better Auth                   | OAuth-only, email/password-only, or no-auth prototype               |
+| Billing   | Autumn                        | Stripe direct, Polar, Creem, none                                   |
+| AI        | AI SDK route and assistant UI | Keep backend only or remove                                         |
+| Teams     | Organizations and invites     | Single-user profile/settings only                                   |
+| Platform  | API keys                      | Activate webhooks or remove the developer surface                   |
+| Demo      | `/auth/demo` disposable demo  | Delete during kickstart or replace with a product-specific demo     |
+| Marketing | Active landing sections       | Copy selected Mist sections from `_template_options/marketing/mist` |
 
 ## Current Starter Surfaces
 

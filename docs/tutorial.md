@@ -20,7 +20,7 @@ The generator installs with Bun, writes ignored local secrets, and keeps Devenv 
 
 ## 3. Configure selected providers
 
-Copy values from `.env.example` into `.env.local`. Configure only providers named in `product-plate.json`. PostHog and Sentry stay disabled until their public keys are present. Production auth profiles require Resend delivery and `AUTH_REQUIRE_EMAIL_VERIFICATION=true`.
+Copy values from `.env.example` into `.env.local`. Configure only providers named in `product-plate.json`. PostHog and Sentry stay disabled locally until their public keys are present. Production strict checks require real PostHog and Sentry values. Production auth profiles also require Resend delivery and `AUTH_REQUIRE_EMAIL_VERIFICATION=true`.
 
 Check progress without exposing secret values:
 
@@ -31,11 +31,13 @@ bun run doctor -- --json
 
 ## 4. Open a preview
 
-Add separate `CONVEX_PREVIEW_DEPLOY_KEY` and `CONVEX_PRODUCTION_DEPLOY_KEY` secrets, Cloudflare credentials, and `CLOUDFLARE_PROJECT_NAME` to GitHub. A pull request creates or reuses a branch-scoped Convex preview, builds against that deployment, uploads the Cloudflare preview, and runs the public smoke test. Preview data never uses the production key.
+Create protected GitHub environments named `preview` and `production`. In each environment, add an environment-specific `CONVEX_DEPLOY_KEY`, Cloudflare credentials, `RESEND_API_KEY`, and the provider secrets named in the generated README. The preview key must be a Convex preview deploy key; the production key must target production.
+
+Set a different `CLOUDFLARE_PROJECT_NAME` in each environment. Set the production `SITE_URL`, `PUBLIC_POSTHOG_KEY`, `PUBLIC_SENTRY_DSN`, `SUPPORT_EMAIL`, and a real sender such as `Product <mail@your-domain.com>` in `TRANSACTIONAL_EMAIL_FROM`. Set `PUBLIC_POSTHOG_HOST` when the project does not use PostHog's default host. A pull request creates or reuses its branch-scoped Convex preview, creates the selected Pages project if it is missing, builds against that deployment, provisions runtime bindings, deploys the same artifact, and uses Cloudflare's returned URL for auth and smoke checks. Preview data and runtime secrets never use the production targets.
 
 ## 5. Launch
 
-Replace legal placeholders, publish or unlink the empty blog, set the final production URL, and run:
+Replace legal placeholders, publish or unlink the empty blog, and set `product.productionUrl` in `product-plate.json` to the same final HTTPS origin as the production `SITE_URL`. Then run:
 
 ```sh
 bun run verify:launch

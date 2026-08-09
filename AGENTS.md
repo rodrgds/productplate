@@ -24,6 +24,43 @@
 - `_template_options/` contains inactive scaffolds for alternate billing and data choices. Do not import from it in active app code. Copy the selected scaffold into the app, then delete unused options.
 - Public docs, blog, changelog, legal pages, component gallery, theme builder, workspace, developer, and admin screens are starter surfaces. Keep, rewrite, or remove them based on the selected product loop instead of leaving Product Plate copy in place.
 
+## Recurring Workflow Playbook
+
+### Start and scope
+
+- Begin with `git status --short`, the current branch, and the relevant diff. This repository often has intentional work on an agent branch; treat every pre-existing change as user-owned.
+- Check existing listeners before starting Vite, preview, or Convex. Reuse a healthy process when possible, and stop only processes you started.
+- For an audit, stay read-only and finish with ranked, file-backed findings. For an implementation request, turn the findings into coherent tested slices instead of repeating the audit.
+
+### Verification ladder
+
+- Run the smallest focused Vitest or Playwright test first, then `verify` for normal handoff.
+- Use `verify-full` only on a release-capable machine. It adds the dependency audit and memory-heavy production build.
+- For generator or release work, run `bun run verify:profiles` from the repository root. It generates all four profiles and runs them sequentially so their fixed preview ports cannot collide. Pass one or more profile names after `--` for focused work, for example `bun run verify:profiles -- solo-saas`.
+- Before publishing `create-product-plate`, also run `bun run verify` inside `packages/create-product-plate`, validate release assets, and prove the public package with `bun info create-product-plate version`, a clean `bun create product-plate ...`, and `bunx product-plate upgrade --check`. A started workflow or tag is not publication proof.
+
+### Convex and authentication
+
+- After Convex schema or function-signature changes, regenerate bindings immediately with `bunx convex codegen --typecheck disable` and run `bun run check` before starting the next large slice.
+- If Better Auth schema changes, regenerate `src/convex/betterAuth/schema.ts` before checking dependent code. Treat Better Auth, `@convex-dev/better-auth`, Better Call, Zod, generated schema, and auth tests as one compatibility cohort.
+- Reuse the working `convex-test` harness in `src/convex/security.test.ts`: register the Better Auth component and use `withIdentity(...)`. Do not invent fixture shapes from memory.
+- Inspect `src/convex/organizations.ts` early for workspace, billing, invite, member, or admin work; it is the main trust-boundary hotspot.
+
+### Browser and production proof
+
+- For broad UI work, inspect the real routes at 390x844, 768x1024, 1280x720, and 1440x1000 where relevant. Cover light and dark themes, horizontal overflow, tap targets, actual interactions, and console errors.
+- For sheets, popovers, and menus, assert the topmost hit-tested element after the transition finishes. DOM presence alone does not prove that a portalled layer is visible.
+- Prefer `domcontentloaded` plus targeted locator waits. External fonts and analytics can make `load` or `networkidle` hang even when the interface is ready.
+- Use a production build/preview for first-paint, hydration, performance, and release-sensitive checks. If a dev server watches generated output and becomes slow, restart it cleanly before judging the UI.
+- Local auth E2E does not prove production auth. For a reported hosted auth bug, verify the deployed signup or disposable-demo entry, cookie handoff, logout, email sign-in, OAuth callback, and protected route as applicable. Production Cloudflare and Convex deployments are separate from local development.
+- `PLAYWRIGHT_BASE_URL=<deployment-url> bun run test:e2e` targets a deployed build without starting a local server. Do not create persistent production test data when the disposable demo can prove the behavior.
+
+### Starter surfaces and generated assets
+
+- When starter capabilities or identity change, inspect `START_HERE.md`, `README.md`, `PRODUCT.md`, `AGENTS.md`, `docs/template-options.md`, `.env.example`, and `CHANGELOG.md` together. Update only the files whose claims actually changed.
+- For README or marketing screenshot work, use a local app and run `SCREENSHOT_BASE_URL=http://127.0.0.1:<port> bun run screenshots:readme`. The capture script intentionally refuses remote account creation unless it is explicitly overridden.
+- Review `static/og.png`, `static/screenshots/`, the landing page consumers, and README references as one asset set. If an image keeps the same filename, update the README cache-busting query so GitHub does not serve its stale proxy copy.
+
 ## Writing and product copy
 
 - Avoid stock metaphors, similes, idioms, and figures of speech.
