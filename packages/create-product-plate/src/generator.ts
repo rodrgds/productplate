@@ -37,7 +37,7 @@ import {
 } from './types.ts';
 import { createManagedState } from './upgrade.ts';
 
-export const GENERATOR_VERSION = '1.0.0';
+export const GENERATOR_VERSION = '1.1.0';
 const DEFAULT_REPOSITORY = 'rodrgds/productplate';
 
 const releaseManifestSchema = z

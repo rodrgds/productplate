@@ -6,6 +6,8 @@ Product Plate follows semantic versioning while it is useful for template consum
 
 ## Unreleased
 
+## [1.1.0] - 2026-08-09
+
 ### Added
 
 - A local `verify:profiles` command that generates and verifies release profiles sequentially.
