@@ -4,6 +4,15 @@ import { describe, expect, it } from 'vitest';
 const buildOnlySecret = "BETTER_AUTH_SECRET: 'ci-build-only-secret-not-used-at-runtime'";
 
 describe('CI workflow environment', () => {
+	it('installs workspace dependencies before running the source initializer', async () => {
+		const workflow = await readFile('.github/workflows/profile-matrix.yml', 'utf8');
+		const installStep = workflow.indexOf('run: bun install --frozen-lockfile');
+		const generateStep = workflow.indexOf('- name: Generate profile');
+
+		expect(installStep).toBeGreaterThan(-1);
+		expect(generateStep).toBeGreaterThan(installStep);
+	});
+
 	it('uses isolated Convex deploy keys for previews and production', async () => {
 		const source = await readFile('.github/workflows/cloudflare-pages.yml', 'utf8');
 		const environment = source.indexOf('    environment:');
