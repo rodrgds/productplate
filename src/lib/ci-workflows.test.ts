@@ -100,4 +100,17 @@ describe('CI workflow environment', () => {
 		expect(release).toContain('product-plate-upgrade-v2.json');
 		expect(release).toContain('sha256sum --check SHA256SUMS');
 	});
+
+	it('exchanges GitHub OIDC for a short-lived npm token before Bun publishes', async () => {
+		const release = await readFile('.github/workflows/release.yml', 'utf8');
+		const exchange = release.indexOf('- name: Exchange npm trusted-publishing token');
+		const publish = release.indexOf('- name: Publish create-product-plate');
+
+		expect(exchange).toBeGreaterThan(-1);
+		expect(publish).toBeGreaterThan(exchange);
+		expect(release).toContain('audience=npm:registry.npmjs.org');
+		expect(release).toContain('/-/npm/v1/oidc/token/exchange/package/create-product-plate');
+		expect(release).toContain('NPM_CONFIG_TOKEN: ${{ steps.npm-auth.outputs.token }}');
+		expect(release).not.toContain('secrets.NPM_TOKEN');
+	});
 });

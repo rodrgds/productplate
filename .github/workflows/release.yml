@@ -74,8 +74,30 @@ jobs:
             sha256sum --check SHA256SUMS
           )
 
+      - name: Exchange npm trusted-publishing token
+        id: npm-auth
+        run: |
+          id_token="$(
+            curl --fail --silent --show-error \
+              --header "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=npm:registry.npmjs.org" \
+              | jq --raw-output '.value // empty'
+          )"
+          test -n "$id_token"
+
+          npm_token="$(
+            curl --fail --silent --show-error \
+              --request POST \
+              --header "Authorization: Bearer ${id_token}" \
+              https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/create-product-plate \
+              | jq --raw-output '.token // empty'
+          )"
+          test -n "$npm_token"
+          echo "::add-mask::${npm_token}"
+          printf 'token=%s\n' "$npm_token" >> "$GITHUB_OUTPUT"
+
       - name: Publish create-product-plate
         working-directory: packages/create-product-plate
         env:
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_TOKEN: ${{ steps.npm-auth.outputs.token }}
         run: bun publish --access public
