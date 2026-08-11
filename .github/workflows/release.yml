@@ -57,6 +57,7 @@ jobs:
           else
             gh release create "$GITHUB_REF_NAME" dist/release/* --generate-notes --verify-tag
           fi
+          gh release edit "$GITHUB_REF_NAME" --draft=false --latest
 
       - name: Verify GitHub release assets
         env:

@@ -101,6 +101,17 @@ describe('CI workflow environment', () => {
 		expect(release).toContain('sha256sum --check SHA256SUMS');
 	});
 
+	it('publishes an existing draft release before npm publication', async () => {
+		const release = await readFile('.github/workflows/release.yml', 'utf8');
+		const publishDraft = release.indexOf('gh release edit "$GITHUB_REF_NAME" --draft=false');
+		const verifyAssets = release.indexOf('- name: Verify GitHub release assets');
+		const npmPublish = release.indexOf('- name: Publish create-product-plate');
+
+		expect(publishDraft).toBeGreaterThan(-1);
+		expect(verifyAssets).toBeGreaterThan(publishDraft);
+		expect(npmPublish).toBeGreaterThan(verifyAssets);
+	});
+
 	it('exchanges GitHub OIDC for a short-lived npm token before Bun publishes', async () => {
 		const release = await readFile('.github/workflows/release.yml', 'utf8');
 		const exchange = release.indexOf('- name: Exchange npm trusted-publishing token');
