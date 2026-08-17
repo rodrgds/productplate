@@ -1,0 +1,1 @@
+.polar_sh_support_container { overflow: hidden; max-width: 100%; box-sizing: border-box; }
