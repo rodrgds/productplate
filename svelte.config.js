@@ -14,7 +14,7 @@ const config = {
 			mode: 'auto',
 			directives: {
 				'default-src': ['self'],
-				'script-src': ['self'],
+				'script-src': ['self', 'https://cool.rgo.pt'],
 				'script-src-attr': ['none'],
 				'style-src': ['self', 'unsafe-inline'],
 				'img-src': ['self', 'data:', 'blob:', 'https:'],
