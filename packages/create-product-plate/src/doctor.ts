@@ -300,7 +300,7 @@ export async function runDoctor(options: DoctorOptions): Promise<DoctorResult> {
 	checks.push(
 		configurationCheck(
 			'content.metadata',
-			'Canonical and social metadata are wired',
+			'Canonical and social metadata exist',
 			metadataReady,
 			options.strict,
 			'Add the shared typed SEO helper and product metadata constants.'

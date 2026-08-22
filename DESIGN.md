@@ -1,6 +1,6 @@
 ---
 name: Product Plate
-description: A quiet, production-minded foundation for modern SaaS products.
+description: A quiet, production-ready foundation for modern SaaS products.
 colors:
   ink: 'oklch(0.2 0.006 95)'
   canvas: 'oklch(0.988 0.003 95)'
@@ -91,8 +91,7 @@ The palette is restrained and warm. Ink is used decisively; tonal neutrals provi
 - **Warm Canvas:** The page background and open breathing space.
 - **Clean Surface:** Cards, popovers, and product preview surfaces.
 - **Soft Neutral:** Muted sections, active navigation, and secondary controls.
-- **Pencil Gray:** Secondary copy and interface metadata.
-- **Border:** Borders, dividers, and input outlines.
+- **Muted Ink:** Secondary copy and interface metadata.
 
 **The Ten Percent Rule.** Strong ink-filled surfaces should occupy less than ten percent of a typical screen. Their rarity preserves hierarchy.
 
@@ -143,7 +142,7 @@ The system is flat by default. Borders and tonal layers establish structure; sof
 - **Corner Style:** Gently rounded (11px radius, 16px for signature containers).
 - **Background:** Clean Surface on Warm Canvas.
 - **Shadow Strategy:** Flat or Surface shadow; Preview shadow only for product demonstrations.
-- **Border:** One-pixel Joinery Line.
+- **Border:** One-pixel `--border` line.
 - **Internal Padding:** 24px by default, 32–48px for feature compositions.
 
 ### Inputs / Fields
@@ -154,7 +153,7 @@ The system is flat by default. Borders and tonal layers establish structure; sof
 
 ### Navigation
 
-Use short, sentence-case labels and muted default text. Active items use Soft Bench with Workbench Ink. Desktop marketing navigation stays horizontal; mobile prioritizes brand and the primary action.
+Use short, sentence-case labels and muted default text. Active items use the muted surface with high-contrast ink. Desktop marketing navigation stays horizontal; mobile prioritizes brand and the primary action.
 
 ### Product Preview
 

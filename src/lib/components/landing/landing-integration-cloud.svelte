@@ -20,7 +20,7 @@
 	let {
 		kicker = 'Integration cloud',
 		title = 'Show the stack as a system, not a logo pile.',
-		description = 'A centered orbit pattern adapted from Magic UI’s orbiting circles, restyled for Product Plate and kept stable so the labels do not drift.',
+		description = 'A centered orbit pattern adapted from the Magic UI orbiting circles design, restyled for Product Plate and kept stable so the labels do not drift.',
 		integrations = [
 			{ name: 'SvelteKit', status: 'App routes' },
 			{ name: 'Convex', status: 'Realtime data' },

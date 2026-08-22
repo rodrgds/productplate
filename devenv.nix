@@ -120,7 +120,7 @@ in
     echo "  convex-dev    Run Convex"
     echo "  check         Type-check Svelte and TypeScript"
     echo "  format-check  Check formatting without changing files"
-    echo "  lint          Check formatting and ESLint"
+    echo "  lint          Check formatting and lint with Oxlint"
     echo "  test-unit     Run unit tests"
     echo "  test-e2e      Run Playwright tests"
     echo "  build         Build for production"

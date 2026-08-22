@@ -184,8 +184,8 @@
 						SvelteKit starter, ready to become your product.
 					</h1>
 					<p class="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl">
-						Generate a focused prelaunch, solo, team, or AI product with the selected auth, billing,
-						data, tests, and deployment path already wired.
+						Generate a focused prelaunch, solo, team, or AI product with auth, billing, data, tests,
+						and deployment already connected.
 					</p>
 					<div class="mt-7 flex flex-wrap gap-3">
 						<Button size="lg" onclick={() => copyCreateCommand('hero_create')}>
@@ -206,7 +206,7 @@
 						<span class="flex items-center gap-2"><CheckIcon class="size-4" /> Bun-native</span>
 						<span class="flex items-center gap-2"><CheckIcon class="size-4" /> Type-safe</span>
 						<span class="flex items-center gap-2"
-							><CheckIcon class="size-4" /> Production-minded</span
+							><CheckIcon class="size-4" /> Production-ready patterns</span
 						>
 					</div>
 				</div>

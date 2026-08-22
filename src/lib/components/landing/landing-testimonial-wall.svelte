@@ -34,7 +34,7 @@
 				avatar:
 					'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=160&h=160&q=80',
 				content:
-					'This starter completely transformed how we build. We shipped our entire customer-facing dashboard in half the time, and design consistency across every page was noticeably better.',
+					'We shipped our customer-facing dashboard in half the time it took with our previous setup, and page styling stayed consistent without extra effort.',
 				source: 'X',
 				link: '#'
 			},
@@ -45,7 +45,7 @@
 				avatar:
 					'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=160&h=160&q=80',
 				content:
-					'The attention to accessibility and performance is outstanding. Our Lighthouse scores improved by 15 points across the board, and we passed our first external accessibility audit with zero critical issues.',
+					'Accessibility and performance held up under audit. Our Lighthouse scores improved by 15 points, and we passed our first external review with zero critical issues.',
 				source: 'LinkedIn',
 				link: '#'
 			},
@@ -89,7 +89,7 @@
 				avatar:
 					'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=160&h=160&q=80',
 				content:
-					'The TypeScript support is best-in-class. Autocomplete just works, prop types catch mistakes before they hit production, and the DX is genuinely enjoyable.',
+					'The TypeScript support is solid. Autocomplete works, prop types catch mistakes before they reach production, and day-to-day development feels smooth.',
 				source: 'LinkedIn',
 				link: '#'
 			},

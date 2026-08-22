@@ -69,7 +69,7 @@ The hosted demo creates a fresh disposable account and opens the authenticated a
   <img src="./static/screenshots/assistant.png?v=2026-08-09-workbench" alt="Product Plate AI assistant" width="49%" />
 </p>
 
-## What is wired
+## What is included
 
 - **App:** SvelteKit 2, Svelte 5, TypeScript, Tailwind CSS v4, shadcn-svelte.
 - **Backend:** Convex functions, realtime data, storage, organizations, notifications, API keys, and generated types.
@@ -195,11 +195,10 @@ Pass profile names after `--` to narrow the run, such as
 | `dev`             | Start SvelteKit                                |
 | `convex-dev`      | Start Convex                                   |
 | `check`           | Typecheck Svelte and TypeScript                |
-| `typecheck`       | Alias for `check`                              |
-| `format-check`    | Check formatting without changes               |
-| `lint`            | Check formatting and ESLint                    |
+| `format-check`    | Check formatting with oxfmt                    |
+| `lint`            | Check formatting, then lint with oxlint        |
 | `test-unit`       | Run Vitest                                     |
-| `test-e2e`        | Run Playwright                                 |
+| `test:e2e`        | Run Playwright                                 |
 | `build`           | Build for production                           |
 | `verify`          | Run lint, checks, and unit tests               |
 | `verify-full`     | Run `verify`, audit dependencies, then build   |

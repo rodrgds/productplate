@@ -20,7 +20,7 @@
 	let {
 		kicker = 'Image comparison',
 		title = 'Let visitors scrub the before and after instead of reading a spreadsheet.',
-		description = 'Ported from Aceternity’s Compare component: a clipped image layer with a pointer-driven slider, drag or hover modes, and a keyboard-friendly handle.',
+		description = 'Ported from the Aceternity Compare component: a clipped image layer with a pointer-driven slider, drag or hover modes, and a keyboard-friendly handle.',
 		firstImage = 'https://assets.aceternity.com/code-problem.png',
 		secondImage = 'https://assets.aceternity.com/code-solution.png',
 		firstImageAlt = 'Before screenshot with messy implementation details',

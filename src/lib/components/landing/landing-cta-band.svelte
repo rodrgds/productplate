@@ -16,7 +16,7 @@
 
 	let {
 		title = 'A foundation ready for your product.',
-		description = 'Auth, billing, realtime data, AI, and a serious component system. Built for founders who would rather work on the idea.',
+		description = 'Auth, billing, realtime data, AI, and a full component system. Built for founders who would rather work on the idea.',
 		image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80',
 		imageAlt = 'Product dashboard preview',
 		primaryLabel = 'Use demo account',

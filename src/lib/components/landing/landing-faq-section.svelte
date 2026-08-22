@@ -16,7 +16,7 @@
 
 	let {
 		kicker = 'FAQ',
-		title = 'Questions that close the loop.',
+		title = 'Common questions.',
 		description = 'A simple accordion pattern for objections, setup details, migration notes, and product constraints.',
 		items = [
 			{

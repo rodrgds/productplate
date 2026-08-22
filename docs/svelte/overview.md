@@ -223,7 +223,7 @@ let { error = null, customPrompt = '' }: Props = $props();
 
 ## Routing and Pages
 
-- Utilize SvelteKit's file-based routing system in the src/routes/ directory.
+- Use SvelteKit's file-based routing system in the src/routes/ directory.
 - Implement dynamic routes using [slug] syntax.
 - Use load functions for server-side data fetching and pre-rendering.
 - Implement proper error handling with +error.svelte pages.
@@ -402,7 +402,7 @@ const password = formFieldProxy(form, 'password');
 - Use shadcn-svelte Form components for new forms: https://shadcn-svelte.com/docs/components/form
 - Implement proper Zod validation schemas
 - Use `formFieldProxy` for reactive field access
-- Utilize SvelteKit's form actions for server-side form handling
+- Use SvelteKit's form actions for server-side form handling
 - Use progressive enhancement for JavaScript-optional form submissions
 - Always include proper ARIA attributes and field descriptions for accessibility
 

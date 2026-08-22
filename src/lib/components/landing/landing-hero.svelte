@@ -29,7 +29,7 @@
 	let {
 		kicker = 'Plug-and-play Svelte sections',
 		title = 'Landing component library',
-		description = 'A catalog of production-minded marketing sections for SaaS starters: heroes, proof, feature systems, pricing, FAQs, CTAs, and motion patterns that live in your repo.',
+		description = 'A catalog of marketing sections for SaaS starters: heroes, proof, feature systems, pricing, FAQs, CTAs, and motion patterns that live in your repo.',
 		actions = [
 			{ label: 'Use the components', href: resolve('/auth/sign-up') },
 			{

@@ -61,7 +61,7 @@
 				{#if $messageErrors}<p class="text-sm text-destructive">{$messageErrors}</p>{/if}
 			</div>
 			<Button type="submit" disabled={$submitting}>
-				{$submitting ? 'Sending…' : 'Send feedback'}
+				{$submitting ? 'Sending...' : 'Send feedback'}
 			</Button>
 		</form>
 	{/if}

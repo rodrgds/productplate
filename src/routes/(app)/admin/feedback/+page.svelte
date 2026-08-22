@@ -37,7 +37,7 @@
 		<p class="mt-2 text-muted-foreground">Review product feedback and keep its status current.</p>
 	</div>
 	{#if feedbackResponse.isLoading}
-		<p class="text-sm text-muted-foreground">Loading feedback…</p>
+		<p class="text-sm text-muted-foreground">Loading feedback...</p>
 	{:else if feedback.length === 0}
 		<div class="rounded-lg border border-dashed p-8 text-sm text-muted-foreground">
 			No feedback has been submitted.

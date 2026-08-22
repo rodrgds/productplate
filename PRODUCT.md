@@ -6,7 +6,7 @@ brand
 
 ## Users
 
-Indie hackers and early-stage founders who want to start a production-minded SaaS product without rebuilding authentication, billing, data, AI, and interface foundations.
+Indie hackers and early-stage founders who want to start a real SaaS product without rebuilding authentication, billing, data, AI, and interface foundations.
 
 ## Product Purpose
 

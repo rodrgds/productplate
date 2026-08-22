@@ -21,7 +21,7 @@
 	let {
 		kicker = 'Process',
 		title = 'A timeline section for onboarding, setup, or delivery.',
-		description = 'Borrowed from Aceternity’s long-form timeline shape: sticky labels, a real rail, screenshots or deliverables beside each moment, and no generic scroll-in choreography.',
+		description = 'Borrowed from the Aceternity long-form timeline shape: sticky labels, a real rail, screenshots or deliverables beside each moment, and no generic scroll-in choreography.',
 		steps = [
 			{
 				title: 'Pick the product story',

@@ -71,7 +71,7 @@
 		<input id="waitlist-website" name="website" type="text" tabindex="-1" autocomplete="off" />
 	</div>
 	<Button type="submit" disabled={status === 'submitting'} class="h-11 w-full px-5 sm:w-auto">
-		{status === 'submitting' ? 'Joining…' : 'Join waitlist'}
+		{status === 'submitting' ? 'Joining...' : 'Join waitlist'}
 	</Button>
 </form>
 {#if message}
