@@ -83,16 +83,15 @@
 
 <Card.Root>
 	<Card.Header>
-		<Card.Title>Email Address</Card.Title>
+		<Card.Title>Email address</Card.Title>
 		<Card.Description>
 			Update your email address for account notifications and login.
 		</Card.Description>
 	</Card.Header>
 	<Card.Content>
 		<div class="space-y-4">
-			<!-- Current Email Display -->
 			<div class="space-y-2">
-				<Label for="current-email">Current Email</Label>
+				<Label for="current-email">Current email</Label>
 				<div class="flex items-center gap-2">
 					<Input id="current-email" value={currentEmail} disabled class="bg-muted" />
 					{#if isEmailVerified}
@@ -118,7 +117,7 @@
 				<Form.Field {form} name="newEmail">
 					<Form.Control>
 						{#snippet children({ props })}
-							<Form.Label>New Email Address</Form.Label>
+							<Form.Label>New email address</Form.Label>
 							<Input
 								{...props}
 								type="email"
@@ -153,7 +152,7 @@
 				{/if}
 
 				<Button type="submit" disabled={isLoading || hasErrors}>
-					{isLoading ? 'Updating...' : 'Update Email'}
+					{isLoading ? 'Updating...' : 'Update email'}
 				</Button>
 			</form>
 		</div>

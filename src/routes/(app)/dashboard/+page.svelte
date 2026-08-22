@@ -134,8 +134,8 @@
 					Welcome, {displayName}
 				</h2>
 				<p class="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-					This starter is wired to the account and workspace shown beside it. Open a surface to
-					inspect the implementation, then keep, replace, or remove it for your product.
+					Every surface reads from the live account and workspace beside it. Open one to inspect the
+					implementation, then keep, replace, or remove it for your product.
 				</p>
 			</div>
 

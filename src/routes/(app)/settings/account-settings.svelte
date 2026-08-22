@@ -134,12 +134,11 @@
 
 <Card.Root>
 	<Card.Header>
-		<Card.Title>Account Information</Card.Title>
-		<Card.Description>Update your account information here.</Card.Description>
+		<Card.Title>Account information</Card.Title>
+		<Card.Description>Update your account details.</Card.Description>
 	</Card.Header>
 	<Card.Content>
 		<form method="POST" use:enhance class="space-y-6">
-			<!-- Profile Picture Section -->
 			<div class="flex flex-col gap-6 sm:flex-row sm:items-center">
 				<div class="group relative">
 					{#if $image}
@@ -172,12 +171,12 @@
 				<div class="flex-1 space-y-1.5">
 					<p class="text-sm font-semibold">Profile picture</p>
 					<p class="max-w-sm text-sm text-muted-foreground">
-						Click the avatar to upload a new one. We'll help you crop it to a perfect circle.
+						Click the avatar to upload a new image. The editor crops it to a circle before upload.
 					</p>
 					<div class="flex gap-2 pt-2">
 						<Button type="button" variant="outline" size="sm" onclick={() => (isEditorOpen = true)}>
 							<Upload class="mr-2 size-3.5" />
-							Change Picture
+							Change picture
 						</Button>
 						{#if $image}
 							<Button
@@ -228,7 +227,7 @@
 
 			<div class="flex items-center justify-between">
 				<Button type="submit" disabled={isLoading || hasErrors} class="w-full sm:w-auto">
-					{isLoading ? 'Saving...' : 'Save Changes'}
+					{isLoading ? 'Saving...' : 'Save changes'}
 				</Button>
 				{#if user?.id}
 					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
@@ -239,7 +238,7 @@
 						onclick={() => goto(resolve(`/profile/${user.id}`))}
 					>
 						<ExternalLink class="mr-2 size-3.5" />
-						View Profile
+						View profile
 					</Button>
 				{/if}
 			</div>

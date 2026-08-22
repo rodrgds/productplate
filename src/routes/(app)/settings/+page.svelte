@@ -13,7 +13,6 @@
 
 	let { data }: { data: PageData } = $props();
 
-	// Get current user from Convex
 	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
 	let user = $derived(currentUserResponse.data);
 	const profileResponse = useQuery(api.userProfiles.getCurrent, {});
@@ -24,7 +23,6 @@
 	<title>Settings | {APP_NAME}</title>
 </svelte:head>
 
-<!-- Header -->
 <header
 	class="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
 >
@@ -35,7 +33,6 @@
 	</div>
 </header>
 
-<!-- Main Content -->
 <div class="flex flex-1 flex-col">
 	<div class="flex-1 space-y-6 p-6 md:p-10">
 		<div>

@@ -176,8 +176,8 @@
 	{:else if !workspaceSummary}
 		<Card.Root class="max-w-xl gap-0 py-0">
 			<Card.Header class="p-4 pb-3">
-				<Card.Title>Initialize developer settings</Card.Title>
-				<Card.Description>Create the workspace record before issuing API keys.</Card.Description>
+				<Card.Title>Create developer settings</Card.Title>
+				<Card.Description>Create a workspace before issuing API keys.</Card.Description>
 			</Card.Header>
 			<Card.Content class="p-4 pt-0">
 				<Button onclick={ensureWorkspace} disabled={isBusy || !clientCurrentUser}>

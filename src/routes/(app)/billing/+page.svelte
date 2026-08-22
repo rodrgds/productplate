@@ -55,7 +55,6 @@
 		products?: CustomerProduct[];
 	}
 
-	// Get Convex client for actions (checkout/portal)
 	const client = useConvexClient();
 	const workspaceResponse = useQuery(api.organizations.getBillingOverview, {});
 	let workspace = $derived(workspaceResponse.data);
@@ -63,9 +62,7 @@
 	let pendingProductId = $state<string | null>(null);
 	let actionError = $state('');
 
-	// Get data from server load function
 	let products = $derived<Product[]>(data.products || []);
-	// customerData from autumn.customers.get() - nested under data.data
 	let customerData = $derived<CustomerData | null>(
 		(data.customerData as CustomerData | null) ?? null
 	);
@@ -124,8 +121,6 @@
 		}
 	}
 
-	// Get active product IDs from customer data
-	// customerData.products is an array of product objects with { id, status }
 	let activeProductIds = $derived<Set<string>>(
 		Array.isArray(customerData?.products)
 			? new Set(
@@ -136,11 +131,9 @@
 			: new Set()
 	);
 
-	// Get current plan info from customerData.products (active subscription)
 	let currentPlan = $derived.by<Plan | null>(() => {
 		if (!customerData?.products || activeProductIds.size === 0) return null;
 
-		// Get the active product from customer data
 		const activeCustomerProduct = customerData.products.find(
 			(p) => p.status === 'active' && activeProductIds.has(p.id)
 		);
@@ -165,7 +158,6 @@
 		};
 	});
 
-	// Map products to display format
 	let plans = $derived<Plan[]>(
 		Array.isArray(products)
 			? products.map((product) => {
@@ -193,7 +185,6 @@
 	<title>Billing | {APP_NAME}</title>
 </svelte:head>
 
-<!-- Header -->
 <header
 	class="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
 >
@@ -204,7 +195,6 @@
 	</div>
 </header>
 
-<!-- Main Content -->
 <div class="flex flex-1 flex-col">
 	<div class="flex-1 space-y-6 p-6 md:p-10">
 		<div>
@@ -234,10 +224,9 @@
 			</Card.Root>
 		{/if}
 
-		<!-- Current Plan Section -->
 		<div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
 			<div class="space-y-4">
-				<h3 class="text-lg font-semibold">Current Plan</h3>
+				<h3 class="text-lg font-semibold">Current plan</h3>
 				{#if currentPlan}
 					<Card.Root>
 						<Card.Header>
@@ -246,7 +235,7 @@
 								{#if currentPlan.price > 0}
 									${currentPlan.price}/{currentPlan.interval} · Active subscription
 								{:else}
-									You're currently on the {currentPlan.name.toLowerCase()}
+									You are on the {currentPlan.name.toLowerCase()} plan.
 								{/if}
 							</Card.Description>
 						</Card.Header>
@@ -275,7 +264,7 @@
 					<Card.Root>
 						<Card.Header>
 							<Card.Title>No Active Plan</Card.Title>
-							<Card.Description>Choose a plan below to get started</Card.Description>
+							<Card.Description>Choose a plan below.</Card.Description>
 						</Card.Header>
 					</Card.Root>
 				{/if}
@@ -311,14 +300,13 @@
 			</Card.Root>
 		</div>
 
-		<!-- Available Plans Section -->
 		<div class="space-y-4">
-			<h3 class="text-lg font-semibold">Available Plans</h3>
+			<h3 class="text-lg font-semibold">Available plans</h3>
 			<div class="grid gap-6 md:grid-cols-2">
 				{#each plans as plan (plan.id)}
 					<Card.Root class="relative">
 						{#if plan.isCurrent}
-							<Badge class="absolute top-4 right-4">Current Plan</Badge>
+							<Badge class="absolute top-4 right-4">Current plan</Badge>
 						{/if}
 						<Card.Header>
 							<Card.Title>{plan.name}</Card.Title>
@@ -339,7 +327,7 @@
 						</Card.Content>
 						<Card.Footer>
 							{#if plan.isCurrent}
-								<Button variant="outline" disabled class="w-full">Current Plan</Button>
+								<Button variant="outline" disabled class="w-full">Current plan</Button>
 							{:else}
 								<Button
 									class="w-full"

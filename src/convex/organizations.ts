@@ -421,7 +421,7 @@ async function createOrganizationForUser(
 		userId: args.userId,
 		type: 'system',
 		title: 'Workspace ready',
-		body: 'Your starter workspace now has members, entitlements, API keys, and notifications wired.',
+		body: 'Your workspace has members, entitlements, API keys, and notifications ready.',
 		actionUrl: '/workspace',
 		createdAt: now
 	});

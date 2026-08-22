@@ -146,7 +146,7 @@
 				<Card.Title class="flex items-center gap-2"
 					><Building2 class="size-5 text-primary" />Create your workspace</Card.Title
 				>
-				<Card.Description>Initialize the workspace for this signed-in user.</Card.Description>
+				<Card.Description>Create the workspace for this account.</Card.Description>
 			</Card.Header>
 			<Card.Content class="p-4 pt-0"
 				><Button onclick={ensureWorkspace} disabled={isBusy || !clientCurrentUser}

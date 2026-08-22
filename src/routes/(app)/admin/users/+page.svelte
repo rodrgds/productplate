@@ -32,19 +32,16 @@
 		{ value: 'admin', label: 'Admin' }
 	];
 
-	// Get current user
 	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
 	const convex = useConvexClient();
 	let currentUser = $derived(currentUserResponse.data);
 
-	// State for users list
 	let users = $state<User[]>([]);
 	let totalUsers = $state(0);
 	let currentPage = $state(1);
 	let perPage = $state(25);
 	let isLoadingUsers = $state(true);
 
-	// Dialog state
 	let showCreateDialog = $state(false);
 	let newUserName = $state('');
 	let newUserEmail = $state('');
@@ -52,15 +49,12 @@
 	let newUserRole = $state('user');
 	let isCreating = $state(false);
 
-	// Alert dialog state for delete confirmation
 	let showDeleteDialog = $state(false);
 	let userToDelete = $state<string | null>(null);
 
-	// Alert dialog state for ban confirmation
 	let showBanDialog = $state(false);
 	let userToBan = $state<{ id: string; shouldBan: boolean } | null>(null);
 
-	// Load users
 	async function loadUsers() {
 		isLoadingUsers = true;
 		try {
@@ -88,16 +82,8 @@
 		}
 	}
 
-	// Load users on mount
 	$effect(() => {
 		loadUsers();
-	});
-
-	// Reload users when page changes
-	$effect(() => {
-		if (currentPage) {
-			loadUsers();
-		}
 	});
 
 	async function handleCreateUser() {
@@ -126,7 +112,6 @@
 			newUserPassword = '';
 			newUserRole = 'user';
 
-			// Go to first page and reload users list
 			currentPage = 1;
 			await loadUsers();
 		} catch (error) {
@@ -216,7 +201,6 @@
 		return new Date(date).toLocaleDateString();
 	}
 
-	// Derived value for create dialog role label
 	let createDialogRoleLabel = $derived(
 		roleOptions.find((r) => r.value === newUserRole)?.label || 'User'
 	);
@@ -226,7 +210,6 @@
 	<title>Users | Admin</title>
 </svelte:head>
 
-<!-- Header -->
 <header
 	class="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
 >
@@ -243,7 +226,6 @@
 	</div>
 </header>
 
-<!-- Main Content -->
 <div class="flex flex-1 flex-col">
 	<div class="flex-1 space-y-6 p-6 md:p-10">
 		<div>
@@ -253,7 +235,6 @@
 
 		<Separator />
 
-		<!-- Users Table -->
 		<div class="rounded-md border">
 			<Table.Root>
 				<Table.Header>
@@ -380,7 +361,6 @@
 			</Table.Root>
 		</div>
 
-		<!-- Pagination -->
 		{#if totalUsers > perPage}
 			<div class="mt-4 flex items-center justify-between">
 				<p class="text-sm text-muted-foreground">
@@ -419,7 +399,6 @@
 	</div>
 </div>
 
-<!-- Create User Dialog -->
 <Dialog.Root bind:open={showCreateDialog}>
 	<Dialog.Content>
 		<Dialog.Header>
@@ -464,7 +443,6 @@
 	</Dialog.Content>
 </Dialog.Root>
 
-<!-- Ban User Alert Dialog -->
 <AlertDialog.Root bind:open={showBanDialog}>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
@@ -489,7 +467,6 @@
 	</AlertDialog.Content>
 </AlertDialog.Root>
 
-<!-- Delete User Alert Dialog -->
 <AlertDialog.Root bind:open={showDeleteDialog}>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
