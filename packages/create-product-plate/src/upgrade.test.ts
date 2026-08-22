@@ -31,18 +31,23 @@ interface ReleasedV1UpgradeManifest {
 	files: Record<string, { content?: string; url?: string; sha256: string }>;
 }
 
-function parseWithReleasedV1Client(input: unknown) {
-	const release = input as ReleasedV1UpgradeManifest;
-	if (release.schemaVersion !== 1 || !/^\d+\.\d+\.\d+/.test(release.version)) {
+// SAFETY: the fixture mimics the released client's manifest; the guard below
+// rejects fixtures that do not carry the v1 schema fields.
+function parseWithReleasedV1Client(input: ReleasedV1UpgradeManifest) {
+	if (input.schemaVersion !== 1 || !/^\d+\.\d+\.\d+/.test(input.version)) {
 		throw new Error('The upgrade release manifest is invalid.');
 	}
-	return release;
+	return input;
 }
 
 async function planWithReleasedV1Client(cwd: string, release: ReleasedV1UpgradeManifest) {
-	const state = (await Bun.file(join(cwd, '.product-plate/managed-files.json')).json()) as {
+	interface ManagedFilesState {
 		files: Record<string, string>;
-	};
+	}
+	// SAFETY: the fixture writes this file before the plan runs.
+	const state = (await Bun.file(
+		join(cwd, '.product-plate/managed-files.json')
+	).json()) as ManagedFilesState;
 	const updates: Array<string> = [];
 	const conflicts: Array<string> = [];
 	for (const [file, asset] of Object.entries(release.files)) {

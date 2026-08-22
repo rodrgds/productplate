@@ -1,5 +1,7 @@
 import { z } from 'zod/v3';
 
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
 const blogMetadataSchema = z.object({
 	title: z.string().trim().min(1).max(120),
 	description: z.string().trim().min(1).max(240),
@@ -21,13 +23,19 @@ export interface BlogPostMetadata extends z.infer<typeof blogMetadataSchema> {
 	slug: string;
 }
 
+/** Frontmatter as mdsvex exposes it: plain JSON-style data. */
+type RawBlogMetadata = { [key: string]: JsonValue };
+
 interface BlogModule {
-	metadata?: unknown;
+	metadata?: RawBlogMetadata;
 }
 
 const modules = import.meta.glob<BlogModule>('/content/blog/*.svx', { eager: true });
 
-export function parseBlogMetadata(slug: string, metadata: unknown): BlogPostMetadata {
+export function parseBlogMetadata(
+	slug: string,
+	metadata: RawBlogMetadata | undefined
+): BlogPostMetadata {
 	const result = blogMetadataSchema.safeParse(metadata);
 	if (!result.success)
 		throw new Error(`Invalid blog metadata for ${slug}: ${result.error.message}`);

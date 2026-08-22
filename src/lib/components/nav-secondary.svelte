@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { resolve } from '$app/paths';
+	import { resolveAppPath } from '$lib/utils.js';
 	import { page } from '$app/state';
 	import type { WithoutChildren } from '$lib/utils.js';
 	import type { ComponentProps, Component } from 'svelte';
@@ -20,7 +20,7 @@
 
 	function isActive(url: string) {
 		if (!url.startsWith('/')) return false;
-		const href = resolve(url as '/');
+		const href = resolveAppPath(url);
 		return page.url.pathname === href || page.url.pathname.startsWith(`${href}/`);
 	}
 </script>
@@ -34,7 +34,7 @@
 						{#snippet child({ props })}
 							{#if item.url && item.url.startsWith('/')}
 								<a
-									href={resolve(item.url as '/')}
+									href={resolveAppPath(item.url)}
 									{...props}
 									onclick={closeMobileSidebar}
 									aria-current={isActive(item.url) ? 'page' : undefined}

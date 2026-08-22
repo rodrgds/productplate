@@ -39,7 +39,7 @@
 	let showRevokeDialog = $state(false);
 
 	let sampleRequest = $derived(`curl -X POST "${
-		typeof location === 'undefined' ? 'https://your-convex-site' : location.origin
+		globalThis.location?.origin ?? 'https://your-convex-site'
 	}/api/template-event" \\
   -H "Authorization: Bearer ${revealedKey || 'pp_live_...'}" \\
   -H "Content-Type: application/json" \\
@@ -70,7 +70,7 @@
 		}
 	}
 
-	async function runAction(action: () => Promise<unknown>, success: string) {
+	async function runAction<TResult>(action: () => Promise<TResult>, success: string) {
 		if (isBusy) return false;
 
 		isBusy = true;

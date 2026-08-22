@@ -336,10 +336,14 @@ export async function runDoctor(options: DoctorOptions): Promise<DoctorResult> {
 		)
 	);
 
-	const packageJson = (await Bun.file(join(options.cwd, 'package.json')).json()) as {
+	interface GeneratedPackageJsonDeps {
 		dependencies?: Record<string, string>;
 		devDependencies?: Record<string, string>;
-	};
+	}
+	// SAFETY: generated apps always ship a JSON package manifest.
+	const packageJson = (await Bun.file(
+		join(options.cwd, 'package.json')
+	).json()) as GeneratedPackageJsonDeps;
 	const installed = { ...packageJson.dependencies, ...packageJson.devDependencies };
 	const forbidden = profile.removeDependencies.filter((dependency) => dependency in installed);
 	checks.push({

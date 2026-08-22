@@ -54,7 +54,7 @@ export class SoundPreferences {
 	}
 
 	private getBrowserStorage(): SoundPreferenceStorage | null {
-		return typeof localStorage === 'undefined' ? null : localStorage;
+		return globalThis.localStorage ?? null;
 	}
 
 	private readPreference() {

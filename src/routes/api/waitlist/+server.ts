@@ -1,4 +1,5 @@
 import { env } from '$env/dynamic/private';
+import { z } from 'zod/v3';
 import { env as publicEnv } from '$env/dynamic/public';
 import { APP_NAME } from '$lib/constants';
 import { deliverProductEmail, renderProductEmail } from '$lib/email/service';
@@ -17,19 +18,17 @@ import { zod } from 'sveltekit-superforms/adapters';
 
 const acceptedResponse = { accepted: true } as const;
 
-function optionalValue(value: FormDataEntryValue | null) {
-	return typeof value === 'string' && value.trim() ? value : undefined;
-}
+// The honeypot field must look filled for the submission to be dropped as spam.
+const honeypotSchema = z.object({ website: z.string() });
 
-function parseBody(body: string, contentType: string) {
-	if (contentType.includes('application/json')) return JSON.parse(body) as unknown;
+function parseFormBody(body: string) {
 	const form = new URLSearchParams(body);
 	return {
 		email: form.get('email'),
-		source: optionalValue(form.get('source')),
-		utmSource: optionalValue(form.get('utmSource')),
-		utmMedium: optionalValue(form.get('utmMedium')),
-		utmCampaign: optionalValue(form.get('utmCampaign')),
+		source: form.get('source') ?? undefined,
+		utmSource: form.get('utmSource') ?? undefined,
+		utmMedium: form.get('utmMedium') ?? undefined,
+		utmCampaign: form.get('utmCampaign') ?? undefined,
 		website: form.get('website') ?? ''
 	};
 }
@@ -46,17 +45,16 @@ export const POST: RequestHandler = async ({ request, url }) => {
 
 	let parsedBody: unknown;
 	try {
-		parsedBody = parseBody(body, request.headers.get('content-type') ?? '');
+		if (request.headers.get('content-type')?.includes('application/json')) {
+			parsedBody = JSON.parse(body);
+		} else {
+			parsedBody = parseFormBody(body);
+		}
 	} catch {
 		return json({ accepted: false, error: 'Use a valid JSON or form body.' }, { status: 400 });
 	}
-	if (
-		parsedBody &&
-		typeof parsedBody === 'object' &&
-		'website' in parsedBody &&
-		typeof parsedBody.website === 'string' &&
-		parsedBody.website.trim()
-	) {
+	const honeypot = honeypotSchema.safeParse(parsedBody);
+	if (honeypot.success && honeypot.data.website.trim()) {
 		return json(acceptedResponse, { status: 202 });
 	}
 	const parsedSubmission = waitlistFormSchema.safeParse(parsedBody);

@@ -65,11 +65,13 @@ describe('generated profile verification', () => {
 	});
 
 	it('keeps generated dependency audits on fixed transitive versions', async () => {
-		const packageJson = JSON.parse(await readFile('package.json', 'utf8')) as {
+		interface PackageJson {
 			dependencies?: Record<string, string>;
 			devDependencies?: Record<string, string>;
 			overrides?: Record<string, string>;
-		};
+		}
+		// SAFETY: package.json in this repo always parses as JSON.
+		const packageJson = JSON.parse(await readFile('package.json', 'utf8')) as PackageJson;
 		const lockfile = await readFile('bun.lock', 'utf8');
 
 		expect(packageJson.dependencies?.nanoid).toBe('5.1.16');

@@ -7,6 +7,10 @@
 		APP_URL
 	} from '$lib/constants';
 
+	/** JSON-LD data: nested records of JSON scalars, arrays, and other records. */
+	type JsonLdValue = string | number | boolean | null | JsonLdObject | JsonLdValue[];
+	type JsonLdObject = { [key: string]: JsonLdValue };
+
 	interface Props {
 		title?: string;
 		description?: string;
@@ -14,7 +18,7 @@
 		image?: string;
 		robots?: string;
 		type?: 'website' | 'article';
-		schema?: Record<string, unknown> | Array<Record<string, unknown>>;
+		schema?: JsonLdObject | JsonLdObject[];
 	}
 
 	let {

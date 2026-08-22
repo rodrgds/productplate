@@ -28,7 +28,9 @@ if (!version || !/^\d+\.\d+\.\d+$/.test(version)) {
 	throw new Error('Pass a semantic version, for example: bun run release:assets -- 1.0.0');
 }
 
+// SAFETY: both manifests are committed JSON that always parses.
 const rootPackage = (await Bun.file('package.json').json()) as PackageManifest;
+// SAFETY: same committed manifest contract as above.
 const generatorPackage = (await Bun.file(
 	'packages/create-product-plate/package.json'
 ).json()) as PackageManifest;
@@ -81,13 +83,12 @@ try {
 		'src/convex/readiness.ts',
 		'src/routes/api/health/+server.ts'
 	];
-	const profileAssets: Record<
-		(typeof profiles)[number],
-		{ files: Record<string, { content: string; sha256: string }> }
-	> = {} as Record<
+	type ProfileAssets = Record<
 		(typeof profiles)[number],
 		{ files: Record<string, { content: string; sha256: string }> }
 	>;
+	// SAFETY: the loop below fills every profile key before this value is read.
+	const profileAssets = {} as ProfileAssets;
 	for (const profile of profiles) {
 		const generated = join(temporaryDirectory, profile);
 		await generateProject({

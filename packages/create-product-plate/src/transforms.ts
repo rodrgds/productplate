@@ -972,15 +972,15 @@ async function stripRepositoryOnlyDevenvCommands(destination: string, productNam
 	if (next !== content) await writeFile(devenvPath, next);
 }
 
-async function rewriteGeneratedEslintGuidance(destination: string) {
-	const eslintPath = join(destination, 'eslint.config.js');
-	if (!(await exists(eslintPath))) return;
-	const content = await readFile(eslintPath, 'utf8');
+async function rewriteGeneratedLintGuidance(destination: string) {
+	const oxlintPath = join(destination, 'oxlint.config.ts');
+	if (!(await exists(oxlintPath))) return;
+	const content = await readFile(oxlintPath, 'utf8');
 	const next = content.replace(
 		'Prefer Svelte 5 runes for local state. See docs/svelte/advanced_state_management.md when a shared store is still appropriate.',
 		'Prefer Svelte 5 runes for local state. Use a Svelte store only for state shared outside a component tree.'
 	);
-	if (next !== content) await writeFile(eslintPath, next);
+	if (next !== content) await writeFile(oxlintPath, next);
 }
 
 async function preferCloudflareDeploymentUrl(destination: string) {
@@ -1041,7 +1041,7 @@ export async function applyProfileTransforms(destination: string, manifest: Prod
 	await write(destination, 'vite.config.ts', generatedViteConfig());
 	await stripPwaTypeReferences(destination);
 	await stripRepositoryOnlyDevenvCommands(destination, manifest.product.name);
-	await rewriteGeneratedEslintGuidance(destination);
+	await rewriteGeneratedLintGuidance(destination);
 	await preferCloudflareDeploymentUrl(destination);
 	if (manifest.profile === 'ai-saas') await protectAiProviderConfiguration(destination);
 
@@ -1168,11 +1168,13 @@ function packageName(specifier: string) {
 
 export async function pruneUnusedDependencies(destination: string) {
 	const packagePath = join(destination, 'package.json');
-	const packageJson = (await Bun.file(packagePath).json()) as {
+	interface TemplatePackageJson {
 		dependencies?: Record<string, string>;
 		devDependencies?: Record<string, string>;
 		scripts?: Record<string, string>;
-	};
+	}
+	// SAFETY: the template package.json is committed and always parses.
+	const packageJson = (await Bun.file(packagePath).json()) as TemplatePackageJson;
 	const declaredDependencies = new Set([
 		...Object.keys(packageJson.dependencies ?? {}),
 		...Object.keys(packageJson.devDependencies ?? {})
@@ -1190,14 +1192,16 @@ export async function pruneUnusedDependencies(destination: string) {
 	const files = [
 		...(await allFiles(join(destination, 'src'))),
 		...(await allFiles(join(destination, 'scripts'))),
-		...(await allFiles(join(destination, 'e2e')))
+		...(await allFiles(join(destination, 'e2e'))),
+		// The vendored Oxlint plugin imports its runtime package from here.
+		...(await allFiles(join(destination, 'tools')))
 	].filter((file) => analyzableExtensions.has(extname(file)));
 	for (const file of [
-		'.prettierrc',
+		'.oxfmtrc.json',
 		'tsconfig.json',
 		'vite.config.ts',
 		'svelte.config.js',
-		'eslint.config.js',
+		'oxlint.config.ts',
 		'playwright.config.ts'
 	]) {
 		const path = join(destination, file);
@@ -1231,15 +1235,17 @@ export async function pruneUnusedDependencies(destination: string) {
 		usesTypeScript ||= ['.ts', '.svelte'].includes(extname(file));
 	}
 	const scripts = Object.values(packageJson.scripts ?? {}).join('\n');
-	const binaryOverrides: Record<string, Array<string>> = {
+	const binaryOverrides = {
 		'@playwright/test': ['playwright'],
 		'@sveltejs/kit': ['svelte-kit'],
 		'create-product-plate': ['create-product-plate', 'product-plate'],
 		typescript: ['tsc', 'tsserver']
-	};
+	} satisfies Record<string, string[]>;
 	for (const dependency of declaredDependencies) {
 		const defaultBinary = dependency.startsWith('@') ? dependency.split('/')[1] : dependency;
-		for (const binary of binaryOverrides[dependency] ?? [defaultBinary]) {
+		// SAFETY: overrides only declare entries for known dependencies.
+		const binaries = binaryOverrides[dependency as keyof typeof binaryOverrides] ?? [defaultBinary];
+		for (const binary of binaries) {
 			const escapedBinary = binary.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 			if (new RegExp(`(?:^|[\\s;&|()])${escapedBinary}(?=$|[\\s;&|()])`).test(scripts)) {
 				used.add(dependency);

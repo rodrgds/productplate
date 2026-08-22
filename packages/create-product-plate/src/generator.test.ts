@@ -82,11 +82,12 @@ async function makeTemplate() {
 			},
 			devDependencies: {
 				'@edge-runtime/vm': '1.0.0',
+				'@oxlint/plugins': '1.0.0',
 				'@types/node': '1.0.0',
 				'@vite-pwa/sveltekit': '1.0.0',
 				'convex-test': '1.0.0',
-				prettier: '1.0.0',
-				'prettier-plugin-svelte': '1.0.0',
+				oxfmt: '1.0.0',
+				oxlint: '1.0.0',
 				typescript: '1.0.0',
 				'vite-plugin-pwa': '1.0.0',
 				vitest: '4.1.10',
@@ -96,15 +97,14 @@ async function makeTemplate() {
 	);
 	await writeFile(join(template, 'bun.lock'), 'stale monorepo lock');
 	await writeFile(
-		join(template, '.prettierrc'),
+		join(template, '.oxfmtrc.json'),
 		JSON.stringify({
 			useTabs: true,
 			singleQuote: true,
 			trailingComma: 'none',
 			printWidth: 100,
-			plugins: ['prettier-plugin-svelte', 'prettier-plugin-tailwindcss'],
-			overrides: [{ files: '*.svelte', options: { parser: 'svelte' } }],
-			tailwindStylesheet: './src/app.css'
+			svelte: {},
+			sortTailwindcss: { stylesheet: './src/app.css' }
 		})
 	);
 	await writeFile(
@@ -114,6 +114,11 @@ async function makeTemplate() {
 declare global { namespace App {} }
 export {};
 `
+	);
+	await mkdir(join(template, 'tools/oxlint/anti-slop'), { recursive: true });
+	await writeFile(
+		join(template, 'tools/oxlint/anti-slop/index.ts'),
+		"import { eslintCompatPlugin } from '@oxlint/plugins';\nexport default eslintCompatPlugin({ meta: { name: 'anti-slop' }, rules: {} });\n"
 	);
 	await writeFile(join(template, 'src/routes/+page.svelte'), '<h1>Product Plate</h1>');
 	await writeFile(
@@ -242,7 +247,7 @@ describe('project generation', () => {
 			"Example only: import 'docs-only';\n"
 		);
 		await writeFile(
-			join(destination, '.prettierrc'),
+			join(destination, '.oxfmtrc.json'),
 			JSON.stringify({ plugins: ['config-plugin'] })
 		);
 
@@ -363,9 +368,9 @@ describe('project generation', () => {
 		).join('');
 		expect(devenv).not.toContain('echo "  Product Plate"');
 		expect(devenv).toContain(`printf '  ${encodedBanner}\\n'`);
-		const eslintConfig = await Bun.file(join(destination, 'eslint.config.js')).text();
-		expect(eslintConfig).not.toContain('docs/svelte/advanced_state_management.md');
-		expect(eslintConfig).toContain('Use a Svelte store only for state shared outside');
+		const oxlintConfig = await Bun.file(join(destination, 'oxlint.config.ts')).text();
+		expect(oxlintConfig).not.toContain('docs/svelte/advanced_state_management.md');
+		expect(oxlintConfig).toContain('Use a Svelte store only for state shared outside');
 	});
 
 	test('keeps no-install output formatted before recording managed hashes', async () => {
@@ -630,7 +635,11 @@ describe('project generation', () => {
 		expect(packageJson.devDependencies).not.toHaveProperty('@vite-pwa/sveltekit');
 		expect(packageJson.devDependencies).not.toHaveProperty('vite-plugin-pwa');
 		expect(packageJson.devDependencies).not.toHaveProperty('workbox-window');
-		expect(packageJson.devDependencies).toHaveProperty('prettier-plugin-svelte');
+		expect(packageJson.devDependencies).not.toHaveProperty('prettier');
+		expect(packageJson.devDependencies).not.toHaveProperty('prettier-plugin-svelte');
+		expect(packageJson.devDependencies).toHaveProperty('oxfmt');
+		expect(packageJson.devDependencies).toHaveProperty('oxlint');
+		expect(packageJson.devDependencies).toHaveProperty('@oxlint/plugins');
 		expect(packageJson.devDependencies).toHaveProperty('typescript');
 		expect(await Bun.file(join(destination, 'src/app.d.ts')).text()).not.toContain(
 			'vite-plugin-pwa'

@@ -63,6 +63,7 @@
 	let actionError = $state('');
 
 	let products = $derived<Product[]>(data.products || []);
+	// SAFETY: the server load always answers with { products, customerData } JSON.
 	let customerData = $derived<CustomerData | null>(
 		(data.customerData as CustomerData | null) ?? null
 	);

@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import { api } from '$convex/_generated/api.js';
 	import { APP_NAME } from '$lib/constants.js';
+	import { resolveAppPath } from '$lib/utils.js';
 	import { isDemoAccountEmail } from '$lib/demo-account.js';
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -142,7 +143,7 @@
 			<nav aria-label="Product workbench" class="divide-y">
 				{#each availableLinks as item (item.href)}
 					<a
-						href={resolve(item.href as '/')}
+						href={resolveAppPath(item.href)}
 						class="group flex min-h-16 items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset sm:px-6"
 					>
 						<span

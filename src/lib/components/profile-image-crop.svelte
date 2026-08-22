@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { useImageEditor } from '@uppy/svelte';
 	import type { UppyFile } from '@uppy/core';
+	import type { Body, Meta } from '@uppy/utils';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import {
 		RotateCcw,
@@ -18,7 +19,7 @@
 		onSave,
 		isUploading
 	}: {
-		file: UppyFile<Record<string, unknown>, Record<string, unknown>>;
+		file: UppyFile<Meta, Body>;
 		onSave: () => void;
 		isUploading: boolean;
 	} = $props();

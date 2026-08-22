@@ -42,7 +42,7 @@
 
 	const headingFonts = ['inherit', ...fonts] as const;
 
-	const styleDetails: Record<ThemePreset['style'], string> = {
+	const styleDetails = {
 		operational: 'Balanced spacing and app-first rhythm.',
 		default: 'The classic shadcn-style baseline.',
 		'new-york': 'Sharper controls and denser app chrome.',
@@ -53,13 +53,13 @@
 		mono: 'Technical typography without the console shell.',
 		console: 'Sharper, technical, command-center styling.',
 		spacious: 'Large panels and relaxed product marketing rhythm.'
-	};
+	} satisfies Record<ThemePreset['style'], string>;
 
-	const menuColorLabels: Record<ThemePreset['menuColor'], string> = {
+	const menuColorLabels = {
 		default: 'Default',
 		inverted: 'Inverted',
 		translucent: 'Translucent'
-	};
+	} satisfies Record<ThemePreset['menuColor'], string>;
 
 	const modeOptions = [
 		{ label: 'Light', value: 'light', icon: SunIcon },

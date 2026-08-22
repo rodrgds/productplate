@@ -1,4 +1,5 @@
 import { env } from '$env/dynamic/private';
+import type { RequestHandler } from './$types';
 import { api } from '$convex/_generated/api.js';
 import { createConvexHttpClient } from '@mmailaender/convex-better-auth-svelte/sveltekit';
 import { createOpenAI } from '@ai-sdk/openai';
@@ -86,7 +87,7 @@ function evaluateExpression(expr: string): number {
 	return parseExpression();
 }
 
-export async function POST({ request, locals }) {
+export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!env.OPENROUTER_API_KEY) {
 		return new Response('OPENROUTER_API_KEY is not configured.', { status: 503 });
 	}
@@ -100,21 +101,17 @@ export async function POST({ request, locals }) {
 	if (new TextEncoder().encode(bodyText).byteLength > MAX_CHAT_BODY_BYTES) {
 		return new Response('Request body is too large.', { status: 413 });
 	}
-	let body: unknown;
+	const chatRequestSchema = z.object({
+		messages: z.array(z.unknown()).min(1).max(MAX_CHAT_MESSAGES)
+	});
+
+	let body: z.infer<typeof chatRequestSchema>;
 	try {
-		body = JSON.parse(bodyText);
+		const parsed = chatRequestSchema.safeParse(JSON.parse(bodyText));
+		if (!parsed.success) return new Response('Invalid message list.', { status: 400 });
+		body = parsed.data;
 	} catch {
 		return new Response('Invalid JSON body.', { status: 400 });
-	}
-	if (
-		!body ||
-		typeof body !== 'object' ||
-		!('messages' in body) ||
-		!Array.isArray(body.messages) ||
-		body.messages.length === 0 ||
-		body.messages.length > MAX_CHAT_MESSAGES
-	) {
-		return new Response('Invalid message list.', { status: 400 });
 	}
 	const validation = await safeValidateUIMessages({ messages: body.messages });
 	if (!validation.success) return new Response('Invalid chat messages.', { status: 400 });
@@ -157,7 +154,7 @@ export async function POST({ request, locals }) {
 
 					try {
 						const result = evaluateExpression(expression);
-						if (typeof result !== 'number' || !Number.isFinite(result)) {
+						if (!Number.isFinite(result)) {
 							return { expression, error: 'The expression did not produce a finite number.' };
 						}
 						return { expression, result };
@@ -172,4 +169,4 @@ export async function POST({ request, locals }) {
 	return result.toUIMessageStreamResponse({
 		originalMessages: messages
 	});
-}
+};

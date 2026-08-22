@@ -26,7 +26,8 @@
 	let position = $state({ x: 260, y: 180 });
 
 	function handlePointerMove(event: PointerEvent) {
-		const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+		if (!(event.currentTarget instanceof HTMLElement)) return;
+		const rect = event.currentTarget.getBoundingClientRect();
 		position = {
 			x: event.clientX - rect.left,
 			y: event.clientY - rect.top

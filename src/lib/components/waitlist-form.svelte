@@ -8,12 +8,13 @@
 	let status = $state<'idle' | 'submitting' | 'accepted' | 'error'>('idle');
 	let message = $state('');
 
-	async function submit(event: SubmitEvent) {
+	async function submit(event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }) {
 		event.preventDefault();
-		const form = event.currentTarget as HTMLFormElement;
+		const form = event.currentTarget;
 		const body = new SvelteURLSearchParams();
 		for (const [key, value] of new FormData(form)) {
-			if (typeof value === 'string') body.append(key, value);
+			// The waitlist form has no file inputs; skip any that appear.
+			if (!(value instanceof File)) body.append(key, value);
 		}
 		status = 'submitting';
 		message = '';
@@ -23,6 +24,7 @@
 				body,
 				headers: { accept: 'application/json' }
 			});
+			// SAFETY: the endpoint always answers with { accepted, error? } JSON.
 			const result = (await response.json()) as { accepted: boolean; error?: string };
 			if (!response.ok || !result.accepted) {
 				status = 'error';

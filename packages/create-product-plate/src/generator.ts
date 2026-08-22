@@ -13,10 +13,10 @@ import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { execPath } from 'node:process';
 import { createHash, randomBytes } from 'node:crypto';
+import { existsSync } from 'node:fs';
 import {
 	format as formatWithPrettier,
 	getFileInfo,
-	resolveConfig,
 	type Options as PrettierOptions
 } from 'prettier';
 import * as sveltePrettierPlugin from 'prettier-plugin-svelte';
@@ -149,7 +149,10 @@ async function assertTemplateHasNoSymlinks(templatePath: string) {
 }
 
 async function formatGeneratedProject(destination: string) {
-	const ignorePaths = [join(destination, '.gitignore'), join(destination, '.prettierignore')];
+	const ignorePaths = [
+		join(destination, '.gitignore'),
+		join(destination, '.prettierignore')
+	].filter((path) => existsSync(path));
 	const plugins = [sveltePrettierPlugin, tailwindPrettierPlugin];
 	const tailwindStylesheet = join(destination, 'src/app.css');
 	const visit = async (directory: string) => {
@@ -165,13 +168,16 @@ async function formatGeneratedProject(destination: string) {
 				withNodeModules: false
 			});
 			if (fileInfo.ignored || !fileInfo.inferredParser) continue;
-			const resolvedOptions = await resolveConfig(target);
-			if (resolvedOptions) delete resolvedOptions.plugins;
+			// Match the shipped .oxfmtrc.json contract so generated files survive
+			// both the generator pass and any later prettier-based proof run.
 			const options: PrettierOptions & { tailwindStylesheet: string } = {
-				...resolvedOptions,
 				filepath: target,
 				plugins,
-				tailwindStylesheet
+				tailwindStylesheet,
+				useTabs: true,
+				singleQuote: true,
+				trailingComma: 'none',
+				printWidth: 100
 			};
 			const contents = await readFile(target, 'utf8');
 			const formatted = await formatWithPrettier(contents, options);
@@ -490,12 +496,19 @@ async function rewritePackageJson(
 	removeDependencies: Array<string>,
 	generatorSpecifier: string
 ) {
-	const packagePath = join(destination, 'package.json');
-	const packageJson = JSON.parse(await readFile(packagePath, 'utf8')) as Record<string, unknown> & {
+	interface GeneratedPackageJson {
+		name?: string;
+		version?: string;
+		private?: boolean;
+		workspaces?: unknown;
+		repository?: unknown;
 		dependencies?: Record<string, string>;
 		devDependencies?: Record<string, string>;
 		scripts?: Record<string, string>;
-	};
+	}
+	const packagePath = join(destination, 'package.json');
+	// SAFETY: the template package.json is committed and always parses.
+	const packageJson = JSON.parse(await readFile(packagePath, 'utf8')) as GeneratedPackageJson;
 	packageJson.name = manifest.product.slug;
 	packageJson.version = '0.1.0';
 	packageJson.private = true;
@@ -505,43 +518,44 @@ async function rewritePackageJson(
 		delete packageJson.dependencies?.[dependency];
 		delete packageJson.devDependencies?.[dependency];
 	}
-	packageJson.devDependencies = {
-		...packageJson.devDependencies,
-		'create-product-plate': generatorSpecifier
-	};
+	const devDependencies = { ...packageJson.devDependencies };
+	devDependencies['create-product-plate'] = generatorSpecifier;
+	packageJson.devDependencies = devDependencies;
 	packageJson.scripts = {
 		dev: 'vite dev',
 		build: 'vite build',
 		preview: 'vite preview',
 		prepare: 'svelte-kit sync',
 		check: 'svelte-kit sync && svelte-check --tsconfig ./tsconfig.json',
-		format: 'prettier --write .',
-		'format:check': 'prettier --check .',
-		lint: 'prettier --check . && eslint .',
+		format: 'oxfmt --write .',
+		'format:check': 'oxfmt --check .',
+		lint: 'oxfmt --check . && oxlint',
 		'test:unit': 'vitest run',
 		'test:e2e': 'playwright test',
 		audit: 'bun audit --audit-level high',
-		...(manifest.profile === 'prelaunch'
-			? { 'waitlist:export': 'bun scripts/waitlist-export.ts' }
-			: {}),
 		verify: 'bun run lint && bun run check && bun run test:unit',
 		doctor: 'product-plate doctor',
 		'verify:launch':
 			'bun run lint && bun run check && bun run test:unit && bun run audit && bun run build && bun run test:e2e && bun run doctor -- --strict'
 	};
+	if (manifest.profile === 'prelaunch') {
+		packageJson.scripts['waitlist:export'] = 'bun scripts/waitlist-export.ts';
+	}
 	await writeFile(packagePath, `${JSON.stringify(packageJson, null, '\t')}\n`);
 }
 
 function escapeXml(value: string) {
+	const entities = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&apos;'
+	} as const;
+
 	return value.replace(/[&<>"']/g, (character) => {
-		const entities: Record<string, string> = {
-			'&': '&amp;',
-			'<': '&lt;',
-			'>': '&gt;',
-			'"': '&quot;',
-			"'": '&apos;'
-		};
-		return entities[character];
+		// SAFETY: the regex above only matches the five entity keys.
+		return entities[character as keyof typeof entities];
 	});
 }
 

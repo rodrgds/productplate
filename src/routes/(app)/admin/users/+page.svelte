@@ -27,10 +27,16 @@
 		createdAt: Date;
 	}
 
-	const roleOptions = [
+	type AdminRole = 'user' | 'admin';
+
+	const roleOptions: { value: AdminRole; label: string }[] = [
 		{ value: 'user', label: 'User' },
 		{ value: 'admin', label: 'Admin' }
 	];
+
+	function isAdminRole(value: string): value is AdminRole {
+		return value === 'user' || value === 'admin';
+	}
 
 	const currentUserResponse = useQuery(api.auth.getCurrentUser, {});
 	const convex = useConvexClient();
@@ -46,7 +52,7 @@
 	let newUserName = $state('');
 	let newUserEmail = $state('');
 	let newUserPassword = $state('');
-	let newUserRole = $state('user');
+	let newUserRole = $state<AdminRole>('user');
 	let isCreating = $state(false);
 
 	let showDeleteDialog = $state(false);
@@ -98,7 +104,7 @@
 				email: newUserEmail,
 				password: newUserPassword,
 				name: newUserName,
-				role: newUserRole as 'user' | 'admin'
+				role: newUserRole
 			});
 
 			if (error) {
@@ -115,17 +121,19 @@
 			currentPage = 1;
 			await loadUsers();
 		} catch (error) {
-			toast.error('Could not create user: ' + (error as Error).message);
+			toast.error(
+				'Could not create user: ' + (error instanceof Error ? error.message : String(error))
+			);
 		} finally {
 			isCreating = false;
 		}
 	}
 
-	async function handleUpdateRole(userId: string, role: string) {
+	async function handleUpdateRole(userId: string, role: AdminRole) {
 		try {
 			const { error } = await authClient.admin.setRole({
 				userId,
-				role: role as 'user' | 'admin'
+				role
 			});
 
 			if (error) {
@@ -135,7 +143,9 @@
 			toast.success('User role updated');
 			await loadUsers();
 		} catch (error) {
-			toast.error('Could not update role: ' + (error as Error).message);
+			toast.error(
+				'Could not update role: ' + (error instanceof Error ? error.message : String(error))
+			);
 		}
 	}
 
@@ -166,7 +176,9 @@
 			userToBan = null;
 			await loadUsers();
 		} catch (error) {
-			toast.error('Could not update ban status: ' + (error as Error).message);
+			toast.error(
+				'Could not update ban status: ' + (error instanceof Error ? error.message : String(error))
+			);
 		}
 	}
 
@@ -193,7 +205,9 @@
 			userToDelete = null;
 			await loadUsers();
 		} catch (error) {
-			toast.error('Could not delete user: ' + (error as Error).message);
+			toast.error(
+				'Could not delete user: ' + (error instanceof Error ? error.message : String(error))
+			);
 		}
 	}
 
@@ -273,7 +287,7 @@
 										type="single"
 										value={userRole}
 										onValueChange={(value) => {
-											if (value) {
+											if (value && isAdminRole(value)) {
 												handleUpdateRole(user.id, value);
 											}
 										}}

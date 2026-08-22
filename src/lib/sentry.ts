@@ -1,28 +1,25 @@
+/** The subset of Sentry event fields this scrubber reads or deletes. */
 interface SentryLikeEvent {
 	message?: string;
-	exception?: { values?: Array<{ value?: string; [key: string]: unknown }> };
+	exception?: { values?: Array<{ value?: string } & Record<string, JsonValue>> };
 	request?: {
 		headers?: Record<string, string>;
-		data?: unknown;
+		data?: JsonValue;
 		url?: string;
-		[key: string]: unknown;
 	};
-	user?: { id?: string; [key: string]: unknown };
-	extra?: Record<string, unknown>;
-	contexts?: Record<string, unknown>;
-	breadcrumbs?: Array<{
-		data?: Record<string, unknown>;
-		message?: string;
-		[key: string]: unknown;
-	}>;
+	user?: { id?: string };
+	extra?: Record<string, JsonValue>;
+	contexts?: Record<string, JsonValue>;
+	breadcrumbs?: Array<{ data?: Record<string, JsonValue>; message?: string }>;
 	tags?: Record<string, string>;
-	[key: string]: unknown;
 }
 
 interface SentryContext {
 	requestId?: string;
 	gitSha?: string;
 }
+
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
 const sensitiveHeaders = new Set([
 	'authorization',
@@ -32,14 +29,24 @@ const sensitiveHeaders = new Set([
 	'x-api-key'
 ]);
 
+// SAFETY: Sentry events arrive as arbitrary JSON from the SDK; only the fields
+// declared in SentryLikeEvent are read or deleted, and the rest passes through.
 export function scrubSentryEvent<Event>(event: Event, context: SentryContext = {}): Event {
+	// SAFETY: Sentry events are arbitrary SDK JSON; only SentryLikeEvent fields are touched.
 	const scrubbed = structuredClone(event) as Event & SentryLikeEvent;
+	scrubEventFields(scrubbed, context);
+	return scrubbed;
+}
+
+function scrubEventFields(scrubbed: SentryLikeEvent, context: SentryContext): void {
 	delete scrubbed.message;
 	if (scrubbed.exception?.values) {
-		scrubbed.exception.values = scrubbed.exception.values.map((value) => ({
-			...value,
-			value: value.value ? 'Application error' : undefined
-		}));
+		scrubbed.exception.values = scrubbed.exception.values.map((entry) => {
+			const next = { ...entry };
+			if (next.value) next.value = 'Application error';
+			else delete next.value;
+			return next;
+		});
 	}
 	if (scrubbed.request) {
 		delete scrubbed.request.data;
@@ -69,10 +76,8 @@ export function scrubSentryEvent<Event>(event: Event, context: SentryContext = {
 			return scrubbedBreadcrumb;
 		});
 	}
-	scrubbed.tags = {
-		...scrubbed.tags,
-		...(context.requestId ? { request_id: context.requestId } : {}),
-		...(context.gitSha ? { git_sha: context.gitSha } : {})
-	};
-	return scrubbed;
+	const tags: Record<string, string> = scrubbed.tags ?? {};
+	if (context.requestId) tags.request_id = context.requestId;
+	if (context.gitSha) tags.git_sha = context.gitSha;
+	scrubbed.tags = tags;
 }

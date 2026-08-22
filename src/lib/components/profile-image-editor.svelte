@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Uppy, { type UppyFile } from '@uppy/core';
+	import type { Body, Meta } from '@uppy/utils';
 	import UppyWebcam from '@uppy/webcam';
 	import UppyImageEditor from '@uppy/image-editor';
 	import { UppyContextProvider } from '@uppy/svelte';
@@ -47,9 +48,7 @@
 		});
 
 	let step = $state<'sources' | 'webcam' | 'edit'>('sources');
-	let selectedFile = $state<UppyFile<Record<string, unknown>, Record<string, unknown>> | null>(
-		null
-	);
+	let selectedFile = $state<UppyFile<Meta, Body> | null>(null);
 	let isUploading = $state(false);
 	let pendingUpload = $state(false);
 
@@ -65,6 +64,7 @@
 
 	uppy.on('file-editor:complete', (file) => {
 		if (!pendingUpload || !file?.data) return;
+		// SAFETY: local uploads always carry a Blob; remote files never reach this editor.
 		handleUpload(file.data as Blob);
 	});
 

@@ -57,7 +57,9 @@
 	function handlePointerDown(event: PointerEvent) {
 		if (slideMode === 'drag') {
 			isDragging = true;
-			(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+			if (event.currentTarget instanceof HTMLElement) {
+				event.currentTarget.setPointerCapture(event.pointerId);
+			}
 		}
 
 		updateSlider(event.clientX);
@@ -71,7 +73,9 @@
 
 	function handlePointerUp(event: PointerEvent) {
 		isDragging = false;
-		(event.currentTarget as HTMLElement).releasePointerCapture(event.pointerId);
+		if (event.currentTarget instanceof HTMLElement) {
+			event.currentTarget.releasePointerCapture(event.pointerId);
+		}
 	}
 
 	function handlePointerLeave() {

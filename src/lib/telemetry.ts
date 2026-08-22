@@ -30,9 +30,9 @@ interface CreateTelemetryOptions {
 
 function safeProperties(properties: ProductEventProperties) {
 	const safe: ProductEventProperties = {};
-	if (typeof properties.path === 'string') safe.path = properties.path.slice(0, 500);
-	if (typeof properties.source === 'string') safe.source = properties.source.slice(0, 100);
-	if (typeof properties.plan === 'string') safe.plan = properties.plan.slice(0, 100);
+	if (properties.path !== undefined) safe.path = properties.path.slice(0, 500);
+	if (properties.source !== undefined) safe.source = properties.source.slice(0, 100);
+	if (properties.plan !== undefined) safe.plan = properties.plan.slice(0, 100);
 	if (
 		properties.profile === 'prelaunch' ||
 		properties.profile === 'solo-saas' ||

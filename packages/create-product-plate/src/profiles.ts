@@ -91,7 +91,7 @@ const authenticatedRemovePaths = [
 	'scripts/waitlist-export.ts'
 ];
 
-const definitions: Record<ProductProfile, ProfileDefinition> = {
+const definitions = {
 	prelaunch: {
 		id: 'prelaunch',
 		capabilities: ['landing', 'waitlist', 'legal', 'seo', 'analytics', 'errors', 'email'],
@@ -259,7 +259,7 @@ const definitions: Record<ProductProfile, ProfileDefinition> = {
 			hosting: 'cloudflare-pages'
 		}
 	}
-};
+} satisfies Record<ProductProfile, ProfileDefinition>;
 
 export function resolveProfile(profile: ProductProfile) {
 	const definition = definitions[profile];

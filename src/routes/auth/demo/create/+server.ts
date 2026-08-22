@@ -13,7 +13,9 @@ const authJsonHeaders = {
 };
 
 function getSetCookieHeaders(headers: Headers) {
-	const getSetCookie = (headers as Headers & { getSetCookie?: () => string[] }).getSetCookie;
+	type HeadersWithGetSetCookie = Headers & { getSetCookie?: () => string[] };
+	// SAFETY: the Workers runtime exposes getSetCookie(), but older DOM types omit it.
+	const getSetCookie = (headers as HeadersWithGetSetCookie).getSetCookie;
 	const values = getSetCookie?.call(headers);
 	if (values?.length) return values;
 
@@ -25,15 +27,38 @@ async function readAuthFailure(response: Response) {
 	const text = await response.text();
 	if (!text) return `HTTP ${response.status}`;
 
+	interface AuthErrorBody {
+		message?: string;
+		error?: string;
+	}
+
 	try {
-		const data = JSON.parse(text) as { message?: string; error?: string };
+		// SAFETY: Better Auth answers JSON errors; fall back to raw text otherwise.
+		const data = JSON.parse(text) as AuthErrorBody;
 		return data.message ?? data.error ?? text;
 	} catch {
 		return text;
 	}
 }
 
-async function postAuth(fetch: typeof globalThis.fetch, url: URL, path: string, body: object) {
+interface AuthSignUpBody {
+	name: string;
+	email: string;
+	password: string;
+}
+
+interface AuthSignInBody {
+	email: string;
+	password: string;
+	rememberMe: boolean;
+}
+
+async function postAuth(
+	fetch: typeof globalThis.fetch,
+	url: URL,
+	path: string,
+	body: AuthSignUpBody | AuthSignInBody
+) {
 	return await fetch(new URL(`/api/auth/${path}`, url), {
 		method: 'POST',
 		headers: {

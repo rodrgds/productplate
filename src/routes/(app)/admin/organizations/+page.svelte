@@ -30,19 +30,16 @@
 		message = '';
 		error = '';
 		try {
-			const args: {
-				orgId: Id<'organizations'>;
-				key: string;
-				enabled: boolean;
-				limit?: number;
-			} = {
+			let limit: number | undefined;
+			if (entitlementLimit) limit = Number(entitlementLimit);
+
+			await convex.mutation(api.organizations.adminSetEntitlement, {
+				// SAFETY: the select only offers org ids taken from the loaded page.
 				orgId: targetOrgId as Id<'organizations'>,
 				key: entitlementKey,
-				enabled: entitlementEnabled
-			};
-			if (entitlementLimit) args.limit = Number(entitlementLimit);
-
-			await convex.mutation(api.organizations.adminSetEntitlement, args);
+				enabled: entitlementEnabled,
+				limit
+			});
 			message = 'Entitlement updated.';
 		} catch (cause) {
 			error = cause instanceof Error ? cause.message : String(cause);

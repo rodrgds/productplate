@@ -1,3 +1,5 @@
+import { z } from 'zod/v3';
+
 export type ProductEmailTemplate =
 	| 'verify-email'
 	| 'password-reset'
@@ -16,11 +18,20 @@ interface RenderProductEmailOptions {
 	status?: string;
 }
 
+const resendResponseSchema = z.object({ id: z.string().optional() });
+
 interface DeliverProductEmailOptions {
 	to: string;
 	subject: string;
 	html: string;
 	replyTo?: string;
+}
+
+// Resend's send API rejects unexpected fields, so reply_to is added only when set.
+function deliveryBody(options: DeliverProductEmailOptions, from: string) {
+	const body = { from, to: options.to, subject: options.subject, html: options.html };
+	if (options.replyTo) return { ...body, reply_to: options.replyTo };
+	return body;
 }
 
 interface ProductEmailDeliveryConfig {
@@ -29,10 +40,7 @@ interface ProductEmailDeliveryConfig {
 	fetcher?: typeof fetch;
 }
 
-const templateCopy: Record<
-	ProductEmailTemplate,
-	{ heading: string; body: (options: RenderProductEmailOptions) => string; action: string }
-> = {
+const templateCopy = {
 	'verify-email': {
 		heading: 'Verify your email',
 		body: () => 'Confirm this address to finish setting up your account.',
@@ -75,7 +83,10 @@ const templateCopy: Record<
 				: 'Your subscription status changed.',
 		action: 'Review billing'
 	}
-};
+} satisfies Record<
+	ProductEmailTemplate,
+	{ heading: string; body: (options: RenderProductEmailOptions) => string; action: string }
+>;
 
 function escapeHtml(value: string) {
 	return value
@@ -116,15 +127,9 @@ export async function deliverProductEmail(
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${config.apiKey}`
 		},
-		body: JSON.stringify({
-			from: config.from,
-			to: options.to,
-			subject: options.subject,
-			html: options.html,
-			...(options.replyTo ? { reply_to: options.replyTo } : {})
-		})
+		body: JSON.stringify(deliveryBody(options, config.from))
 	});
 	if (!response.ok) throw new Error(`Resend rejected the email with status ${response.status}.`);
-	const payload = (await response.json()) as { id?: string };
+	const payload = resendResponseSchema.parse(await response.json());
 	return { status: 'sent' as const, ...options, providerId: payload.id };
 }

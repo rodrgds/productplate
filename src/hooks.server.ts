@@ -19,12 +19,14 @@ function trimTrailingSlash(value: string) {
 function syncRuntimeAuthEnvironment(origin?: string) {
 	try {
 		const siteUrl = env.CF_PAGES_URL ?? env.SITE_URL ?? origin;
-		if (typeof process !== 'undefined') {
-			if (siteUrl) process.env.SITE_URL = trimTrailingSlash(siteUrl);
-			if (env.BETTER_AUTH_SECRET) process.env.BETTER_AUTH_SECRET = env.BETTER_AUTH_SECRET;
+		// process.env is unavailable on Cloudflare Workers.
+		const runtimeEnv = globalThis.process?.env;
+		if (runtimeEnv) {
+			if (siteUrl) runtimeEnv.SITE_URL = trimTrailingSlash(siteUrl);
+			if (env.BETTER_AUTH_SECRET) runtimeEnv.BETTER_AUTH_SECRET = env.BETTER_AUTH_SECRET;
 		}
 	} catch {
-		// process.env not available (e.g. Cloudflare Workers)
+		// Environment sync must never break request handling.
 	}
 }
 

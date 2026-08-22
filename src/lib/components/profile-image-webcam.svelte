@@ -24,7 +24,8 @@
 	const isReady = $derived(state.cameraReady && !hasError);
 	const mirrored = $derived(
 		'data-uppy-mirrored' in videoProps &&
-			(videoProps as Record<string, unknown>)['data-uppy-mirrored']
+			// SAFETY: Uppy sets the data attribute as a plain boolean flag.
+			Boolean((videoProps as { 'data-uppy-mirrored'?: unknown })['data-uppy-mirrored'])
 	);
 </script>
 

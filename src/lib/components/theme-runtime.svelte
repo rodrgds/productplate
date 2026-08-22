@@ -24,6 +24,7 @@
 			parsedPreset === null
 				? defaultPresetCode
 				: (code ?? defaultPresetCode).trim().replace(/^--preset\s+/, '');
+		// SAFETY: getElementById returns null for missing ids; the null case is handled below.
 		let styleElement = document.getElementById(
 			themeRuntimeStyleElementId
 		) as HTMLStyleElement | null;
@@ -45,8 +46,9 @@
 		void revealInitialTheme();
 
 		const handleThemeChange = (event: Event) => {
-			const detail = (event as CustomEvent<string>).detail;
-			writeTheme(detail);
+			if (!('detail' in event)) return;
+			// SAFETY: themePresetChangeEvent always dispatches the preset code string.
+			writeTheme(event.detail as string);
 		};
 
 		const handleStorage = (event: StorageEvent) => {

@@ -30,6 +30,7 @@ describe('product telemetry', () => {
 
 	it('only forwards the allowlisted property shape', () => {
 		const telemetry = createTelemetry({ key: 'ph_test', consent: 'granted', adapter });
+		// SAFETY: the extra keys are intentional; the adapter must drop them.
 		telemetry.capture('first_value_completed', {
 			path: '/dashboard',
 			plan: 'starter',

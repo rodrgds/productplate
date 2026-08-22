@@ -19,11 +19,9 @@ export function parseChangelog(markdown: string): ChangelogRelease[] {
 		if (releaseMatch) {
 			const version = releaseMatch[1] ?? releaseMatch[2];
 			if (!version) continue;
-			currentRelease = {
-				version,
-				...(releaseMatch[3] ? { date: releaseMatch[3] } : {}),
-				groups: []
-			};
+			const release: ChangelogRelease = { version, groups: [] };
+			if (releaseMatch[3]) release.date = releaseMatch[3];
+			currentRelease = release;
 			releases.push(currentRelease);
 			currentGroup = undefined;
 			continue;

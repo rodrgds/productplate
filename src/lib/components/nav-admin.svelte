@@ -3,7 +3,7 @@
 	import type { IconProps } from '@lucide/svelte';
 
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { resolve } from '$app/paths';
+	import { resolveAppPath } from '$lib/utils.js';
 	import { page } from '$app/state';
 
 	let { items }: { items: { name: string; url: string; icon: Component<IconProps> }[] } = $props();
@@ -15,7 +15,7 @@
 
 	function isActive(url: string) {
 		if (!url.startsWith('/')) return false;
-		const href = resolve(url as '/');
+		const href = resolveAppPath(url);
 		return page.url.pathname === href || page.url.pathname.startsWith(`${href}/`);
 	}
 </script>
@@ -30,7 +30,7 @@
 						{#if item.url && item.url.startsWith('/')}
 							<a
 								{...props}
-								href={resolve(item.url as '/')}
+								href={resolveAppPath(item.url)}
 								onclick={closeMobileSidebar}
 								aria-current={isActive(item.url) ? 'page' : undefined}
 							>

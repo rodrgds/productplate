@@ -40,7 +40,7 @@
 		return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(value);
 	}
 
-	async function runAction(action: () => Promise<unknown>, success: string) {
+	async function runAction<TResult>(action: () => Promise<TResult>, success: string) {
 		isBusy = true;
 		error = '';
 		try {
@@ -68,7 +68,7 @@
 	}
 
 	function inviteUrl(token: string) {
-		const origin = typeof location === 'undefined' ? '' : location.origin;
+		const origin = globalThis.location?.origin ?? '';
 		return `${origin}/invite/${token}`;
 	}
 

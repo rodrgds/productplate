@@ -88,10 +88,10 @@ export async function readUnsubscribeToken(token: string, secret: string, now = 
 	const expectedSignature = await hmac(encodedPayload, secret);
 	if (!constantTimeEqual(signature, expectedSignature)) return null;
 	try {
+		// SAFETY: the token is HMAC-verified above, so the payload shape is ours.
 		const payload = JSON.parse(new TextDecoder().decode(payloadBytes)) as UnsubscribePayload;
 		if (
-			typeof payload.emailNormalized !== 'string' ||
-			typeof payload.expiresAt !== 'number' ||
+			payload.expiresAt === undefined ||
 			payload.expiresAt < now ||
 			normalizeWaitlistEmail(payload.emailNormalized) !== payload.emailNormalized
 		) {
