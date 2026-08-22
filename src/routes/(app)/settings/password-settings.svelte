@@ -23,8 +23,7 @@
 			revokeOtherSessions: true
 		},
 		{
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			validators: zodClient(passwordFormSchema as any),
+			validators: zodClient(passwordFormSchema),
 			async onSubmit({ cancel }) {
 				cancel();
 				isLoading = true;

@@ -151,7 +151,7 @@ export async function runDoctor(options: DoctorOptions): Promise<DoctorResult> {
 				`${key} uses a final HTTPS URL`,
 				Boolean(
 					value?.startsWith('https://') &&
-						!placeholders.some((placeholder) => value.includes(placeholder))
+					!placeholders.some((placeholder) => value.includes(placeholder))
 				),
 				options.strict,
 				`${key} must be a final HTTPS provider URL.`
@@ -191,8 +191,8 @@ export async function runDoctor(options: DoctorOptions): Promise<DoctorResult> {
 	const productUrl = manifest.product.productionUrl;
 	const validProductionUrl = Boolean(
 		productUrl &&
-			productUrl.startsWith('https://') &&
-			!placeholders.some((value) => productUrl.includes(value))
+		productUrl.startsWith('https://') &&
+		!placeholders.some((value) => productUrl.includes(value))
 	);
 	checks.push({
 		id: 'product.production-url',

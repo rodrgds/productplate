@@ -1,0 +1,29 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"useTabs": true,
+	"singleQuote": true,
+	"trailingComma": "none",
+	"printWidth": 100,
+	"sortPackageJson": false,
+	"sortTailwindcss": {
+		"stylesheet": "./src/app.css"
+	},
+	"svelte": {},
+	"ignorePatterns": [
+		"tools/",
+		".agents/",
+		".claude/",
+		".codex/",
+		"package-lock.json",
+		"pnpm-lock.yaml",
+		"yarn.lock",
+		"bun.lock",
+		"bun.lockb",
+		".claude/",
+		"src/lib/components/ui/",
+		"src/convex/_generated/",
+		"src/convex/*/_generated/",
+		"/static/",
+		".agents/skills/"
+	]
+}

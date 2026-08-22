@@ -33,7 +33,6 @@
 					<Sidebar.MenuButton isActive={isActive(item.url)}>
 						{#snippet child({ props })}
 							{#if item.url && item.url.startsWith('/')}
-								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 								<a
 									href={resolve(item.url as '/')}
 									{...props}
@@ -44,7 +43,6 @@
 									<span>{item.title}</span>
 								</a>
 							{:else if item.url && (item.url.startsWith('https://') || item.url.startsWith('mailto:') || item.url.startsWith('tel:'))}
-								<!-- eslint-disable svelte/no-navigation-without-resolve -->
 								<a
 									href={item.url}
 									target="_blank"
@@ -55,7 +53,6 @@
 									<item.icon />
 									<span>{item.title}</span>
 								</a>
-								<!-- eslint-enable svelte/no-navigation-without-resolve -->
 							{:else}
 								<span {...props}>
 									<item.icon />

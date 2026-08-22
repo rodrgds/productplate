@@ -57,8 +57,7 @@
 					rows="5"
 					maxlength="2000"
 					required
-					class="w-full rounded-md border bg-background p-3 text-sm"
-				></textarea>
+					class="w-full rounded-md border bg-background p-3 text-sm"></textarea>
 				{#if $messageErrors}<p class="text-sm text-destructive">{$messageErrors}</p>{/if}
 			</div>
 			<Button type="submit" disabled={$submitting}>

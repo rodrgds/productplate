@@ -37,7 +37,6 @@
 </script>
 
 <svelte:head>
-	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html webManifest}
 	<meta name="keywords" content={APP_KEYWORDS.join(', ')} />
 	<meta name="application-name" content={APP_NAME} />

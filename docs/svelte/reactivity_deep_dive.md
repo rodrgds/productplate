@@ -47,8 +47,7 @@ When you pass an object or array to `$state`, it becomes a deeply reactive `Prox
 
 <textarea
 	value={editor.content}
-	oninput={(e) => (editor.content = (e.target as HTMLTextAreaElement).value)}
-></textarea>
+	oninput={(e) => (editor.content = (e.target as HTMLTextAreaElement).value)}></textarea>
 
 {@html editor.content}
 ```

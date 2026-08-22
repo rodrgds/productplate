@@ -113,7 +113,7 @@ type OptionRecord<T extends readonly string[]> = Record<
 	{ name: string; color?: string; value?: string }
 >;
 
-export const themeStyleMeta: OptionRecord<typeof themeStyles> = {
+export const themeStyleMeta = {
 	operational: { name: 'Operational' },
 	default: { name: 'Default' },
 	'new-york': { name: 'New York' },
@@ -124,9 +124,9 @@ export const themeStyleMeta: OptionRecord<typeof themeStyles> = {
 	mono: { name: 'Mono' },
 	console: { name: 'Console' },
 	spacious: { name: 'Spacious' }
-};
+} satisfies OptionRecord<typeof themeStyles>;
 
-export const baseColorMeta: OptionRecord<typeof baseColors> = {
+export const baseColorMeta = {
 	neutral: { name: 'Neutral', color: '#737373' },
 	zinc: { name: 'Zinc', color: '#71717a' },
 	slate: { name: 'Slate', color: '#64748b' },
@@ -143,9 +143,9 @@ export const baseColorMeta: OptionRecord<typeof baseColors> = {
 	green: { name: 'Green', color: '#22c55e' },
 	blue: { name: 'Blue', color: '#3b82f6' },
 	violet: { name: 'Violet', color: '#8b5cf6' }
-};
+} satisfies OptionRecord<typeof baseColors>;
 
-export const accentColorMeta: OptionRecord<typeof accentColors> = {
+export const accentColorMeta = {
 	red: { name: 'Red', color: '#ef4444' },
 	orange: { name: 'Orange', color: '#ff6900' },
 	amber: { name: 'Amber', color: '#f59e0b' },
@@ -163,9 +163,9 @@ export const accentColorMeta: OptionRecord<typeof accentColors> = {
 	fuchsia: { name: 'Fuchsia', color: '#d946ef' },
 	pink: { name: 'Pink', color: '#ec4899' },
 	rose: { name: 'Rose', color: '#ff2056' }
-};
+} satisfies OptionRecord<typeof accentColors>;
 
-export const chartColorMeta: OptionRecord<typeof chartColors> = {
+export const chartColorMeta = {
 	red: { name: 'Red', color: '#ef4444' },
 	orange: { name: 'Orange', color: '#f97316' },
 	amber: { name: 'Amber', color: '#f59e0b' },
@@ -180,17 +180,17 @@ export const chartColorMeta: OptionRecord<typeof chartColors> = {
 	purple: { name: 'Purple', color: '#a855f7' },
 	fuchsia: { name: 'Fuchsia', color: '#d946ef' },
 	rose: { name: 'Rose', color: '#f43f5e' }
-};
+} satisfies OptionRecord<typeof chartColors>;
 
-export const radiusMeta: OptionRecord<typeof radii> = {
+export const radiusMeta = {
 	none: { name: 'None', value: '0rem' },
 	small: { name: 'Small', value: '0.45rem' },
 	default: { name: 'Default', value: '0.7rem' },
 	medium: { name: 'Medium', value: '0.875rem' },
 	large: { name: 'Large', value: '1.1rem' }
-};
+} satisfies OptionRecord<typeof radii>;
 
-export const fontMeta: OptionRecord<typeof fonts> = {
+export const fontMeta = {
 	inter: { name: 'Inter', value: '"Inter Variable", ui-sans-serif, system-ui, sans-serif' },
 	geist: { name: 'Geist', value: '"Geist Variable", ui-sans-serif, system-ui, sans-serif' },
 	manrope: { name: 'Manrope', value: '"Manrope Variable", ui-sans-serif, system-ui, sans-serif' },
@@ -217,7 +217,21 @@ export const fontMeta: OptionRecord<typeof fonts> = {
 		value: '"JetBrains Mono Variable", ui-monospace, monospace'
 	},
 	system: { name: 'System', value: 'ui-sans-serif, system-ui, sans-serif' }
-};
+} satisfies OptionRecord<typeof fonts>;
+
+// SAFETY: the empty seeds are filled with one entry per key from the same key lists.
+const radiusValues = radii.reduce<Record<(typeof radii)[number], string>>(
+	(values, radius) => ({
+		...values,
+		[radius]: radiusMeta[radius].value ?? radiusMeta.default.value
+	}),
+	{} as Record<(typeof radii)[number], string>
+);
+// SAFETY: the empty seed is filled with one entry per font key.
+const fontValues = fonts.reduce<Record<(typeof fonts)[number], string>>(
+	(values, font) => ({ ...values, [font]: fontMeta[font].value }),
+	{} as Record<(typeof fonts)[number], string>
+);
 
 const fieldDefinitions = [
 	{ key: 'style', values: themeStyles, bits: 4 },
@@ -258,8 +272,10 @@ export function encodeThemePreset(config: ThemePreset) {
 	let bits = 0;
 	let offset = 0;
 	for (const field of fieldDefinitions) {
-		const value = config[field.key as keyof ThemePreset] as string;
-		const index = (field.values as readonly string[]).indexOf(value);
+		// SAFETY: field keys are ThemePreset keys and each value list holds that key's stored values.
+		const index = (field.values as readonly string[]).indexOf(
+			config[field.key as keyof ThemePreset] as string
+		);
 		bits += Math.max(index, 0) * 2 ** offset;
 		offset += field.bits;
 	}
@@ -271,6 +287,7 @@ export function decodeThemePreset(code: string): ThemePreset | null {
 	if (!code.startsWith('p')) return null;
 	const bits = fromBase62(code.slice(1));
 	if (bits < 0) return null;
+	// Keys and values both come from fieldDefinitions; the spread result is a full preset.
 	const decoded: Record<string, string> = {};
 	let offset = 0;
 
@@ -280,10 +297,11 @@ export function decodeThemePreset(code: string): ThemePreset | null {
 		offset += field.bits;
 	}
 
+	// SAFETY: decoded only carries keys and values taken from the ThemePreset field definitions.
 	return { ...defaultThemePreset, ...decoded } as ThemePreset;
 }
 
-const baseOklch: Record<(typeof baseColors)[number], { hue: number; chroma: number }> = {
+const baseOklch = {
 	neutral: { hue: 95, chroma: 0.006 },
 	zinc: { hue: 285, chroma: 0.012 },
 	slate: { hue: 250, chroma: 0.018 },
@@ -300,9 +318,9 @@ const baseOklch: Record<(typeof baseColors)[number], { hue: number; chroma: numb
 	green: { hue: 150, chroma: 0.028 },
 	blue: { hue: 260, chroma: 0.03 },
 	violet: { hue: 305, chroma: 0.034 }
-};
+} satisfies Record<(typeof baseColors)[number], { hue: number; chroma: number }>;
 
-const accentOklch: Record<(typeof accentColors)[number], { hue: number; chroma: number }> = {
+const accentOklch = {
 	red: { hue: 27, chroma: 0.2 },
 	orange: { hue: 42, chroma: 0.19 },
 	amber: { hue: 75, chroma: 0.17 },
@@ -320,10 +338,10 @@ const accentOklch: Record<(typeof accentColors)[number], { hue: number; chroma: 
 	fuchsia: { hue: 335, chroma: 0.2 },
 	pink: { hue: 350, chroma: 0.2 },
 	rose: { hue: 20, chroma: 0.2 }
-};
+} satisfies Record<(typeof accentColors)[number], { hue: number; chroma: number }>;
 
 const chartHueOffset = [0, 65, 120, 180, 245];
-const styleVariables: Record<(typeof themeStyles)[number], Record<string, string>> = {
+const styleVariables = {
 	operational: {
 		'--pp-theme-density': '1',
 		'--pp-theme-card-padding': '1rem',
@@ -394,7 +412,7 @@ const styleVariables: Record<(typeof themeStyles)[number], Record<string, string
 		'--pp-theme-border-width': '1px',
 		'--pp-theme-shadow-alpha': '9%'
 	}
-};
+} satisfies Record<(typeof themeStyles)[number], Record<string, string>>;
 
 const themeBootstrapRuntime = {
 	defaultThemePreset,
@@ -403,13 +421,8 @@ const themeBootstrapRuntime = {
 	accentOklch,
 	chartHueOffset,
 	styleVariables,
-	radiusValues: Object.fromEntries(
-		radii.map((radius) => [radius, radiusMeta[radius].value ?? radiusMeta.default.value])
-	) as Record<(typeof radii)[number], string>,
-	fontValues: Object.fromEntries(fonts.map((font) => [font, fontMeta[font].value])) as Record<
-		(typeof fonts)[number],
-		string
-	>
+	radiusValues,
+	fontValues
 };
 
 type ThemeBootstrapRuntime = typeof themeBootstrapRuntime;
@@ -705,7 +718,7 @@ export function setInitialThemePreset({
 	defaultPresetCode?: string;
 	runtime?: ThemeBootstrapRuntime;
 } = {}) {
-	if (typeof document === 'undefined') return;
+	if (!globalThis.document) return;
 
 	const rootElement = document.documentElement;
 	const base62 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -724,6 +737,7 @@ export function setInitialThemePreset({
 		if (!code.startsWith('p')) return null;
 		const bits = fromSerializedBase62(code.slice(1));
 		if (bits < 0) return null;
+		// Keys and values both come from fieldDefinitions; the spread result is a full preset.
 		const decoded: Record<string, string> = {};
 		let offset = 0;
 
@@ -733,6 +747,7 @@ export function setInitialThemePreset({
 			offset += field.bits;
 		}
 
+		// SAFETY: decoded only carries keys and values taken from the ThemePreset field definitions.
 		return { ...runtime.defaultThemePreset, ...decoded } as ThemePreset;
 	}
 
@@ -748,6 +763,7 @@ export function setInitialThemePreset({
 	const parsedPreset = normalizedPresetCode ? decodeSerializedPreset(normalizedPresetCode) : null;
 	const preset = parsedPreset ?? runtime.defaultThemePreset;
 	const appliedPresetCode = parsedPreset ? normalizedPresetCode : defaultPresetCode;
+	// SAFETY: getElementById returns null for missing ids; the null case is handled below.
 	let styleElement = document.getElementById(styleElementId) as HTMLStyleElement | null;
 
 	if (!styleElement) {
@@ -767,13 +783,10 @@ export async function revealInitialTheme({
 	fontsReady?: Promise<unknown>;
 	rootElement?: HTMLElement | null;
 } = {}) {
-	const targetRoot =
-		rootElement ?? (typeof document === 'undefined' ? null : document.documentElement);
+	const targetRoot = rootElement ?? globalThis.document?.documentElement ?? null;
 	if (!targetRoot) return;
 
-	const ready =
-		fontsReady ??
-		(typeof document !== 'undefined' && document.fonts ? document.fonts.ready : Promise.resolve());
+	const ready = fontsReady ?? globalThis.document?.fonts?.ready ?? Promise.resolve();
 
 	try {
 		await ready;

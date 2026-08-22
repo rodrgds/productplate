@@ -271,8 +271,7 @@
 						}
 					}}
 					oncompositionstart={() => (isComposing = true)}
-					oncompositionend={() => (isComposing = false)}
-				></textarea>
+					oncompositionend={() => (isComposing = false)}></textarea>
 			</div>
 			{#if isBusy}
 				<Button

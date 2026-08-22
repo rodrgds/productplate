@@ -44,8 +44,7 @@
 			workspaceName: ''
 		},
 		{
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			validators: zodClient(onboardingFormSchema as any),
+			validators: zodClient(onboardingFormSchema),
 			SPA: true,
 			onUpdate: async ({ form: validatedForm }) => {
 				if (!validatedForm.valid) return;
@@ -197,8 +196,7 @@
 										bind:value={$bio}
 										rows="4"
 										class="min-h-24 w-full resize-y rounded-lg border border-input bg-background px-3 py-2.5 text-sm shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
-										placeholder="A quick note about you or your team."
-									></textarea>
+										placeholder="A quick note about you or your team."></textarea>
 								{/snippet}
 							</Form.Control>
 							<Form.FieldErrors />

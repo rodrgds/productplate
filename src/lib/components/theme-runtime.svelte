@@ -64,8 +64,6 @@
 </script>
 
 <svelte:head>
-	<!-- eslint-disable svelte/no-at-html-tags, svelte/no-unused-svelte-ignore -->
 	<!-- svelte-ignore hydration_html_changed -->
 	{@html initialThemePresetScript}
-	<!-- eslint-enable svelte/no-at-html-tags, svelte/no-unused-svelte-ignore -->
 </svelte:head>

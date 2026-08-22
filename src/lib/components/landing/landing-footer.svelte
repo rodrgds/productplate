@@ -59,7 +59,6 @@
 					<p class="text-sm font-semibold">{group.title}</p>
 					<ul class="mt-4 grid gap-3">
 						{#each group.links as link (link.label)}
-							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 							<li>
 								<a
 									href={resolve(link.href)}

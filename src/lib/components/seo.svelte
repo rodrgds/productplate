@@ -46,7 +46,6 @@
 	<meta name="twitter:description" content={description} />
 	<meta name="twitter:image" content={image} />
 	{#if schemaJson}
-		<!-- eslint-disable-next-line svelte/no-at-html-tags -- JSON is escaped above before insertion. -->
 		{@html `<script type="application/ld+json">${schemaJson}</${'script'}>`}
 	{/if}
 </svelte:head>

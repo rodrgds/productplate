@@ -29,8 +29,7 @@
 	const form = superForm<EmailForm>(
 		{ newEmail: '' },
 		{
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			validators: zodClient(emailFormSchema as any),
+			validators: zodClient(emailFormSchema),
 			async onSubmit({ cancel }) {
 				cancel();
 

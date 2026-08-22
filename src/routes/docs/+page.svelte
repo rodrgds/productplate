@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { APP_DESCRIPTION, APP_NAME, APP_URL } from '$lib/constants.js';
 	import PublicPageShell from '$lib/components/public-page-shell.svelte';
 
@@ -42,7 +41,6 @@
 
 		<section class="grid gap-4 md:grid-cols-3">
 			{#each guides as guide (guide.title)}
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a
 					href={guide.href}
 					class="rounded-lg border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-muted/30"
@@ -56,7 +54,6 @@
 		<section class="grid gap-3 text-sm text-muted-foreground">
 			<h2 class="text-xl font-semibold text-foreground">Core paths</h2>
 			<p>
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a class="underline underline-offset-4" href={`${sourceRoot}/START_HERE.md`}
 					><code>START_HERE.md</code></a
 				> guides product discovery and stack selection.
@@ -70,7 +67,6 @@
 				API keys.
 			</p>
 			<p>
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a
 					class="underline underline-offset-4"
 					href={`${sourceRoot}/docs/observability-security.md`}

@@ -28,7 +28,6 @@
 				<Sidebar.MenuButton isActive={isActive(item.url)}>
 					{#snippet child({ props })}
 						{#if item.url && item.url.startsWith('/')}
-							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 							<a
 								{...props}
 								href={resolve(item.url as '/')}
@@ -39,7 +38,6 @@
 								<span>{item.name}</span>
 							</a>
 						{:else if item.url && (item.url.startsWith('https://') || item.url.startsWith('mailto:') || item.url.startsWith('tel:'))}
-							<!-- eslint-disable svelte/no-navigation-without-resolve -->
 							<a
 								{...props}
 								href={item.url}
@@ -50,7 +48,6 @@
 								<item.icon />
 								<span>{item.name}</span>
 							</a>
-							<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						{:else}
 							<span {...props}>
 								<item.icon />

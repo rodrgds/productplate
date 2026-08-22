@@ -44,8 +44,7 @@
 			bio: profile?.bio || ''
 		}))(),
 		{
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			validators: zodClient(accountFormSchema as any),
+			validators: zodClient(accountFormSchema),
 			onSubmit: async ({ cancel }) => {
 				cancel();
 				isLoading = true;
@@ -230,7 +229,6 @@
 					{isLoading ? 'Saving...' : 'Save changes'}
 				</Button>
 				{#if user?.id}
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					<Button
 						type="button"
 						variant="outline"

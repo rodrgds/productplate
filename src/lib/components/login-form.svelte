@@ -28,6 +28,9 @@
 	let isLoading = $state(false);
 	let error = $state<string | null>(null);
 	let oauthError = $derived(getOAuthErrorMessage(page.url.searchParams.get('error')));
+	// The mode prop never changes for a mounted form, so reading it once here is safe.
+	// svelte-ignore state_referenced_locally
+	const formSchema = isSignUp ? authSignUpFormSchema : authSignInFormSchema;
 	const form = superForm<AuthForm>(
 		{
 			name: '',
@@ -35,10 +38,7 @@
 			password: ''
 		},
 		{
-			validators: zodClient(
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				(() => (mode === 'signup' ? authSignUpFormSchema : authSignInFormSchema))() as any
-			)
+			validators: zodClient(formSchema)
 		}
 	);
 	const { form: formData, errors } = form;
@@ -270,13 +270,11 @@
 		<div class="mt-6 text-center text-sm text-muted-foreground">
 			{#if isSignUp}
 				Already have an account?
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a href={resolve('/auth/sign-in')} class="font-medium text-foreground hover:text-primary"
 					>Sign in</a
 				>
 			{:else}
 				Don't have an account?
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a href={resolve('/auth/sign-up')} class="font-medium text-foreground hover:text-primary"
 					>Create one</a
 				>

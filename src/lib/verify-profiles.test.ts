@@ -74,9 +74,9 @@ describe('generated profile verification', () => {
 
 		expect(packageJson.dependencies?.nanoid).toBe('5.1.16');
 		// Bun overrides are global. Forcing brace-expansion 5 would break the
-		// CommonJS API expected by minimatch 3 and 5 on a fresh installation.
+		// CommonJS API expected by older minimatch lines on a fresh installation.
 		expect(packageJson.overrides?.['brace-expansion']).toBeUndefined();
-		expect(lockfile).toContain('brace-expansion@1.1.18');
+		expect(lockfile).not.toContain('brace-expansion@1.');
 		expect(lockfile).toContain('brace-expansion@2.1.4');
 		expect(lockfile).toContain('brace-expansion@5.0.9');
 		expect(packageJson.overrides?.['fast-uri']).toBe('3.1.5');
@@ -112,17 +112,16 @@ describe('generated profile verification', () => {
 		}
 	});
 
-	it('keeps one active ESLint config for Svelte and reusable UI components', async () => {
-		const eslintConfig = await readFile('eslint.config.js', 'utf8');
+	it('keeps one active Oxlint config with carried-over policies', async () => {
+		const oxlintConfig = await readFile('oxlint.config.ts', 'utf8');
 		const hasLegacyConfig = await access('.eslintrc.cjs').then(
 			() => true,
 			() => false
 		);
 		expect(hasLegacyConfig).toBe(false);
-		expect(eslintConfig).not.toContain("'src/lib/components/ui/**'");
-		expect(eslintConfig).toContain("'_template_options/**'");
-		expect(eslintConfig).toContain("'no-restricted-imports'");
-		expect(eslintConfig).toContain("'svelte/valid-compile'");
-		expect(eslintConfig).toContain("'svelte/require-store-reactive-access'");
+		// Vendored shadcn-svelte primitives stay out of lint scope.
+		expect(oxlintConfig).toContain("'src/lib/components/ui/**'");
+		expect(oxlintConfig).toContain("'_template_options/**'");
+		expect(oxlintConfig).toContain("'no-restricted-imports'");
 	});
 });
