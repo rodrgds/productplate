@@ -12,6 +12,7 @@ interface ProfileArguments {
 	profiles: readonly ProfileName[];
 	keep: boolean;
 	installBrowser: boolean;
+	skipBrowser: boolean;
 }
 
 export interface VerificationStep {
@@ -33,6 +34,7 @@ export function parseProfileArguments(arguments_: string[]): ProfileArguments {
 	const profiles: ProfileName[] = [];
 	let keep = false;
 	let installBrowser = true;
+	let skipBrowser = false;
 
 	for (const argument of arguments_) {
 		if (argument === '--keep') {
@@ -41,6 +43,10 @@ export function parseProfileArguments(arguments_: string[]): ProfileArguments {
 		}
 		if (argument === '--skip-browser-install') {
 			installBrowser = false;
+			continue;
+		}
+		if (argument === '--skip-browser') {
+			skipBrowser = true;
 			continue;
 		}
 		if (argument.startsWith('--')) {
@@ -57,22 +63,18 @@ export function parseProfileArguments(arguments_: string[]): ProfileArguments {
 	return {
 		profiles: profiles.length > 0 ? profiles : PROFILE_NAMES,
 		keep,
-		installBrowser
+		installBrowser: skipBrowser ? false : installBrowser,
+		skipBrowser
 	};
 }
 
 export function createProfileVerificationSteps(
 	profileDirectory: string,
-	installBrowser = false
+	installBrowser = false,
+	skipBrowser = false
 ): VerificationStep[] {
-	return [
-		{
-			label: 'Prove frozen installation',
-			command: bunExecutable,
-			args: ['install', '--frozen-lockfile', '--ignore-scripts'],
-			cwd: profileDirectory
-		},
-		...(installBrowser
+	const browserSteps =
+		installBrowser && !skipBrowser
 			? [
 					{
 						label: 'Install matching Playwright Chromium',
@@ -81,7 +83,15 @@ export function createProfileVerificationSteps(
 						cwd: profileDirectory
 					}
 				]
-			: []),
+			: [];
+	return [
+		{
+			label: 'Prove frozen installation',
+			command: bunExecutable,
+			args: ['install', '--frozen-lockfile', '--ignore-scripts'],
+			cwd: profileDirectory
+		},
+		...browserSteps,
 		{
 			label: 'Lint',
 			command: bunExecutable,
@@ -112,13 +122,17 @@ export function createProfileVerificationSteps(
 			args: ['run', 'build'],
 			cwd: profileDirectory
 		},
-		{
-			label: 'Browser smoke',
-			command: bunExecutable,
-			args: ['run', 'test:e2e'],
-			cwd: profileDirectory,
-			env: { PLAYWRIGHT_PREBUILT: 'true' }
-		},
+		...(skipBrowser
+			? []
+			: [
+					{
+						label: 'Browser smoke',
+						command: bunExecutable,
+						args: ['run', 'test:e2e'],
+						cwd: profileDirectory,
+						env: { PLAYWRIGHT_PREBUILT: 'true' }
+					}
+				]),
 		{
 			label: 'Launch doctor',
 			command: bunExecutable,
@@ -159,7 +173,8 @@ async function runStep(step: VerificationStep) {
 async function verifyProfile(
 	profile: ProfileName,
 	temporaryDirectory: string,
-	installBrowser: boolean
+	installBrowser: boolean,
+	skipBrowser: boolean
 ) {
 	const profileDirectory = join(temporaryDirectory, profile);
 
@@ -186,7 +201,11 @@ async function verifyProfile(
 		cwd: repositoryDirectory
 	});
 
-	for (const step of createProfileVerificationSteps(profileDirectory, installBrowser)) {
+	for (const step of createProfileVerificationSteps(
+		profileDirectory,
+		installBrowser,
+		skipBrowser
+	)) {
 		await runStep(step);
 	}
 }
@@ -201,7 +220,9 @@ Usage:
 
 Options:
   --keep                    Keep generated apps for inspection.
-  --skip-browser-install    Reuse an already installed Playwright browser.`);
+  --skip-browser-install    Reuse an already installed Playwright browser.
+  --skip-browser            Skip Chromium install and the browser smoke step for
+                            machines without Playwright system libraries.`);
 }
 
 async function main() {
@@ -216,7 +237,7 @@ async function main() {
 	try {
 		for (const profile of options.profiles) {
 			console.log(`\n### ${profile}`);
-			await verifyProfile(profile, temporaryDirectory, options.installBrowser);
+			await verifyProfile(profile, temporaryDirectory, options.installBrowser, options.skipBrowser);
 		}
 
 		console.log(`\nVerified ${options.profiles.join(', ')}.`);

@@ -22,7 +22,7 @@
         "@xyflow/svelte": "^1.6.2",
         "ai": "^6.0.226",
         "autumn-js": "^0.1.85",
-        "better-auth": "^1.6.23",
+        "better-auth": "~1.6.23",
         "convex": "^1.42.2",
         "convex-svelte": "^0.14.0",
         "cuelume": "^0.1.2",

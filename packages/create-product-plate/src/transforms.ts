@@ -470,15 +470,20 @@ async function pagesProjectExists(projectName: string) {
 	);
 	const output = await new Response(child.stdout).text();
 	if ((await child.exited) !== 0) throw new Error('Cloudflare Pages project lookup failed.');
-	const projects: unknown = JSON.parse(output);
+	interface WranglerProjectRow {
+		name?: string;
+		'Project Name'?: string;
+	}
+
+	// SAFETY: wrangler --json emits an array of project table rows.
+	const projects = JSON.parse(output) as WranglerProjectRow[];
 	if (!Array.isArray(projects)) {
 		throw new Error('Cloudflare Pages project lookup returned an unexpected response.');
 	}
-	return projects.some((project) => {
-		if (typeof project !== 'object' || project === null) return false;
-		const record = project as Record<string, unknown>;
-		return record['Project Name'] === projectName || record.name === projectName;
-	});
+
+	return projects.some(
+		(project) => project['Project Name'] === projectName || project.name === projectName
+	);
 }
 
 function requiredValue(environment: Record<string, string | undefined>, name: string) {
@@ -489,8 +494,10 @@ function requiredValue(environment: Record<string, string | undefined>, name: st
 
 async function withProductIdentity(environment: Record<string, string | undefined>) {
 	if (environment.PRODUCT_NAME?.trim()) return environment;
-	const manifest = await Bun.file('product-plate.json').json() as { product?: { name?: unknown } };
-	const productName = typeof manifest.product?.name === 'string' ? manifest.product.name.trim() : '';
+
+	// SAFETY: the generated manifest is committed JSON with a product object.
+	const manifest = await Bun.file('product-plate.json').json() as { product?: { name?: string } };
+	const productName = manifest.product?.name?.trim() ?? '';
 	if (!productName || /[\\r\\n\\u2028\\u2029]/u.test(productName)) {
 		throw new Error('product-plate.json must contain a single-line product name.');
 	}
@@ -557,10 +564,11 @@ export async function provisionRuntime(options: ProvisionOptions = {}) {
 	if (provisionConvex) {
 		for (const name of requiredConvexEnvironment) requiredValue(environment, name);
 	}
+	// SAFETY: requiredConvexEnvironment is emitted from the same const arrays typed below.
+	const convexEnvironmentNames = requiredConvexEnvironment as readonly string[];
 	if (
 		provisionCloudflare ||
-		(provisionConvex &&
-			(requiredConvexEnvironment as readonly string[]).includes('TRANSACTIONAL_EMAIL_FROM'))
+		(provisionConvex && convexEnvironmentNames.includes('TRANSACTIONAL_EMAIL_FROM'))
 	) {
 		assertValidEmailSender(requiredValue(environment, 'TRANSACTIONAL_EMAIL_FROM'));
 	}
@@ -843,6 +851,7 @@ async function smokeAttempt(baseUrl: string, fetcher: typeof fetch) {
 		signal: AbortSignal.timeout(15_000)
 	});
 	if (!health.ok) throw new Error(\`Runtime readiness returned \${health.status}.\`);
+	// SAFETY: the health endpoint answers with the readiness contract or fails the check.
 	const readiness = await health.json() as { ready?: boolean; profile?: string };
 	if (!readiness.ready || readiness.profile !== ${JSON.stringify(manifest.profile)}) {
 		throw new Error('Runtime readiness response did not match the generated profile.');
@@ -1344,7 +1353,8 @@ export async function stripGeneratedDemoCode(destination: string) {
 	if (await exists(lifecyclePath)) {
 		let content = await readFile(lifecyclePath, 'utf8');
 		content = content
-			.replace(/\nexport const listExpiredDemoUsers = internalQuery\([\s\S]*?\n\}\);\n$/, '\n')
+			.replace(/\nexport const expireDemoAccounts = internalAction\([\s\S]*?\n\}\);\n?/, '\n')
+			.replace(/\nexport const listExpiredDemoUsers = internalQuery\([\s\S]*?\n\}\);\n?/, '\n')
 			.replace(
 				"import {\n\tinternalAction,\n\tinternalMutation,\n\tinternalQuery,\n\ttype MutationCtx\n} from './_generated/server';",
 				"import { internalMutation, type MutationCtx } from './_generated/server';"
@@ -1359,9 +1369,9 @@ export async function stripGeneratedDemoCode(destination: string) {
 	if (await exists(cronsPath)) {
 		let content = await readFile(cronsPath, 'utf8');
 		content = content
-			.replace(/\nconst expireDemoAccountsRef = makeFunctionReference[\s\S]*?number>;\n/, '')
+			// The formatted template splits the call across lines; older templates keep it inline.
 			.replace(
-				"crons.interval('expire disposable demo accounts', { hours: 1 }, expireDemoAccountsRef, {});\n",
+				/crons\.interval\(\s*'expire disposable demo accounts',\s*\{ hours: 1 \},\s*(?:internal\.lifecycle\.expireDemoAccounts|expireDemoAccountsRef),\s*\{\}\s*\);\n/g,
 				''
 			);
 		await writeFile(cronsPath, content);

@@ -11,7 +11,8 @@ describe('generated profile verification', () => {
 		expect(parseProfileArguments([])).toEqual({
 			profiles: PROFILE_NAMES,
 			keep: false,
-			installBrowser: true
+			installBrowser: true,
+			skipBrowser: false
 		});
 	});
 
@@ -19,8 +20,22 @@ describe('generated profile verification', () => {
 		expect(parseProfileArguments(['solo-saas', '--keep', '--skip-browser-install'])).toEqual({
 			profiles: ['solo-saas'],
 			keep: true,
-			installBrowser: false
+			installBrowser: false,
+			skipBrowser: false
 		});
+	});
+
+	it('skips browser install and smoke on machines without browser libraries', () => {
+		expect(parseProfileArguments(['--skip-browser'])).toEqual({
+			profiles: PROFILE_NAMES,
+			keep: false,
+			installBrowser: false,
+			skipBrowser: true
+		});
+		const steps = createProfileVerificationSteps('/tmp/generated-profile', false, true);
+		expect(steps.some((step) => step.label === 'Browser smoke')).toBe(false);
+		expect(steps.some((step) => step.label.startsWith('Install matching'))).toBe(false);
+		expect(steps.some((step) => step.label === 'Lint')).toBe(true);
 	});
 
 	it('rejects unknown profiles before creating temporary apps', () => {
@@ -62,6 +77,11 @@ describe('generated profile verification', () => {
 				(step) => step.label === 'Install matching Playwright Chromium'
 			)
 		).toBe(false);
+		expect(
+			createProfileVerificationSteps('/tmp/generated-profile', false, false).some(
+				(step) => step.label === 'Browser smoke'
+			)
+		).toBe(true);
 	});
 
 	it('keeps generated dependency audits on fixed transitive versions', async () => {
