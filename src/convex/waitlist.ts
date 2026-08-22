@@ -9,8 +9,9 @@ function normalizeEmail(email: string) {
 	return email.trim().toLowerCase();
 }
 
+// Convex functions run in a V8 runtime without Node's process global.
 function configuredExportSecret() {
-	return typeof process === 'undefined' ? undefined : process.env.WAITLIST_EXPORT_SECRET;
+	return globalThis.process?.env.WAITLIST_EXPORT_SECRET;
 }
 
 function requireExportSecret(secret: string) {

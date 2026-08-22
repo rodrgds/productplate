@@ -17,24 +17,39 @@ function createTestBackend() {
 	return t;
 }
 
+// Matches the Better Auth adapter's user model fields used by these tests.
+interface TestUserData {
+	name: string;
+	email: string;
+	emailVerified: boolean;
+	createdAt: number;
+	updatedAt: number;
+	role?: string;
+}
+
 async function createAuthenticatedUser(
 	t: ReturnType<typeof createTestBackend>,
 	args: { id: string; sessionId: string; email: string; role?: string }
 ) {
 	const now = Date.now();
+	const userData: TestUserData = {
+		name: args.id,
+		email: args.email,
+		emailVerified: true,
+		createdAt: now,
+		updatedAt: now
+	};
+	if (args.role) userData.role = args.role;
+
+	// SAFETY: the test backend returns the created document including its generated _id.
 	const user = (await t.mutation(components.betterAuth.adapter.create, {
 		input: {
 			model: 'user',
-			data: {
-				name: args.id,
-				email: args.email,
-				emailVerified: true,
-				createdAt: now,
-				updatedAt: now,
-				...(args.role ? { role: args.role } : {})
-			}
+			data: userData
 		}
 	})) as { _id: string };
+
+	// SAFETY: the test backend returns the created session including its generated _id.
 	const session = (await t.mutation(components.betterAuth.adapter.create, {
 		input: {
 			model: 'session',

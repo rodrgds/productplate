@@ -1,6 +1,7 @@
 import { mutation, query, type DatabaseReader } from './_generated/server';
 import { v } from 'convex/values';
 import { authComponent } from './auth';
+import type { Doc } from './_generated/dataModel';
 import { accountProfileUpdateSchema } from '../lib/forms/schemas.js';
 import { DEMO_PROFILE, isDemoAccountEmail } from '../lib/demo-account.js';
 
@@ -123,13 +124,17 @@ export const updateCurrent = mutation({
 			}
 		}
 
-		await ctx.db.patch(existing._id, {
+		const patch: Partial<
+			Pick<Doc<'userProfiles'>, 'displayName' | 'bio' | 'image' | 'imageStorageId' | 'updatedAt'>
+		> = {
 			displayName: profileUpdate.displayName,
 			bio: profileUpdate.bio,
 			image: nextImage,
-			...(nextImage === existing.image ? {} : { imageStorageId: undefined }),
 			updatedAt: Date.now()
-		});
+		};
+		if (nextImage !== existing.image) patch.imageStorageId = undefined;
+
+		await ctx.db.patch(existing._id, patch);
 		const profile = await ctx.db.get(existing._id);
 		if (!profile) throw new Error('Profile was not found after update.');
 		return profile;

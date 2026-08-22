@@ -2,6 +2,7 @@ import { internalMutation, mutation, query, type MutationCtx } from './_generate
 import { v } from 'convex/values';
 import { authComponent } from './auth';
 import { internal } from './_generated/api';
+import type { Doc } from './_generated/dataModel';
 
 const notificationTypeValidator = v.union(
 	v.literal('invite'),
@@ -107,6 +108,11 @@ export const markAllReadContinuation = internalMutation({
 	handler: async (ctx, args) => await markUnreadBatch(ctx, args.userId, args.readAt)
 });
 
+type NewNotificationDoc = Pick<
+	Doc<'notifications'>,
+	'orgId' | 'userId' | 'type' | 'title' | 'body' | 'actionUrl' | 'createdAt'
+>;
+
 export const create = internalMutation({
 	args: {
 		orgId: v.optional(v.id('organizations')),
@@ -118,22 +124,13 @@ export const create = internalMutation({
 	},
 	returns: notificationValidator,
 	handler: async (ctx, args) => {
-		const notification: {
-			orgId?: typeof args.orgId;
-			userId: string;
-			type: typeof args.type;
-			title: string;
-			body: string;
-			actionUrl?: string;
-			createdAt: number;
-		} = {
+		const notification: NewNotificationDoc = {
 			userId: args.userId,
 			type: args.type,
 			title: args.title,
 			body: args.body,
 			createdAt: Date.now()
 		};
-
 		if (args.orgId) notification.orgId = args.orgId;
 		if (args.actionUrl) notification.actionUrl = args.actionUrl;
 

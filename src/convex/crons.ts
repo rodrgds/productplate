@@ -1,35 +1,28 @@
-import { cronJobs, makeFunctionReference, type FunctionReference } from 'convex/server';
-
-const expireOldInvitesRef = makeFunctionReference<'mutation', Record<string, never>, number>(
-	'maintenance:expireOldInvites'
-) as unknown as FunctionReference<'mutation', 'internal', Record<string, never>, number>;
-
-const pruneReadNotificationsRef = makeFunctionReference<
-	'mutation',
-	{ olderThanDays?: number },
-	number
->('maintenance:pruneReadNotifications') as unknown as FunctionReference<
-	'mutation',
-	'internal',
-	{ olderThanDays?: number },
-	number
->;
-
-const expireDemoAccountsRef = makeFunctionReference<'action', Record<string, never>, number>(
-	'lifecycle:expireDemoAccounts'
-) as unknown as FunctionReference<'action', 'internal', Record<string, never>, number>;
-
-const pruneOperationalDataRef = makeFunctionReference<'mutation', Record<string, never>, number>(
-	'maintenance:pruneOperationalData'
-) as unknown as FunctionReference<'mutation', 'internal', Record<string, never>, number>;
+import { cronJobs } from 'convex/server';
+import { internal } from './_generated/api';
 
 const crons = cronJobs();
 
-crons.interval('expire pending organization invites', { hours: 1 }, expireOldInvitesRef, {});
-crons.cron('prune read notifications', '30 3 * * *', pruneReadNotificationsRef, {
+crons.interval(
+	'expire pending organization invites',
+	{ hours: 1 },
+	internal.maintenance.expireOldInvites,
+	{}
+);
+crons.cron('prune read notifications', '30 3 * * *', internal.maintenance.pruneReadNotifications, {
 	olderThanDays: 45
 });
-crons.interval('expire disposable demo accounts', { hours: 1 }, expireDemoAccountsRef, {});
-crons.cron('prune operational records', '45 3 * * *', pruneOperationalDataRef, {});
+crons.interval(
+	'expire disposable demo accounts',
+	{ hours: 1 },
+	internal.lifecycle.expireDemoAccounts,
+	{}
+);
+crons.cron(
+	'prune operational records',
+	'45 3 * * *',
+	internal.maintenance.pruneOperationalData,
+	{}
+);
 
 export default crons;

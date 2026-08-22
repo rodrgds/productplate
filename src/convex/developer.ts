@@ -11,12 +11,12 @@ import { authComponent } from './auth';
 import type { Doc, Id } from './_generated/dataModel';
 import { isDemoAccountEmail } from '../lib/demo-account.js';
 
-const roleRank: Record<Doc<'organizationMembers'>['role'], number> = {
+const roleRank = {
 	viewer: 0,
 	member: 1,
 	admin: 2,
 	owner: 3
-};
+} satisfies Record<Doc<'organizationMembers'>['role'], number>;
 
 const apiKeySummaryValidator = v.object({
 	_id: v.id('apiKeys'),
@@ -102,14 +102,16 @@ async function insertAuditLog(
 		target: string;
 	}
 ) {
-	await ctx.db.insert('auditLogs', {
+	const auditLog: NewAuditLogDoc = {
 		orgId: args.orgId,
-		...(args.actorUserId ? { actorUserId: args.actorUserId } : {}),
 		action: args.action,
 		target: args.target,
 		metadata: {},
 		createdAt: Date.now()
-	});
+	};
+	if (args.actorUserId) auditLog.actorUserId = args.actorUserId;
+
+	await ctx.db.insert('auditLogs', auditLog);
 }
 
 async function assertCanCreateApiKey(ctx: QueryCtx | MutationCtx, orgId: Id<'organizations'>) {
@@ -128,6 +130,11 @@ async function assertCanCreateApiKey(ctx: QueryCtx | MutationCtx, orgId: Id<'org
 		throw new Error('The API key entitlement limit has been reached.');
 	}
 }
+
+type NewAuditLogDoc = Pick<
+	Doc<'auditLogs'>,
+	'orgId' | 'actorUserId' | 'action' | 'target' | 'metadata' | 'createdAt'
+>;
 
 function normalizeScopes(scopes: string[]) {
 	return Array.from(new Set(scopes.map((scope) => scope.trim()).filter(Boolean))).sort();

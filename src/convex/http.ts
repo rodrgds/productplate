@@ -1,41 +1,35 @@
-import { httpRouter, makeFunctionReference, type FunctionReference } from 'convex/server';
+import { httpRouter } from 'convex/server';
+import { z } from 'zod/v3';
 import { httpAction } from './_generated/server';
+import { internal } from './_generated/api';
 import { authComponent, createAuth } from './auth';
-import type { Id } from './_generated/dataModel';
 
 const http = httpRouter();
 
 authComponent.registerRoutes(http, createAuth);
-
-type ApiKeyRecord = {
-	_id: Id<'apiKeys'>;
-	orgId: Id<'organizations'>;
-	keyHash: string;
-	scopes: string[];
-	revokedAt?: number;
-};
-
-const getApiKeyByPrefixRef = makeFunctionReference<
-	'query',
-	{ prefix: string },
-	ApiKeyRecord | null
->('developer:getApiKeyByPrefix') as unknown as FunctionReference<
-	'query',
-	'internal',
-	{ prefix: string },
-	ApiKeyRecord | null
->;
-
-const touchApiKeyRef = makeFunctionReference<'mutation', { apiKeyId: Id<'apiKeys'> }, null>(
-	'developer:touchApiKey'
-) as unknown as FunctionReference<'mutation', 'internal', { apiKeyId: Id<'apiKeys'> }, null>;
 
 async function sha256Hex(value: string) {
 	const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
 	return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
-function jsonResponse(data: unknown, init?: ResponseInit) {
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
+const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
+	z.union([
+		z.string(),
+		z.number(),
+		z.boolean(),
+		z.null(),
+		z.array(jsonValueSchema),
+		z.record(jsonValueSchema)
+	])
+);
+
+const jsonObjectSchema = z.record(jsonValueSchema);
+
+// JSON.stringify accepts any JSON-serializable value; this endpoint echoes known fields.
+function jsonResponse(data: JsonValue, init?: ResponseInit) {
 	return new Response(JSON.stringify(data, null, 2), {
 		...init,
 		headers: {
@@ -55,7 +49,7 @@ http.route({
 			return jsonResponse({ error: 'Missing bearer token.' }, { status: 401 });
 		}
 
-		const apiKey = await ctx.runQuery(getApiKeyByPrefixRef, {
+		const apiKey = await ctx.runQuery(internal.developer.getApiKeyByPrefix, {
 			prefix: token.slice(0, 16)
 		});
 		if (!apiKey || apiKey.revokedAt || apiKey.keyHash !== (await sha256Hex(token))) {
@@ -65,14 +59,15 @@ http.route({
 			return jsonResponse({ error: 'API key is missing the events:write scope.' }, { status: 403 });
 		}
 
-		let payload: unknown = {};
+		let payload: { [key: string]: JsonValue } = {};
 		try {
-			payload = await request.json();
+			const parsed = jsonObjectSchema.safeParse(await request.json());
+			if (parsed.success) payload = parsed.data;
 		} catch {
 			return jsonResponse({ error: 'Request body must be JSON.' }, { status: 400 });
 		}
 
-		await ctx.runMutation(touchApiKeyRef, { apiKeyId: apiKey._id });
+		await ctx.runMutation(internal.developer.touchApiKey, { apiKeyId: apiKey._id });
 
 		return jsonResponse({
 			ok: true,

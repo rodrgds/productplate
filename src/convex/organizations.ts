@@ -113,12 +113,12 @@ interface CurrentAuthUser {
 	role?: string | null;
 }
 
-const roleRank: Record<Role, number> = {
+const roleRank = {
 	viewer: 0,
 	member: 1,
 	admin: 2,
 	owner: 3
-};
+} satisfies Record<Role, number>;
 
 const defaultEntitlements: readonly {
 	key: string;
@@ -131,13 +131,7 @@ const defaultEntitlements: readonly {
 	{ key: 'advanced_admin', enabled: false }
 ];
 
-const billingPlanEntitlements: Record<
-	string,
-	{
-		planKey: string;
-		entitlements: readonly Omit<EntitlementPatch, 'source'>[];
-	}
-> = {
+const billingPlanEntitlements = {
 	starter: {
 		planKey: 'starter',
 		entitlements: [
@@ -165,7 +159,13 @@ const billingPlanEntitlements: Record<
 			{ key: 'advanced_admin', enabled: true }
 		]
 	}
-};
+} satisfies Record<
+	string,
+	{
+		planKey: string;
+		entitlements: readonly Omit<EntitlementPatch, 'source'>[];
+	}
+>;
 
 function normalizeEmail(email: string) {
 	return email.trim().toLowerCase();
@@ -245,6 +245,25 @@ async function requireRole(
 	return { user, membership };
 }
 
+type NewAuditLogDoc = Pick<
+	Doc<'auditLogs'>,
+	'orgId' | 'actorUserId' | 'action' | 'target' | 'metadata' | 'createdAt'
+>;
+
+type NewMemberDoc = Pick<
+	Doc<'organizationMembers'>,
+	'orgId' | 'userId' | 'email' | 'displayName' | 'role' | 'status' | 'joinedAt' | 'updatedAt'
+>;
+
+type NewEntitlementDoc = Pick<
+	Doc<'entitlements'>,
+	'orgId' | 'key' | 'enabled' | 'limit' | 'usage' | 'source'
+> & { updatedAt: number };
+
+type EntitlementPatchDoc = Pick<EntitlementPatch, 'enabled' | 'limit' | 'source'> & {
+	updatedAt: number;
+};
+
 async function insertAuditLog(
 	ctx: MutationCtx,
 	args: {
@@ -255,14 +274,7 @@ async function insertAuditLog(
 		metadata?: Record<string, string>;
 	}
 ) {
-	const auditLog: {
-		orgId?: Id<'organizations'>;
-		actorUserId?: string;
-		action: string;
-		target: string;
-		metadata: Record<string, string>;
-		createdAt: number;
-	} = {
+	const auditLog: NewAuditLogDoc = {
 		action: args.action,
 		target: args.target,
 		metadata: args.metadata ?? {},
@@ -278,15 +290,7 @@ async function insertAuditLog(
 async function insertDefaultEntitlements(ctx: MutationCtx, orgId: Id<'organizations'>) {
 	const now = Date.now();
 	for (const entitlement of defaultEntitlements) {
-		const entitlementRecord: {
-			orgId: Id<'organizations'>;
-			key: string;
-			enabled: boolean;
-			limit?: number;
-			usage: number;
-			source: 'plan';
-			updatedAt: number;
-		} = {
+		const entitlementRecord: NewEntitlementDoc = {
 			orgId,
 			key: entitlement.key,
 			enabled: entitlement.enabled,
@@ -312,12 +316,7 @@ async function upsertEntitlements(
 			.withIndex('by_orgId_and_key', (q) => q.eq('orgId', orgId).eq('key', entitlement.key))
 			.unique();
 
-		const patch: {
-			enabled: boolean;
-			limit?: number;
-			source: 'plan' | 'billing' | 'manual';
-			updatedAt: number;
-		} = {
+		const patch: EntitlementPatchDoc = {
 			enabled: entitlement.enabled,
 			source: entitlement.source,
 			updatedAt: now
@@ -329,15 +328,7 @@ async function upsertEntitlements(
 			continue;
 		}
 
-		const record: {
-			orgId: Id<'organizations'>;
-			key: string;
-			enabled: boolean;
-			limit?: number;
-			usage: number;
-			source: 'plan' | 'billing' | 'manual';
-			updatedAt: number;
-		} = {
+		const record: NewEntitlementDoc = {
 			orgId,
 			key: entitlement.key,
 			enabled: entitlement.enabled,
@@ -393,16 +384,7 @@ async function createOrganizationForUser(
 		updatedAt: now
 	});
 
-	const member: {
-		orgId: Id<'organizations'>;
-		userId: string;
-		email: string;
-		displayName?: string;
-		role: 'owner';
-		status: 'active';
-		joinedAt: number;
-		updatedAt: number;
-	} = {
+	const member: NewMemberDoc = {
 		orgId,
 		userId: args.userId,
 		email: normalizeEmail(args.email),
@@ -739,16 +721,7 @@ export const acceptInvite = mutation({
 		if (existing) return existing;
 
 		const now = Date.now();
-		const memberRecord: {
-			orgId: Id<'organizations'>;
-			userId: string;
-			email: string;
-			displayName?: string;
-			role: Role;
-			status: 'active';
-			joinedAt: number;
-			updatedAt: number;
-		} = {
+		const memberRecord: NewMemberDoc = {
 			orgId: invite.orgId,
 			userId: user._id,
 			email: normalizeEmail(user.email),
@@ -768,11 +741,15 @@ export const acceptInvite = mutation({
 		const profile = await getProfile(ctx, user._id);
 		if (profile) {
 			const organization = await ctx.db.get(invite.orgId);
-			await ctx.db.patch(profile._id, {
+			const profilePatch: Partial<
+				Pick<Doc<'userProfiles'>, 'activeOrganizationId' | 'workspaceName' | 'updatedAt'>
+			> = {
 				activeOrganizationId: invite.orgId,
-				...(organization ? { workspaceName: organization.name } : {}),
 				updatedAt: now
-			});
+			};
+			if (organization) profilePatch.workspaceName = organization.name;
+
+			await ctx.db.patch(profile._id, profilePatch);
 		}
 		await ctx.db.insert('notifications', {
 			orgId: invite.orgId,
@@ -956,7 +933,10 @@ export const applyVerifiedBillingPlan = internalMutation({
 		const organization = await ctx.db.get(orgId);
 		if (!organization) throw new Error('Workspace not found.');
 		const productId = args.status === 'active' && args.productId ? args.productId : 'starter';
-		const plan = billingPlanEntitlements[productId] ?? billingPlanEntitlements.starter;
+		// SAFETY: productId comes from Autumn's product catalog; unknown ids fall back to starter.
+		const plan =
+			billingPlanEntitlements[productId as keyof typeof billingPlanEntitlements] ??
+			billingPlanEntitlements.starter;
 		const now = Date.now();
 		const planChanged = organization.planKey !== plan.planKey;
 
@@ -1041,12 +1021,7 @@ export const adminSetEntitlement = mutation({
 		const now = Date.now();
 
 		if (existing) {
-			const patch: {
-				enabled: boolean;
-				limit?: number;
-				source: 'manual';
-				updatedAt: number;
-			} = {
+			const patch: EntitlementPatchDoc & { source: 'manual' } = {
 				enabled: args.enabled,
 				source: 'manual',
 				updatedAt: now
@@ -1059,15 +1034,7 @@ export const adminSetEntitlement = mutation({
 			return updated;
 		}
 
-		const entitlementRecord: {
-			orgId: Id<'organizations'>;
-			key: string;
-			enabled: boolean;
-			limit?: number;
-			usage: number;
-			source: 'manual';
-			updatedAt: number;
-		} = {
+		const entitlementRecord: NewEntitlementDoc = {
 			orgId: args.orgId,
 			key: args.key,
 			enabled: args.enabled,

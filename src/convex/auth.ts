@@ -16,8 +16,9 @@ import {
 	type ProductEmailTemplate
 } from '../lib/email/service';
 
+// Convex functions run in a V8 runtime without Node's process global.
 function getRuntimeEnv(key: string) {
-	return typeof process === 'undefined' ? undefined : process.env[key];
+	return globalThis.process?.env[key];
 }
 
 function trimTrailingSlash(value: string) {
@@ -45,8 +46,8 @@ function getTrustedOrigins(siteUrl: string) {
 				getRuntimeEnv('BETTER_AUTH_URL'),
 				siteUrl
 			]
-				.filter(Boolean)
-				.map((origin) => trimTrailingSlash(origin as string))
+				.filter((origin): origin is string => Boolean(origin))
+				.map((origin) => trimTrailingSlash(origin))
 		)
 	);
 }
@@ -115,6 +116,18 @@ async function sendAuthEmail(args: {
 				`${productName} <no-reply@example.com>`
 		}
 	);
+}
+
+// Google sign-in activates only when both credentials are configured.
+function socialProviders() {
+	if (!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)) return {};
+
+	return {
+		google: {
+			clientId: process.env.GOOGLE_CLIENT_ID,
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET
+		}
+	};
 }
 
 export const createAuthOptions = (
@@ -213,16 +226,7 @@ export const createAuthOptions = (
 				});
 			}
 		},
-		socialProviders: {
-			...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-				? {
-						google: {
-							clientId: process.env.GOOGLE_CLIENT_ID,
-							clientSecret: process.env.GOOGLE_CLIENT_SECRET
-						}
-					}
-				: {})
-		},
+		socialProviders: socialProviders(),
 		plugins: [
 			// The Convex plugin is required for Convex compatibility
 			convex({ authConfig }),

@@ -1,7 +1,7 @@
 import { action, type ActionCtx } from './_generated/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
-import { Autumn } from 'autumn-js';
+import { Autumn, type AutumnError } from 'autumn-js';
 import { z } from 'zod/v3';
 
 if (!process.env.SITE_URL && process.env.BETTER_AUTH_URL) {
@@ -35,6 +35,68 @@ const customerSchema = z
 	})
 	.passthrough();
 
+interface ParsedCustomerItem {
+	type: string;
+	feature_id?: string;
+	price?: number;
+	interval?: string;
+	included_usage?: number;
+}
+
+interface ParsedCustomerProduct {
+	id: string;
+	name: string;
+	status: string;
+	items?: ParsedCustomerItem[];
+}
+
+interface ParsedCustomer {
+	products: ParsedCustomerProduct[];
+}
+
+function isCustomerNotFound(error: AutumnError): boolean {
+	return (
+		error.code.includes('customer_not_found') ||
+		error.message.includes('customer_not_found') ||
+		(error.message.includes('Customer') && error.message.includes('not found'))
+	);
+}
+
+function toParsedCustomer(products: z.infer<typeof customerSchema>['products']): ParsedCustomer {
+	return {
+		products: products.map((product) => {
+			const items = product.items?.map((item): ParsedCustomerItem => {
+				const parsedItem: ParsedCustomerItem = { type: item.type };
+				if (item.feature_id !== undefined) parsedItem.feature_id = item.feature_id;
+				if (item.price !== undefined) parsedItem.price = item.price;
+				if (item.interval !== undefined) parsedItem.interval = item.interval;
+				if (item.included_usage !== undefined) parsedItem.included_usage = item.included_usage;
+				return parsedItem;
+			});
+
+			const parsedProduct: ParsedCustomerProduct = {
+				id: product.id,
+				name: product.name,
+				status: product.status
+			};
+			if (items) parsedProduct.items = items;
+			return parsedProduct;
+		})
+	};
+}
+
+// Some Autumn endpoints wrap the customer in a data envelope; try that shape first.
+function parseCustomerResult(result: { data?: unknown }): ParsedCustomer {
+	const enveloped = customerResponseEnvelopeSchema.safeParse(result.data);
+	if (enveloped.success) return toParsedCustomer(enveloped.data.data.products);
+
+	const direct = customerSchema.safeParse(result.data);
+	if (!direct.success) {
+		throw new Error('Autumn returned an invalid customer response.');
+	}
+	return toParsedCustomer(direct.data.products);
+}
+
 const customerItemValidator = v.object({
 	type: v.string(),
 	feature_id: v.optional(v.string()),
@@ -50,54 +112,15 @@ const customerProductValidator = v.object({
 	items: v.optional(v.array(customerItemValidator))
 });
 
+const customerResponseEnvelopeSchema = z
+	.object({
+		data: customerSchema
+	})
+	.passthrough();
+
 const customerValidator = v.object({
 	products: v.array(customerProductValidator)
 });
-
-function getErrorMessage(error: unknown): string {
-	return error instanceof Error ? error.message : String(error);
-}
-
-function isCustomerNotFound(error: unknown): boolean {
-	const serialized = JSON.stringify(error);
-	return (
-		serialized.includes('customer_not_found') ||
-		(serialized.includes('Customer') && serialized.includes('not found'))
-	);
-}
-
-function unwrapData(value: unknown): unknown {
-	if (!value || typeof value !== 'object' || !('data' in value)) return value;
-	return (value as { data: unknown }).data;
-}
-
-function parseCustomer(value: unknown) {
-	const result = customerSchema.safeParse(unwrapData(value));
-	if (!result.success) {
-		throw new Error('Autumn returned an invalid customer response.');
-	}
-
-	return {
-		products: result.data.products.map((product) => ({
-			id: product.id,
-			name: product.name,
-			status: product.status,
-			...(product.items
-				? {
-						items: product.items.map((item) => ({
-							type: item.type,
-							...(item.feature_id ? { feature_id: item.feature_id } : {}),
-							...(item.price !== undefined ? { price: item.price } : {}),
-							...(item.interval ? { interval: item.interval } : {}),
-							...(item.included_usage !== undefined ? { included_usage: item.included_usage } : {})
-						}))
-					}
-				: {})
-		}))
-	};
-}
-
-type ParsedCustomer = ReturnType<typeof parseCustomer>;
 
 interface BillingContext {
 	orgId: import('./_generated/dataModel').Id<'organizations'>;
@@ -135,7 +158,7 @@ async function loadCustomer(ctx: ActionCtx): Promise<{
 	return {
 		billingContext,
 		autumn,
-		customer: parseCustomer(response.data)
+		customer: parseCustomerResult(response)
 	};
 }
 
@@ -165,7 +188,8 @@ export const getCustomer = action({
 			return { data: customer, error: null, statusCode: 200 };
 		} catch (error) {
 			console.error('Error getting Autumn customer:', error);
-			return { data: null, error: getErrorMessage(error), statusCode: 500 };
+			const message = error instanceof Error ? error.message : String(error);
+			return { data: null, error: message, statusCode: 500 };
 		}
 	}
 });
@@ -190,10 +214,16 @@ const actionUrlValidator = v.object({
 	url: v.union(v.string(), v.null())
 });
 
-function extractActionUrl(value: unknown) {
-	const data = unwrapData(value);
-	if (!data || typeof data !== 'object' || !('url' in data)) return null;
-	return typeof (data as { url: unknown }).url === 'string' ? (data as { url: string }).url : null;
+const checkoutResponseSchema = z
+	.object({
+		data: z.object({ url: z.string() }).passthrough()
+	})
+	.passthrough();
+
+// Autumn returns the redirect URL inside a data envelope; anything else means no URL.
+function extractActionUrl(envelope: { data?: unknown }): string | null {
+	const result = checkoutResponseSchema.safeParse(envelope);
+	return result.success ? result.data.data.url : null;
 }
 
 export const checkout = action({
@@ -204,7 +234,7 @@ export const checkout = action({
 			throw new Error('Invalid billing product.');
 		}
 		const { autumn, billingContext } = await loadCustomer(ctx);
-		const result: unknown = await autumn.checkout({
+		const result = await autumn.checkout({
 			customer_id: billingContext.customerId,
 			product_id: args.productId,
 			success_url: `${process.env.SITE_URL}/billing?checkout=completed&plan=${encodeURIComponent(args.productId)}`,
@@ -222,7 +252,7 @@ export const billingPortal = action({
 	returns: actionUrlValidator,
 	handler: async (ctx): Promise<{ url: string | null }> => {
 		const { autumn, billingContext } = await loadCustomer(ctx);
-		const result: unknown = await autumn.customers.billingPortal(billingContext.customerId, {
+		const result = await autumn.customers.billingPortal(billingContext.customerId, {
 			return_url: `${process.env.SITE_URL}/billing`
 		});
 		return { url: extractActionUrl(result) };
