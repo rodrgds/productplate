@@ -67,3 +67,25 @@ export async function createCheckoutSession(
 		checkoutUrl: checkout.url
 	};
 }
+
+export async function createCustomerPortalSession(
+	customerId: string,
+	env: PolarBillingEnv
+): Promise<string> {
+	const response = await fetch(`${getPolarBaseUrl(env.POLAR_SERVER)}/customer-portal/customers/${customerId}/session`, {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${env.POLAR_ACCESS_TOKEN}`,
+			'Content-Type': 'application/json',
+			Accept: 'application/json'
+		}
+	});
+
+	const data = (await response.json()) as { url?: string; detail?: string };
+	if (!response.ok || !data.url) {
+		throw new Error(data.detail ?? 'Failed to create Polar customer portal session');
+	}
+
+	return data.url;
+}
+
