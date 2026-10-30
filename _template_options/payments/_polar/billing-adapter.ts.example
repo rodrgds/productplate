@@ -37,7 +37,7 @@ export async function createCheckoutSession(
 	input: CheckoutInput,
 	env: PolarBillingEnv
 ): Promise<CheckoutResult> {
-	const response = await fetch(`${getPolarBaseUrl(env.POLAR_SERVER)}/checkouts/`, {
+	const response = await fetch(`${getPolarBaseUrl(env.POLAR_SERVER)}/checkouts/custom/`, {
 		method: 'POST',
 		headers: {
 			Authorization: `Bearer ${env.POLAR_ACCESS_TOKEN}`,
@@ -66,4 +66,29 @@ export async function createCheckoutSession(
 		id: checkout.id,
 		checkoutUrl: checkout.url
 	};
+}
+
+export async function createCustomerPortalSession(
+	customerId: string,
+	env: PolarBillingEnv
+): Promise<string> {
+	const response = await fetch(`${getPolarBaseUrl(env.POLAR_SERVER)}/customer-sessions/`, {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${env.POLAR_ACCESS_TOKEN}`,
+			'Content-Type': 'application/json',
+			Accept: 'application/json'
+		},
+		body: JSON.stringify({
+			external_customer_id: customerId
+		})
+	});
+
+	const session = (await response.json()) as { customer_portal_url?: string; detail?: string };
+
+	if (!response.ok || !session.customer_portal_url) {
+		throw new Error(session.detail ?? 'Polar customer portal session failed');
+	}
+
+	return session.customer_portal_url;
 }
