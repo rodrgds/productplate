@@ -29,4 +29,4 @@ Official docs checked while creating this scaffold:
 
 - Polar API overview: https://polar.sh/docs/api-reference/introduction
 - Polar create Checkout Session: https://polar.sh/docs/api-reference/checkouts/create-session
-- Polar Customer Portal Sessions: https://polar.sh/docs/api-reference/customer-sessions/create
+- Polar Customer Portal Sessions: https://docs.polar.sh/api/customer-sessions/create
