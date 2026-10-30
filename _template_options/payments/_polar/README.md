@@ -2,7 +2,7 @@
 
 Use this when the product should sell through Polar checkout sessions and later map orders, subscriptions, or benefits into app entitlements.
 
-Install only if selected:
+Install only if using the optional SDK (the default adapter uses native `fetch` with zero dependencies):
 
 ```sh
 bun add @polar-sh/sdk
@@ -29,3 +29,4 @@ Official docs checked while creating this scaffold:
 
 - Polar API overview: https://polar.sh/docs/api-reference/introduction
 - Polar create Checkout Session: https://polar.sh/docs/api-reference/checkouts/create-session
+- Polar Customer Portal Sessions: https://docs.polar.sh/api/customer-sessions/create
